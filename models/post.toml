@@ -1,0 +1,13 @@
+name = "Page"
+
+[fields.title]
+label = "Title"
+type = "string"
+
+[fields.is_draft]
+label = "Draft"
+type = "boolean"
+
+[fields.body]
+label = "Body"
+type = "textarea"

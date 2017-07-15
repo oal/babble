@@ -1,0 +1,12 @@
+{% extends 'base.twig' %}
+
+{% block body %}
+    <h1>BLOG POST!</h1>
+    <h2>
+        {{ post.title }}
+    </h2>
+    Draft? {{ post.is_draft }}
+    <div>
+        {{ post.body }}
+    </div>
+{% endblock %}
