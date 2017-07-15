@@ -4,7 +4,8 @@
         "twig/twig": "^2.0",
         "symfony/http-foundation": "^3.3",
         "symfony/finder": "^3.3",
-        "yosymfony/toml": "^0.3.3"
+        "yosymfony/toml": "^0.3.3",
+        "symfony/routing": "^3.3"
     },
     "autoload": {
         "psr-4": {

@@ -13,7 +13,7 @@ class Page
     private $request;
     private $model;
 
-    public function __construct(Request $request, Model $model)
+    public function __construct(Request $request, ModelInstance $model)
     {
         $this->request = $request;
         $this->model = $model;

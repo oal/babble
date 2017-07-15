@@ -2,12 +2,12 @@
 
 namespace Babble\Content;
 
-use Babble\Model;
+use Babble\ModelInstance;
 use Exception;
 
 interface ContentFilter
 {
-    public function isMatch(Model $model): bool;
+    public function isMatch(ModelInstance $model): bool;
 }
 
 class WhereFilter implements ContentFilter
@@ -23,7 +23,7 @@ class WhereFilter implements ContentFilter
         $this->value = $value;
     }
 
-    public function isMatch(Model $model): bool
+    public function isMatch(ModelInstance $model): bool
     {
         $key = $model[$this->key];
         $value = $this->value;
@@ -61,7 +61,7 @@ class FilterContainer
         return $this;
     }
 
-    public function isMatch(Model $model)
+    public function isMatch(ModelInstance $model)
     {
         $numFilters = count($this->filters);
         if ($numFilters === 0) return true;

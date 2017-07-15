@@ -3,7 +3,7 @@
 namespace Babble\Content;
 
 use Babble\Exceptions\InvalidModelException;
-use Babble\Model;
+use Babble\ModelInstance;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -51,7 +51,7 @@ class ContentLoader
         $result = [];
         foreach ($files as $file) {
             $id = $this->filenameToId($file->getFilename());
-            $model = new Model($this->modelName, $id);
+            $model = new ModelInstance($this->modelName, $id);
             if (!$this->filters->isMatch($model)) continue;
             $result[] = $model;
         }
@@ -62,7 +62,7 @@ class ContentLoader
 
     /**
      * @param $path
-     * @return null|Model
+     * @return null|ModelInstance
      */
     static function matchPath(string $path)
     {
@@ -95,12 +95,12 @@ class ContentLoader
         return '../content/' . $this->modelName . '/';
     }
 
-    private function idToModel(string $id): Model
+    private function idToModel(string $id): ModelInstance
     {
         $fs = new Filesystem();
         $dataFileExists = $fs->exists($this->getModelDirectory() . $id . '.toml');
 
-        if ($dataFileExists) return new Model($this->modelName, $id);
+        if ($dataFileExists) return new ModelInstance($this->modelName, $id);
         return null;
     }
 

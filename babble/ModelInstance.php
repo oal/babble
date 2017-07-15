@@ -5,7 +5,7 @@ namespace Babble;
 use ArrayAccess;
 use Yosymfony\Toml\Toml;
 
-class Model implements ArrayAccess
+class ModelInstance implements ArrayAccess
 {
     private $type;
     private $name;
