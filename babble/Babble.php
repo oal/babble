@@ -8,11 +8,13 @@ class Babble {
     public function __construct()
     {
         $request = Request::createFromGlobals();
-        $loader = new ContentLoader();
 
-        $model = $loader->matchPath($request->getPathInfo());
+        $model = ContentLoader::matchPath($request->getPathInfo());
         $page = new Page($request, $model);
         echo $page->render();
+
+        $loader = new ContentLoader('post');
+        var_export($loader->get());
     }
 
 }

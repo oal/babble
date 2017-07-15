@@ -14,13 +14,17 @@ class Model implements ArrayAccess
     private $id;
     private $data = [];
 
-    public $test = 'asd';
-
     public function __construct($model, $id)
     {
         $this->initModel($model);
         $this->initData($id);
     }
+
+    public function __toString()
+    {
+        return json_encode($this->data);
+    }
+
 
     /**
      * @param $modelType
