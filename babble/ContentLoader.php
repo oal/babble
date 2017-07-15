@@ -54,7 +54,7 @@ class ContentLoader
         if (empty($id)) $id = 'index';
 
         $templateFinder = new Finder();
-        $templateFinder->files()->in('../templates' . $basePath);
+        $templateFinder->files()->depth('== 0')->in('../templates/' . $basePath);
 
         foreach ($templateFinder as $file) {
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
@@ -88,6 +88,20 @@ class ContentLoader
 
     private function filenameToId(string $filename): string
     {
-        return pathinfo($filename, PATHINFO_FILENAME);;
+        return pathinfo($filename, PATHINFO_FILENAME);
+    }
+
+    static function getModelNames()
+    {
+        $models = [];
+        $finder = new Finder();
+        $files = $finder->files()->in('../models/');
+
+        foreach ($files as $filename) {
+            $modelName = pathinfo($filename, PATHINFO_FILENAME);
+            $models[] = $modelName;
+        }
+
+        return $models;
     }
 }

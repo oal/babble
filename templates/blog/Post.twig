@@ -1,0 +1,19 @@
+{% extends 'base.twig' %}
+
+{% block body %}
+    <h1>BLOG POST!</h1>
+    <h2>
+        {{ this.title }}
+    </h2>
+    {% if this.is_draft %}This is a draft{% endif %}
+    <div>
+        {{ this.body }}
+    </div>
+
+    <h3>Want more? Check out these posts:</h3>
+    <ul>
+        {% for post in Post().get() %}
+            <li><a href="/blog/{{ post.id }}">{{ post.title }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

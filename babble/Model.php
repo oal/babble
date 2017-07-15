@@ -57,11 +57,13 @@ class Model implements ArrayAccess
 
     public function offsetExists($offset)
     {
+        if ($offset === 'id') return true;
         return isset($this->data[$offset]);
     }
 
     public function offsetGet($offset)
     {
+        if ($offset === 'id') return $this->id;
         return $this->data[$offset];
     }
 

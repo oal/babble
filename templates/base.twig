@@ -1,8 +1,17 @@
 <html>
 <head>
-    <title>asd</title>
+    <title>{{ this.title }}</title>
 </head>
 <body>
+
+<h3>Menu</h3>
+<ul>
+    {% for page in Page().get() %}
+        <li><a href="/{{ page.id }}">{{ page.title }}</a></li>
+    {% endfor %}
+</ul>
+<hr>
+
 {% block body %}
 {% endblock %}
 </body>

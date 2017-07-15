@@ -1,4 +1,4 @@
-name = "Page"
+name = "Post"
 
 [fields.title]
 label = "Title"

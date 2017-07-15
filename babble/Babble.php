@@ -13,8 +13,8 @@ class Babble {
         $page = new Page($request, $model);
         echo $page->render();
 
-        $loader = new ContentLoader('post');
-        var_export($loader->get());
+//        $loader = new ContentLoader('Post');
+//        var_export($loader->get());
     }
 
 }
