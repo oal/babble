@@ -4,6 +4,10 @@ name = "Post"
 label = "Title"
 type = "string"
 
+[fields.published]
+label = "Publish"
+type = "datetime"
+
 [fields.is_draft]
 label = "Draft"
 type = "boolean"

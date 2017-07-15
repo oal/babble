@@ -1,18 +1,21 @@
 <?php
 
-namespace Babble;
+namespace Babble\Content;
 
 use Babble\Exceptions\InvalidModelException;
+use Babble\Model;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
 class ContentLoader
 {
     private $modelName;
+    private $filters;
 
     public function __construct($model)
     {
         $this->modelName = $model;
+        $this->filters = new FilterContainer();
 
         $fs = new Filesystem();
         $isModel = $fs->exists('../models/' . $model . '.toml');
@@ -26,6 +29,20 @@ class ContentLoader
         return $this->idToModel($id);
     }
 
+    public function where($key, $comparison, $value)
+    {
+        // TODO: Validate that model actually has the key / column provided.
+        $this->filters->and(new WhereFilter($key, $comparison, $value));
+        return $this;
+    }
+
+    public function orWhere($key, $comparison, $value)
+    {
+        // TODO: Validate that model actually has the key / column provided.
+        $this->filters->or(new WhereFilter($key, $comparison, $value));
+        return $this;
+    }
+
     public function get()
     {
         $finder = new Finder();
@@ -35,6 +52,7 @@ class ContentLoader
         foreach ($files as $file) {
             $id = $this->filenameToId($file->getFilename());
             $model = new Model($this->modelName, $id);
+            if (!$this->filters->isMatch($model)) continue;
             $result[] = $model;
         }
 

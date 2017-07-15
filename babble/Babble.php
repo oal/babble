@@ -2,6 +2,7 @@
 
 namespace Babble;
 
+use Babble\Content\ContentLoader;
 use Symfony\Component\HttpFoundation\Request;
 
 class Babble {

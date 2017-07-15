@@ -2,6 +2,7 @@
 
 namespace Babble;
 
+use Babble\Content\ContentLoader;
 use Symfony\Component\HttpFoundation\Request;
 use Twig_Environment;
 use Twig_Function;
