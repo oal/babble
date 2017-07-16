@@ -31,6 +31,8 @@ class WhereFilter implements ContentFilter
         switch ($this->comparison) {
             case '=':
                 return $key == $value;
+            case '!=':
+                return $key != $value;
             case '<':
                 return $key < $value;
             case '>':
@@ -61,7 +63,7 @@ class FilterContainer
         return $this;
     }
 
-    public function isMatch(ModelInstance $model)
+    public function isMatch(ModelInstance $model): bool
     {
         $numFilters = count($this->filters);
         if ($numFilters === 0) return true;
@@ -75,14 +77,10 @@ class FilterContainer
             $filter = $filter[1];
             $matchedCurrent = $filter->isMatch($model);
 
-            $previousAndOr = $this->filters[$i - 1][1];
-            if (!$matchedCurrent && !$matchedPrevious && $andOr === 'AND' && $previousAndOr === 'AND') {
-                return false;
-            }
+            if ($andOr === 'AND') $matchedCurrent = $matchedCurrent & $matchedPrevious;
+            if ($andOr === 'OR') $matchedCurrent = $matchedCurrent | $matchedPrevious;
 
-            if ($andOr === 'OR' && ($matchedCurrent || $matchedPrevious)) {
-                $matchedCurrent = true;
-            }
+            // TODO: Return early if result can't be true anymore?
 
             $matchedPrevious = $matchedCurrent;
         }

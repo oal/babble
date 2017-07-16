@@ -53,6 +53,8 @@ class Router
                 return $controller->create($request);
             case 'DELETE':
                 return $controller->delete($request, $id);
+            case 'OPTIONS':
+                return $controller->describe($request);
         }
         return 'NOT FOUND';
     }

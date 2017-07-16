@@ -37,4 +37,9 @@ class ModelController
     {
         return 'DELETE';
     }
+
+    public function describe(Request $request)
+    {
+        return 'DESCRIBE' . $this->model;
+    }
 }

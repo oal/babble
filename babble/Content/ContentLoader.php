@@ -4,24 +4,19 @@ namespace Babble\Content;
 
 use Babble\Exceptions\InvalidModelException;
 use Babble\ModelInstance;
+use Babble\Models\Model;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
 class ContentLoader
 {
-    private $modelName;
+    private $model;
     private $filters;
 
-    public function __construct($model)
+    public function __construct(string $modelType)
     {
-        $this->modelName = $model;
+        $this->model = new Model($modelType);
         $this->filters = new FilterContainer();
-
-        $fs = new Filesystem();
-        $isModel = $fs->exists('../models/' . $model . '.toml');
-        if (!$isModel) {
-            throw new InvalidModelException('Model does not exist.');
-        }
     }
 
     public function find($id)
@@ -51,7 +46,7 @@ class ContentLoader
         $result = [];
         foreach ($files as $file) {
             $id = $this->filenameToId($file->getFilename());
-            $model = new ModelInstance($this->modelName, $id);
+            $model = new ModelInstance($this->model, $id);
             if (!$this->filters->isMatch($model)) continue;
             $result[] = $model;
         }
@@ -92,7 +87,7 @@ class ContentLoader
      */
     private function getModelDirectory(): string
     {
-        return '../content/' . $this->modelName . '/';
+        return '../content/' . $this->model->getType() . '/';
     }
 
     private function idToModel(string $id): ModelInstance
@@ -100,7 +95,7 @@ class ContentLoader
         $fs = new Filesystem();
         $dataFileExists = $fs->exists($this->getModelDirectory() . $id . '.toml');
 
-        if ($dataFileExists) return new ModelInstance($this->modelName, $id);
+        if ($dataFileExists) return new ModelInstance($this->model, $id);
         return null;
     }
 

@@ -12,7 +12,7 @@
 
     <h3>Want more? Check out these posts:</h3>
     <ul>
-        {% for post in Post().where('is_draft', '=', false).orWhere('title', '=', 'New posta').where('published', '<=', '2017-07-17 00:00').get() %}
+        {% for post in Post().where('is_draft', '=', false).where('title', '!=', this.title).get() %}
             <li><a href="/blog/{{ post.id }}">{{ post.title }}</a></li>
         {% endfor %}
     </ul>

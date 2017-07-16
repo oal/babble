@@ -4,12 +4,14 @@ namespace Babble;
 
 use Babble\API;
 use Babble\Content\ContentLoader;
+use Babble\Models\Model;
 use Symfony\Component\HttpFoundation\Request;
 
 class Babble
 {
     public function __construct()
     {
+        new Model('Post');
         $request = Request::createFromGlobals();
         $this->routeRequest($request);
     }
@@ -35,8 +37,8 @@ class Babble
 
     private function routeRequestToPage(Request $request)
     {
-        $model = ContentLoader::matchPath($request->getPathInfo());
-        $page = new Page($request, $model);
+        $modelInstance = ContentLoader::matchPath($request->getPathInfo());
+        $page = new Page($request, $modelInstance);
         echo $page->render();
     }
 }

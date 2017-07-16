@@ -3,38 +3,25 @@
 namespace Babble;
 
 use ArrayAccess;
+use Babble\Models\Model;
 use Yosymfony\Toml\Toml;
 
 class ModelInstance implements ArrayAccess
 {
-    private $type;
-    private $name;
-    private $fields = [];
+    private $model;
 
     private $id;
     private $data = [];
 
-    public function __construct($model, $id)
+    public function __construct(Model $model, $id)
     {
-        $this->initModel($model);
+        $this->model = $model;
         $this->initData($id);
     }
 
     public function __toString()
     {
         return json_encode($this->data);
-    }
-
-
-    /**
-     * @param $modelType
-     */
-    private function initModel($modelType)
-    {
-        $this->type = $modelType;
-        $modelFormat = Toml::Parse('../models/' . $modelType . '.toml');
-        $this->name = $modelFormat['name'];
-        $this->fields = $modelFormat['fields'];
     }
 
     /**
@@ -44,15 +31,15 @@ class ModelInstance implements ArrayAccess
     {
         $this->id = $id;
 
-        $modelData = Toml::Parse('../content/' . $this->type . '/' . $id . '.toml');
-        foreach ($this->fields as $key => $value) {
-            $this->data[$key] = $modelData[$key];
+        $modelData = Toml::Parse('../content/' . $this->getType() . '/' . $id . '.toml');
+        foreach ($this->model->getFields() as $field) {
+            $this->data[$field->getKey()] = $modelData[$field->getKey()];
         }
     }
 
     public function getType()
     {
-        return $this->type;
+        return $this->model->getType();
     }
 
     public function offsetExists($offset)
