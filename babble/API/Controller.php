@@ -6,7 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class Controller
 {
-    public function create(Request $request)
+    public function create(Request $request, $id)
     {
     }
 

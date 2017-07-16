@@ -16,12 +16,18 @@ class ModelController extends Controller
         $this->model = new Model($modelType);
     }
 
-    public function create(Request $request)
+    public function create(Request $request, $id)
     {
+        // If ID is already taken.
+        if($this->model->exists($id)) {
+            return null;
+        }
+
         $data = json_decode($request->getContent(), true);
 
-        $modelInstance = ModelInstance::fromData($this->model, $data);
-
+        // Save model instance.
+        $modelInstance = ModelInstance::fromData($this->model, $id, $data);
+        $modelInstance->save();
         return json_encode($modelInstance);
     }
 
@@ -36,7 +42,25 @@ class ModelController extends Controller
 
     public function update(Request $request, $id)
     {
-        return 'UPDATE';
+        $data = json_decode($request->getContent(), true);
+
+        // If ID was changed and new ID is already taken.
+        $oldId = $data['_old_id'];
+        if(!empty($oldId) && $oldId !== $id && $this->model->exists($id)) {
+            return null;
+        }
+
+        // Save model instance.
+        $modelInstance = ModelInstance::fromData($this->model, $id, $data);
+        $modelInstance->save();
+
+        // If ID was changed, delete old version.
+        if (!empty($oldId) && $oldId !== $id) {
+            $deleteInstance = ModelInstance::fromDisk($this->model, $oldId);
+            $deleteInstance->delete();
+        }
+
+        return json_encode($modelInstance);
     }
 
     public function delete(Request $request, $id)

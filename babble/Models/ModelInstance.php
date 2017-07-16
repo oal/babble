@@ -6,7 +6,9 @@ use ArrayAccess;
 use Babble\Models\Model;
 use InvalidModelFieldException;
 use JsonSerializable;
+use Symfony\Component\Filesystem\Filesystem;
 use Yosymfony\Toml\Toml;
+use Yosymfony\Toml\TomlBuilder;
 
 class ModelInstance implements ArrayAccess, JsonSerializable
 {
@@ -15,9 +17,10 @@ class ModelInstance implements ArrayAccess, JsonSerializable
     private $id;
     private $data = [];
 
-    public function __construct(Model $model)
+    public function __construct(Model $model, $id)
     {
         $this->model = $model;
+        $this->id = $id;
     }
 
     public function __toString()
@@ -25,14 +28,9 @@ class ModelInstance implements ArrayAccess, JsonSerializable
         return json_encode($this->data);
     }
 
-    /**
-     * @param $id
-     */
-    private function loadFromDisk($id)
+    private function loadFromDisk()
     {
-        $this->id = $id;
-
-        $modelData = Toml::Parse('../content/' . $this->getType() . '/' . $id . '.toml');
+        $modelData = Toml::Parse($this->getContentFilePath());
         foreach ($this->model->getFields() as $field) {
             $this->data[$field->getKey()] = $modelData[$field->getKey()];
         }
@@ -41,6 +39,24 @@ class ModelInstance implements ArrayAccess, JsonSerializable
     public function getType()
     {
         return $this->model->getType();
+    }
+
+    public function save()
+    {
+        $builder = new TomlBuilder();
+        foreach ($this->data as $key => $value) {
+            $builder->addValue($key, $value);
+        }
+        $toml = $builder->getTomlString();
+
+        $fs = new Filesystem();
+        $fs->dumpFile($this->getContentFilePath(), $toml);
+    }
+
+    public function delete()
+    {
+        $fs = new Filesystem();
+        $fs->remove($this->getContentFilePath());
     }
 
     public function offsetExists($offset)
@@ -75,15 +91,15 @@ class ModelInstance implements ArrayAccess, JsonSerializable
 
     static function fromDisk(Model $model, string $id)
     {
-        $modelInstance = new ModelInstance($model);
-        $modelInstance->loadFromDisk($id);
+        $modelInstance = new ModelInstance($model, $id);
+        $modelInstance->loadFromDisk();
 
         return $modelInstance;
     }
 
-    static function fromData(Model $model, array $data)
+    static function fromData(Model $model, string $id, array $data)
     {
-        $modelInstance = new ModelInstance($model);
+        $modelInstance = new ModelInstance($model, $id);
         foreach ($model->getFields() as $field) {
             $key = $field->getKey();
             $value = $data[$key];
@@ -91,5 +107,13 @@ class ModelInstance implements ArrayAccess, JsonSerializable
         }
 
         return $modelInstance;
+    }
+
+    /**
+     * @return string
+     */
+    private function getContentFilePath(): string
+    {
+        return '../content/' . $this->getType() . '/' . $this->id . '.toml';
     }
 }

@@ -57,7 +57,7 @@ class Router
             case 'PUT':
                 return $controller->update($request, $id);
             case 'POST':
-                return $controller->create($request);
+                return $controller->create($request, $id);
             case 'DELETE':
                 return $controller->delete($request, $id);
             case 'OPTIONS':

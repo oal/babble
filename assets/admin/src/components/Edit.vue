@@ -3,12 +3,17 @@
         <div class="ui loading basic segment" v-if="loading"></div>
         <div v-else>
             <h1>
-                <span v-if="id">Edit</span>
+                <span v-if="isNew">Edit</span>
                 <span v-else>New</span>
                 {{ model.name }}
             </h1>
 
             <div class="ui form">
+                <div class="field">
+                    <label>ID</label>
+                    <input type="text" v-model="changedId">
+                </div>
+
                 <div class="field" v-for="value, key in data">
                     <label>{{ getFieldName(key) }}</label>
                     <input type="text" v-bind:value="value" v-on:input="onFieldInput($event, key)">
@@ -34,6 +39,8 @@
 
         data () {
             return {
+                isNew: !!this.id,
+                changedId: this.id,
                 loading: true,
                 model: {},
                 data: {},
@@ -51,7 +58,11 @@
         methods: {
             fetchData() {
                 this.loading = true;
-                this.data = {};
+
+                if (!this.id) {
+                    this.changedId = null;
+                    this.data = {};
+                }
 
                 let promises = [];
 
@@ -79,14 +90,27 @@
             save() {
                 this.loading = true;
                 let request;
-                if (this.id) request = this.$http.put('/' + this.modelType + '/' + this.id, this.data);
-                else request = this.$http.post('/' + this.modelType, this.data);
+                if (this.id) request = this.$http.put;
+                else request = this.$http.post;
 
-                request.then(response => {
-                    console.log(response);
+                let data = this.data;
+                if (this.id !== this.changedId) {
+                    data = Object.assign({}, this.data, {
+                        '_old_id': this.id
+                    });
+                }
+
+                request('/' + this.modelType + '/' + this.changedId, data).then(response => {
+                    let location = {
+                        name: 'Edit',
+                        params: {
+                            modelType: this.model.type,
+                            id: this.changedId
+                        }
+                    };
+                    this.$router.push(location);
                     this.loading = false;
-                }).catch(response => {
-                    console.log(response);
+                }).catch(_ => {
                     this.loading = false
                 });
             },

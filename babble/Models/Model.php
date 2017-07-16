@@ -4,6 +4,7 @@ namespace Babble\Models;
 
 use Babble\Exceptions\InvalidModelException;
 use JsonSerializable;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Yosymfony\Toml\Exception\ParseException;
 use Yosymfony\Toml\Toml;
@@ -60,6 +61,12 @@ class Model implements JsonSerializable
             'options' => $this->options,
             'fields' => $this->fields
         ];
+    }
+
+    public function exists(string $id)
+    {
+        $fs = new Filesystem();
+        return $fs->exists('../content/' . $this->getType() . '/' . $id . '.toml');
     }
 
     static function all()
