@@ -118,6 +118,15 @@ class Model implements JsonSerializable
         }
         return true;
     }
+
+    public function hasField($key)
+    {
+        // TODO: Cache field names / keys somewhere to avoid this loop?
+        foreach ($this->fields as $field) {
+            if ($field->getKey() === $key) return true;
+        }
+        return false;
+    }
 }
 
 class Field implements JsonSerializable

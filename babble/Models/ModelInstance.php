@@ -4,6 +4,7 @@ namespace Babble;
 
 use ArrayAccess;
 use Babble\Models\Model;
+use InvalidModelFieldException;
 use JsonSerializable;
 use Yosymfony\Toml\Toml;
 
@@ -14,10 +15,9 @@ class ModelInstance implements ArrayAccess, JsonSerializable
     private $id;
     private $data = [];
 
-    public function __construct(Model $model, $id)
+    public function __construct(Model $model)
     {
         $this->model = $model;
-        $this->initData($id);
     }
 
     public function __toString()
@@ -28,7 +28,7 @@ class ModelInstance implements ArrayAccess, JsonSerializable
     /**
      * @param $id
      */
-    private function initData($id)
+    private function loadFromDisk($id)
     {
         $this->id = $id;
 
@@ -55,8 +55,13 @@ class ModelInstance implements ArrayAccess, JsonSerializable
         return $this->data[$offset];
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($key, $value)
     {
+        if (!$this->model->hasField($key)) {
+            $modelName = $this->model->getName();
+            throw new InvalidModelFieldException("Field \"$key\" does not exist on model \"$modelName\"");
+        }
+        $this->data[$key] = $value;
     }
 
     public function offsetUnset($offset)
@@ -66,5 +71,25 @@ class ModelInstance implements ArrayAccess, JsonSerializable
     function jsonSerialize()
     {
         return array_merge(['id' => $this->id], $this->data);
+    }
+
+    static function fromDisk(Model $model, string $id)
+    {
+        $modelInstance = new ModelInstance($model);
+        $modelInstance->loadFromDisk($id);
+
+        return $modelInstance;
+    }
+
+    static function fromData(Model $model, array $data)
+    {
+        $modelInstance = new ModelInstance($model);
+        foreach ($model->getFields() as $field) {
+            $key = $field->getKey();
+            $value = $data[$key];
+            if (!empty($value)) $modelInstance[$key] = $value;
+        }
+
+        return $modelInstance;
     }
 }

@@ -46,7 +46,7 @@ class ContentLoader
         $result = [];
         foreach ($files as $file) {
             $id = $this->filenameToId($file->getFilename());
-            $model = new ModelInstance($this->model, $id);
+            $model = ModelInstance::fromDisk($this->model, $id);
             if (!$this->filters->isMatch($model)) continue;
             $result[] = $model;
         }
@@ -95,7 +95,7 @@ class ContentLoader
         $fs = new Filesystem();
         $dataFileExists = $fs->exists($this->getModelDirectory() . $id . '.toml');
 
-        if ($dataFileExists) return new ModelInstance($this->model, $id);
+        if ($dataFileExists) return ModelInstance::fromDisk($this->model, $id);
         return null;
     }
 
