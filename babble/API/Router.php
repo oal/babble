@@ -25,15 +25,22 @@ class Router
         $matcher = new UrlMatcher($this->router, $context);
         $parameters = $matcher->match($request->getPathInfo());
 
+        header('Content-Type: application/json');
         switch ($parameters['_route']) {
             case 'model':
                 return $this->handleModelRoute($request, $parameters);
+            case 'root':
+                return $this->handleRootRoute($request);
         }
+
         var_export($parameters);
     }
 
     private function addRoutes()
     {
+        $rootRoute = new Route('/api');
+        $this->router->add('root', $rootRoute);
+
         $modelRoute = new Route('/api/{model}/{id}', ['id' => null]);
         $this->router->add('model', $modelRoute);
     }
@@ -56,6 +63,18 @@ class Router
             case 'OPTIONS':
                 return $controller->describe($request);
         }
-        return 'NOT FOUND';
+        return null;
+    }
+
+    private function handleRootRoute($request)
+    {
+        $controller = new RootController();
+        $method = $request->getMethod();
+
+        switch ($method) {
+            case 'OPTIONS':
+                return $controller->describe($request);
+        }
+        return null;
     }
 }

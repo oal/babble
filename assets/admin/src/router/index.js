@@ -6,7 +6,7 @@ import Panel from '@/components/Panel';
 
 Vue.use(Router);
 Vue.prototype.$http = axios.create({
-    baseURL: '/api/'
+    baseURL: '/api'
 });
 
 export default new Router({

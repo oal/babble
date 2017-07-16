@@ -3,15 +3,16 @@
 namespace Babble\API;
 
 use Babble\Content\ContentLoader;
+use Babble\Models\Model;
 use Symfony\Component\HttpFoundation\Request;
 
-class ModelController
+class ModelController extends Controller
 {
-    private $model;
+    private $modelType;
 
     public function __construct(string $model)
     {
-        $this->model = $model;
+        $this->modelType = $model;
     }
 
     public function create(Request $request)
@@ -21,7 +22,7 @@ class ModelController
 
     public function read(Request $request, $id)
     {
-        $loader = new ContentLoader($this->model);
+        $loader = new ContentLoader($this->modelType);
         if (!empty($id)) {
             return $loader->find($id);
         }
@@ -40,6 +41,7 @@ class ModelController
 
     public function describe(Request $request)
     {
-        return 'DESCRIBE' . $this->model;
+        $model = new Model($this->modelType);
+        return json_encode($model);
     }
 }

@@ -3,9 +3,14 @@
         <header id="top">Babble CMS Admin</header>
         <div id="main">
             <aside id="sidebar">
-                <ul>
-                    <li v-for="post in posts">{{ post.title }}</li>
-                </ul>
+                <div v-for="model in models">
+                    <h3>{{ model.name_plural }}</h3>
+                    <ul>
+                        <li><a href="#">All {{ model.name_plural }}</a></li>
+                        <li><a href="#">Add new</a></li>
+                    </ul>
+                </div>
+
             </aside>
             <article id="content"></article>
         </div>
@@ -16,14 +21,14 @@
     export default {
         name: 'panel',
         mounted: function() {
-            this.$http.get('/Post').then(response => {
+            this.$http.options('').then(response => {
                 console.log(response);
-                this.posts = response.data;
+                this.models = response.data;
             });
         },
         data () {
             return {
-                posts: [],
+                models: [],
                 msg: 'Welcome to Babble CMS Admin'
             }
         }
