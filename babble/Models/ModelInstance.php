@@ -4,9 +4,10 @@ namespace Babble;
 
 use ArrayAccess;
 use Babble\Models\Model;
+use JsonSerializable;
 use Yosymfony\Toml\Toml;
 
-class ModelInstance implements ArrayAccess
+class ModelInstance implements ArrayAccess, JsonSerializable
 {
     private $model;
 
@@ -60,5 +61,10 @@ class ModelInstance implements ArrayAccess
 
     public function offsetUnset($offset)
     {
+    }
+
+    function jsonSerialize()
+    {
+        return array_merge(['id' => $this->id], $this->data);
     }
 }

@@ -4,16 +4,18 @@
         <div v-else>
             <h1>
                 {{ model.name_plural }}
-                <a href="#" class="ui right floated primary left labeled icon button">
+
+                <router-link v-bind:to="{name: 'Create', params: {modelType: model.type}}"
+                             class="ui right floated primary left labeled icon button">
                     <i class="add icon"></i>
                     New {{ model.name }}
-                </a>
+                </router-link>
             </h1>
             <table class="ui table">
                 <thead>
                 <tr>
                     <th v-for="column in options.list_display">
-                        {{ getColumnLabel(column) }}
+                        {{ getColumnName(column) }}
                     </th>
                     <th>&nbsp;</th>
                 </tr>
@@ -25,10 +27,11 @@
                     </td>
 
                     <td class="collapsing">
-                        <a href="#" class="ui green left labeled icon button">
+                        <router-link v-bind:to="{name: 'Edit', params: {modelType: model.type, id: instance.id}}"
+                                     class="ui green left labeled icon button">
                             <i class="edit icon"></i>
                             Edit
-                        </a>
+                        </router-link>
                         <a href="#" class="ui red left labeled icon button">
                             <i class="remove icon"></i>
                             Delete
@@ -80,9 +83,9 @@
                     this.loading = false;
                 });
             },
-            getColumnLabel(column) {
-                let label = this.model.fields.filter(field => field.key === column)[0].label;
-                return label;
+            getColumnName(column) {
+                let name = this.model.fields.filter(field => field.key === column)[0].name;
+                return name;
             },
             getColumn(column, modelInstance) {
                 return modelInstance[column];

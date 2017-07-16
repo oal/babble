@@ -26,7 +26,7 @@ class ModelController extends Controller
         if (!empty($id)) {
             return $loader->find($id);
         }
-        return '[' . join(', ', $loader->get()) . ']';
+        return json_encode($loader->get());
     }
 
     public function update(Request $request, $id)

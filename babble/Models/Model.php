@@ -112,14 +112,14 @@ class Model implements JsonSerializable
 class Field implements JsonSerializable
 {
     private $key;
-    private $label;
+    private $name;
     private $type;
     private $options = [];
 
     public function __construct($key, $data)
     {
         $this->key = $key;
-        $this->label = $data['label'];
+        $this->name = $data['name'];
         $this->type = $data['type'];
     }
 
@@ -135,7 +135,7 @@ class Field implements JsonSerializable
     {
         return [
             'key' => $this->key,
-            'label' => $this->label,
+            'name' => $this->name,
             'type' => $this->type,
             'options' => $this->options
         ];

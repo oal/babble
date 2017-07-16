@@ -4,17 +4,17 @@ name = "Blog post"
 list_display = ['title', 'is_draft', 'published']
 
 [fields.title]
-label = "Title"
+name = "Title"
 type = "string"
 
 [fields.published]
-label = "Published at"
+name = "Published at"
 type = "datetime"
 
 [fields.is_draft]
-label = "Draft"
+name = "Draft"
 type = "boolean"
 
 [fields.body]
-label = "Body"
+name = "Body"
 type = "textarea"

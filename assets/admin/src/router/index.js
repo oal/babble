@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import Panel from '@/components/Panel';
 import List from '@/components/List';
+import Edit from '@/components/Edit';
 
 Vue.use(Router);
 Vue.prototype.$http = axios.create({
@@ -21,6 +22,18 @@ export default new Router({
                     path: '/model/:modelType',
                     name: 'List',
                     component: List,
+                    props: true
+                },
+                {
+                    path: '/model/:modelType/create',
+                    name: 'Create',
+                    component: Edit,
+                    props: true
+                },
+                {
+                    path: '/model/:modelType/edit/:id',
+                    name: 'Edit',
+                    component: Edit,
                     props: true
                 }
             ]
