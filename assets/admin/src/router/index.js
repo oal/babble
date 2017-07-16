@@ -1,15 +1,20 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Hello from '@/components/Hello'
+import Vue from 'vue';
+import Router from 'vue-router';
+import axios from 'axios';
 
-Vue.use(Router)
+import Panel from '@/components/Panel';
+
+Vue.use(Router);
+Vue.prototype.$http = axios.create({
+    baseURL: '/api/'
+});
 
 export default new Router({
-  routes: [
-    {
-      path: '/',
-      name: 'Hello',
-      component: Hello
-    }
-  ]
-})
+    routes: [
+        {
+            path: '/',
+            name: 'Panel',
+            component: Panel
+        }
+    ]
+});
