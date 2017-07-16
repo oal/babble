@@ -1,11 +1,14 @@
 name = "Blog post"
 
+[options.admin]
+list_display = ['title', 'is_draft', 'published']
+
 [fields.title]
 label = "Title"
 type = "string"
 
 [fields.published]
-label = "Publish"
+label = "Published at"
 type = "datetime"
 
 [fields.is_draft]

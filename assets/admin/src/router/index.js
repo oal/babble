@@ -3,6 +3,7 @@ import Router from 'vue-router';
 import axios from 'axios';
 
 import Panel from '@/components/Panel';
+import List from '@/components/List';
 
 Vue.use(Router);
 Vue.prototype.$http = axios.create({
@@ -14,7 +15,15 @@ export default new Router({
         {
             path: '/',
             name: 'Panel',
-            component: Panel
+            component: Panel,
+            children: [
+                {
+                    path: '/model/:modelType',
+                    name: 'List',
+                    component: List,
+                    props: true
+                }
+            ]
         }
     ]
 });

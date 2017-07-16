@@ -3,16 +3,19 @@
         <header id="top">Babble CMS Admin</header>
         <div id="main">
             <aside id="sidebar">
-                <div v-for="model in models">
-                    <h3>{{ model.name_plural }}</h3>
-                    <ul>
-                        <li><a href="#">All {{ model.name_plural }}</a></li>
-                        <li><a href="#">Add new</a></li>
-                    </ul>
-                </div>
+                <div class="ui vertical text menu"  v-for="model in models">
+                    <div class="header item">{{ model.name_plural }}</div>
 
+                    <router-link v-bind:to="{name: 'List', params: {modelType: model.type}}" class="item">
+                        All {{ model.name_plural }}
+                    </router-link>
+
+                    <router-link v-bind:to="'/model/' + model.type + '/create'" class="item">Add new</router-link>
+                </div>
             </aside>
-            <article id="content"></article>
+            <article id="content">
+                <router-view></router-view>
+            </article>
         </div>
     </div>
 </template>
@@ -20,7 +23,7 @@
 <script>
     export default {
         name: 'panel',
-        mounted: function() {
+        created: function() {
             this.$http.options('').then(response => {
                 console.log(response);
                 this.models = response.data;

@@ -15,6 +15,8 @@ class Model implements JsonSerializable
     private $name;
     private $namePlural;
 
+    private $options = [];
+
     private $fields = [];
 
     public function __construct(string $type)
@@ -32,6 +34,7 @@ class Model implements JsonSerializable
         $modelFormat = Toml::Parse('../models/' . $modelType . '.toml');
 
         $this->initName($modelFormat);
+        $this->initOptions($modelFormat);
         $this->initFields($modelFormat['fields']);
     }
 
@@ -54,6 +57,7 @@ class Model implements JsonSerializable
             'type' => $this->type,
             'name' => $this->name,
             'name_plural' => $this->namePlural,
+            'options' => $this->options,
             'fields' => $this->fields
         ];
     }
@@ -93,6 +97,15 @@ class Model implements JsonSerializable
         foreach ($fields as $key => $data) {
             $this->fields[] = new Field($key, $data);
         }
+    }
+
+    /**
+     * @param $modelFormat
+     */
+    private function initOptions($modelFormat)
+    {
+        $options = $modelFormat['options'];
+        if (is_array($options)) $this->options = $options;
     }
 }
 
