@@ -18,14 +18,14 @@ class Babble
 
     private function routeRequest(Request $request)
     {
-        if (preg_match('/static/', $request->getPathInfo())) {
-            return false;
-        }
-        if (preg_match('/api/', $request->getPathInfo())) {
+        $path = $request->getPathInfo();
+
+        if (preg_match('/api/', $path)) {
             $this->routeRequestToAPI($request);
         } else {
             $this->routeRequestToPage($request);
         }
+
         return true;
     }
 
