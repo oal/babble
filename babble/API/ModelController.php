@@ -8,21 +8,25 @@ use Symfony\Component\HttpFoundation\Request;
 
 class ModelController extends Controller
 {
-    private $modelType;
+    private $model;
 
     public function __construct(string $model)
     {
-        $this->modelType = $model;
+        $this->model = new Model($model);
     }
 
     public function create(Request $request)
     {
-        return 'CREATE';
+        $data = json_decode($request->getContent(), true);
+
+        return json_encode([
+            'valid' => $this->model->validate($data)
+        ]);
     }
 
     public function read(Request $request, $id)
     {
-        $loader = new ContentLoader($this->modelType);
+        $loader = new ContentLoader($this->model->getType());
         if (!empty($id)) {
             return $loader->find($id);
         }
@@ -41,7 +45,6 @@ class ModelController extends Controller
 
     public function describe(Request $request)
     {
-        $model = new Model($this->modelType);
-        return json_encode($model);
+        return json_encode($this->model);
     }
 }

@@ -11,10 +11,10 @@
             <div class="ui form">
                 <div class="field" v-for="value, key in data">
                     <label>{{ getFieldName(key) }}</label>
-                    <input type="text" v-model="value">
+                    <input type="text" v-bind:value="value" v-on:input="onFieldInput($event, key)">
                 </div>
 
-                <div class="ui green left labeled icon button">
+                <div class="ui green left labeled icon button" v-on:click="save">
                     <i class="save icon"></i>
                     Save
                 </div>
@@ -76,7 +76,23 @@
                     this.loading = false;
                 });
             },
+            save() {
+                this.loading = true;
+                let request;
+                if (this.id) request = this.$http.put('/' + this.modelType + '/' + this.id, this.data);
+                else request = this.$http.post('/' + this.modelType, this.data);
 
+                request.then(response => {
+                    console.log(response);
+                    this.loading = false;
+                }).catch(response => {
+                    console.log(response);
+                    this.loading = false
+                });
+            },
+            onFieldInput(event, key) {
+                this.data[key] = event.target.value;
+            },
             getFieldName(key) {
                 return this.model.fields.filter(field => field.key === key)[0].name;
             }

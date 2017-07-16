@@ -104,8 +104,19 @@ class Model implements JsonSerializable
      */
     private function initOptions($modelFormat)
     {
+        if (empty($modelFormat['options'])) return;
+
         $options = $modelFormat['options'];
         if (is_array($options)) $this->options = $options;
+    }
+
+    public function validate(array $data)
+    {
+        foreach ($this->getFields() as $field) {
+            $value = $data[$field->getKey()];
+            if (!$field->validate($value)) return false;
+        }
+        return true;
     }
 }
 
@@ -129,6 +140,11 @@ class Field implements JsonSerializable
     public function getKey()
     {
         return $this->key;
+    }
+
+    public function validate($value)
+    {
+        return count($value) > 2; // TODO: Add proper validation.
     }
 
     function jsonSerialize()
