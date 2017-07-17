@@ -15,9 +15,10 @@
                 </div>
 
                 <div class="field" v-for="field in model.fields" v-bind:key="field.key">
-                    <label>{{ field.name }}</label>
                     <component v-bind:is="field.type + '-field'" v-bind:value="data[field.key]"
                                v-on:input="onFieldInput(field.key, $event)"
+                               v-bind:name="field.key"
+                               v-bind:label="field.name"
                                v-bind:options="field.options"></component>
                 </div>
 
@@ -32,12 +33,16 @@
 
 <script>
     import TextField from '@/components/fields/TextField';
+    import BooleanField from '@/components/fields/BooleanField';
+    import DatetimeField from '@/components/fields/DatetimeField';
 
     export default {
         name: 'panel',
 
         components: {
-            TextField
+            BooleanField,
+            DatetimeField,
+            TextField,
         },
 
         props: [

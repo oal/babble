@@ -1,20 +1,23 @@
 name = "Blog post"
 
 [options.admin]
-list_display = ['title', 'is_draft', 'published']
+    list_display = ['title', 'is_draft', 'published']
 
 [fields.title]
-name = "Title"
-type = "text"
+    name = "Title"
+    type = "text"
 
 [fields.published]
-name = "Published at"
-type = "datetime"
+    name = "Published at"
+    type = "datetime"
 
 [fields.is_draft]
-name = "Draft"
-type = "boolean"
+    name = "Draft"
+    type = "boolean"
 
 [fields.body]
-name = "Body"
-type = "textarea"
+    name = "Body"
+    type = "text"
+
+    [fields.body.options]
+    multiline = true

@@ -1,12 +1,12 @@
 name = "Page"
 
 [fields.title]
-name = "Title"
-type = "text"
+    name = "Title"
+    type = "text"
 
 [fields.body]
-name = "Body"
-type = "text"
+    name = "Body"
+    type = "text"
 
-[fields.body.options]
-multiline = true
+    [fields.body.options]
+    multiline = true
