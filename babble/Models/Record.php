@@ -10,7 +10,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Yosymfony\Toml\Toml;
 use Yosymfony\Toml\TomlBuilder;
 
-class ModelInstance implements ArrayAccess, JsonSerializable
+class Record implements ArrayAccess, JsonSerializable
 {
     private $model;
 
@@ -91,7 +91,7 @@ class ModelInstance implements ArrayAccess, JsonSerializable
 
     static function fromDisk(Model $model, string $id)
     {
-        $modelInstance = new ModelInstance($model, $id);
+        $modelInstance = new Record($model, $id);
         $modelInstance->loadFromDisk();
 
         return $modelInstance;
@@ -99,7 +99,7 @@ class ModelInstance implements ArrayAccess, JsonSerializable
 
     static function fromData(Model $model, string $id, array $data)
     {
-        $modelInstance = new ModelInstance($model, $id);
+        $modelInstance = new Record($model, $id);
         foreach ($model->getFields() as $field) {
             $key = $field->getKey();
             $value = $data[$key];

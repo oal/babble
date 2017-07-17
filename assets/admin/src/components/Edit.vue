@@ -14,9 +14,11 @@
                     <input type="text" v-model="changedId">
                 </div>
 
-                <div class="field" v-for="value, key in data">
-                    <label>{{ getFieldName(key) }}</label>
-                    <input type="text" v-bind:value="value" v-on:input="onFieldInput($event, key)">
+                <div class="field" v-for="field in model.fields" v-bind:key="field.key">
+                    <label>{{ field.name }}</label>
+                    <component v-bind:is="field.type + '-field'" v-bind:value="data[field.key]"
+                               v-on:input="onFieldInput(field.key, $event)"
+                               v-bind:options="field.options"></component>
                 </div>
 
                 <div class="ui green left labeled icon button" v-on:click="save">
@@ -29,8 +31,14 @@
 </template>
 
 <script>
+    import TextField from '@/components/fields/TextField';
+
     export default {
         name: 'panel',
+
+        components: {
+            TextField
+        },
 
         props: [
             'modelType',
@@ -114,8 +122,8 @@
                     this.loading = false
                 });
             },
-            onFieldInput(event, key) {
-                this.data[key] = event.target.value;
+            onFieldInput(key, value) {
+                this.data[key] = value;
             },
             getFieldName(key) {
                 return this.model.fields.filter(field => field.key === key)[0].name;

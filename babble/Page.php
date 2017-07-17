@@ -11,12 +11,12 @@ use Twig_Loader_Filesystem;
 class Page
 {
     private $request;
-    private $model;
+    private $record;
 
-    public function __construct(Request $request, ModelInstance $model)
+    public function __construct(Request $request, Record $record)
     {
         $this->request = $request;
-        $this->model = $model;
+        $this->record = $record;
     }
 
     function render()
@@ -34,9 +34,9 @@ class Page
         $path = $this->request->getPathInfo();
         $basePath = substr($path, 0, strrpos($path, '/'));
 
-        $modelType = $this->model->getType();
+        $modelType = $this->record->getType();
         return $twig->render($basePath . '/' . $modelType . '.twig', [
-            'this' => $this->model
+            'this' => $this->record
         ]);
     }
 }

@@ -148,6 +148,7 @@ class Field implements JsonSerializable
         $this->key = $key;
         $this->name = $data['name'];
         $this->type = $data['type'];
+        $this->options = $data['options'];
     }
 
     /**

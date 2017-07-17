@@ -3,7 +3,7 @@
         <header id="top">Babble CMS Admin</header>
         <div id="main">
             <aside id="sidebar">
-                <div class="ui vertical text menu" v-for="model in models">
+                <div class="ui vertical text menu" v-for="model in models" v-bind:key="model.type">
                     <div class="header item">{{ model.name_plural }}</div>
 
                     <router-link v-bind:to="{name: 'List', params: {modelType: model.type}}" class="item">
@@ -27,7 +27,6 @@
         name: 'panel',
         created: function () {
             this.$http.options('').then(response => {
-                console.log(response);
                 this.models = response.data;
             });
         },

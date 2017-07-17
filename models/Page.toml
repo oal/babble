@@ -2,8 +2,11 @@ name = "Page"
 
 [fields.title]
 name = "Title"
-type = "string"
+type = "text"
 
 [fields.body]
 name = "Body"
-type = "textarea"
+type = "text"
+
+[fields.body.options]
+multiline = true

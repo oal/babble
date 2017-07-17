@@ -37,8 +37,8 @@ class Babble
 
     private function routeRequestToPage(Request $request)
     {
-        $modelInstance = ContentLoader::matchPath($request->getPathInfo());
-        $page = new Page($request, $modelInstance);
+        $record = ContentLoader::matchPath($request->getPathInfo());
+        $page = new Page($request, $record);
         echo $page->render();
     }
 }

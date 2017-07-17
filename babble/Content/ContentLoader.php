@@ -3,7 +3,7 @@
 namespace Babble\Content;
 
 use Babble\Exceptions\InvalidModelException;
-use Babble\ModelInstance;
+use Babble\Record;
 use Babble\Models\Model;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -21,7 +21,7 @@ class ContentLoader
 
     public function find($id)
     {
-        return $this->idToModel($id);
+        return $this->idToRecord($id);
     }
 
     public function where($key, $comparison, $value)
@@ -46,9 +46,9 @@ class ContentLoader
         $result = [];
         foreach ($files as $file) {
             $id = $this->filenameToId($file->getFilename());
-            $model = ModelInstance::fromDisk($this->model, $id);
-            if (!$this->filters->isMatch($model)) continue;
-            $result[] = $model;
+            $record = Record::fromDisk($this->model, $id);
+            if (!$this->filters->isMatch($record)) continue;
+            $result[] = $record;
         }
 
         return $result;
@@ -57,7 +57,7 @@ class ContentLoader
 
     /**
      * @param $path
-     * @return null|ModelInstance
+     * @return null|Record
      */
     static function matchPath(string $path)
     {
@@ -73,8 +73,8 @@ class ContentLoader
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
             try {
                 $loader = new ContentLoader($modelNameMaybe);
-                $model = $loader->find($id);
-                if ($model) return $model;
+                $record = $loader->find($id);
+                if ($record) return $record;
             } catch (InvalidModelException $e) {
             }
         }
@@ -90,12 +90,12 @@ class ContentLoader
         return '../content/' . $this->model->getType() . '/';
     }
 
-    private function idToModel(string $id): ModelInstance
+    private function idToRecord(string $id)
     {
         $fs = new Filesystem();
         $dataFileExists = $fs->exists($this->getModelDirectory() . $id . '.toml');
 
-        if ($dataFileExists) return ModelInstance::fromDisk($this->model, $id);
+        if ($dataFileExists) return Record::fromDisk($this->model, $id);
         return null;
     }
 

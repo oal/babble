@@ -3,7 +3,7 @@
 namespace Babble\API;
 
 use Babble\Content\ContentLoader;
-use Babble\ModelInstance;
+use Babble\Record;
 use Babble\Models\Model;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -26,7 +26,7 @@ class ModelController extends Controller
         $data = json_decode($request->getContent(), true);
 
         // Save model instance.
-        $modelInstance = ModelInstance::fromData($this->model, $id, $data);
+        $modelInstance = Record::fromData($this->model, $id, $data);
         $modelInstance->save();
         return json_encode($modelInstance);
     }
@@ -51,12 +51,12 @@ class ModelController extends Controller
         }
 
         // Save model instance.
-        $modelInstance = ModelInstance::fromData($this->model, $id, $data);
+        $modelInstance = Record::fromData($this->model, $id, $data);
         $modelInstance->save();
 
         // If ID was changed, delete old version.
         if (!empty($oldId) && $oldId !== $id) {
-            $deleteInstance = ModelInstance::fromDisk($this->model, $oldId);
+            $deleteInstance = Record::fromDisk($this->model, $oldId);
             $deleteInstance->delete();
         }
 
