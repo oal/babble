@@ -19,7 +19,13 @@
                                v-on:input="onFieldInput(field.key, $event)"
                                v-bind:name="field.key"
                                v-bind:label="field.name"
-                               v-bind:options="field.options"></component>
+                               v-bind:options="field.options" v-if="hasFieldComponent(field)"></component>
+                    <div class="field" v-else>
+                        <label>{{ field.name }}</label>
+                        <div class="ui visible error message">
+                            No component registered for field type "{{ field.type }}".
+                        </div>
+                    </div>
                 </div>
 
                 <div class="ui green left labeled icon button" v-on:click="save">
@@ -32,9 +38,11 @@
 </template>
 
 <script>
+    import {upperFirst, camelCase} from 'lodash';
     import TextField from '@/components/fields/TextField';
     import BooleanField from '@/components/fields/BooleanField';
     import DatetimeField from '@/components/fields/DatetimeField';
+    import ImageField from '@/components/fields/ImageField';
 
     export default {
         name: 'panel',
@@ -43,6 +51,7 @@
             BooleanField,
             DatetimeField,
             TextField,
+            ImageField
         },
 
         props: [
@@ -79,13 +88,13 @@
 
                 let promises = [];
 
-                let modelPromise = this.$http.options('/' + this.modelType).then(response => {
+                let modelPromise = this.$http.options('/models/' + this.modelType).then(response => {
                     this.model = response.data;
                 });
                 promises.push(modelPromise);
 
                 if (this.id) {
-                    let dataPromise = this.$http.get('/' + this.modelType + '/' + this.id).then(response => {
+                    let dataPromise = this.$http.get('/models/' + this.modelType + '/' + this.id).then(response => {
                         this.data = response.data;
                     });
                     promises.push(dataPromise);
@@ -113,7 +122,7 @@
                     });
                 }
 
-                request('/' + this.modelType + '/' + this.changedId, data).then(response => {
+                request('/models/' + this.modelType + '/' + this.changedId, data).then(response => {
                     let location = {
                         name: 'Edit',
                         params: {
@@ -132,6 +141,10 @@
             },
             getFieldName(key) {
                 return this.model.fields.filter(field => field.key === key)[0].name;
+            },
+            hasFieldComponent(field) {
+                let componentName = upperFirst(`${camelCase(field.type)}Field`);
+                return !!this.$options.components[componentName];
             }
         }
     }

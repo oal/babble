@@ -4,6 +4,10 @@ name = "Page"
     name = "Title"
     type = "text"
 
+[fields.image]
+    name = "Header image"
+    type = "image"
+
 [fields.body]
     name = "Body"
     type = "text"

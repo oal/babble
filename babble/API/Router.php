@@ -27,9 +27,9 @@ class Router
 
         header('Content-Type: application/json');
         switch ($parameters['_route']) {
-            case 'model':
+            case 'resources':
                 return $this->handleModelRoute($request, $parameters);
-            case 'root':
+            case 'models':
                 return $this->handleRootRoute($request);
         }
 
@@ -38,11 +38,11 @@ class Router
 
     private function addRoutes()
     {
-        $rootRoute = new Route('/api');
-        $this->router->add('root', $rootRoute);
+        $modelsRoute = new Route('/api/models');
+        $this->router->add('models', $modelsRoute);
 
-        $modelRoute = new Route('/api/{model}/{id}', ['id' => null]);
-        $this->router->add('model', $modelRoute);
+        $modelRoute = new Route('/api/models/{model}/{id}', ['id' => null]);
+        $this->router->add('resources', $modelRoute);
     }
 
     private function handleModelRoute(Request $request, array $parameters)

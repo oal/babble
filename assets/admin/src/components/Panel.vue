@@ -26,7 +26,7 @@
     export default {
         name: 'panel',
         created: function () {
-            this.$http.options('').then(response => {
+            this.$http.options('/models').then(response => {
                 this.models = response.data;
             });
         },

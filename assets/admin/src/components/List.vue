@@ -84,10 +84,10 @@
             fetchData() {
                 this.loading = true;
 
-                let modelPromise = this.$http.options('/' + this.modelType).then(response => {
+                let modelPromise = this.$http.options('/models/' + this.modelType).then(response => {
                     this.model = response.data;
                 });
-                let recordsPromise = this.$http.get('/' + this.modelType).then(response => {
+                let recordsPromise = this.$http.get('/models/' + this.modelType).then(response => {
                     this.models = response.data;
                 });
 
