@@ -31,6 +31,8 @@ class Router
                 return $this->handleModelRoute($request, $parameters);
             case 'models':
                 return $this->handleRootRoute($request);
+            case 'files':
+                return $this->handleFileRoute($request, $parameters);
         }
 
         var_export($parameters);
@@ -43,6 +45,9 @@ class Router
 
         $modelRoute = new Route('/api/models/{model}/{id}', ['id' => null]);
         $this->router->add('resources', $modelRoute);
+
+        $fileRoute = new Route('/api/files/{path}', ['path' => null]);
+        $this->router->add('files', $fileRoute);
     }
 
     private function handleModelRoute(Request $request, array $parameters)
@@ -74,6 +79,28 @@ class Router
         switch ($method) {
             case 'OPTIONS':
                 return $controller->describe($request);
+        }
+        return null;
+    }
+
+    private function handleFileRoute($request, array $parameters)
+    {
+        error_log(json_encode($parameters));
+        $controller = new FileController();
+        $method = $request->getMethod();
+
+        $path = $parameters['path'];
+        switch ($method) {
+            case 'GET':
+                return $controller->read($request, $path);
+//            case 'PUT':
+//                return $controller->update($request, $id);
+//            case 'POST':
+//                return $controller->create($request, $id);
+//            case 'DELETE':
+//                return $controller->delete($request, $id);
+//            case 'OPTIONS':
+//                return $controller->describe($request);
         }
         return null;
     }

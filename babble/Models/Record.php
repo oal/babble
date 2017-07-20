@@ -32,6 +32,7 @@ class Record implements ArrayAccess, JsonSerializable
     {
         $modelData = Toml::Parse($this->getContentFilePath());
         foreach ($this->model->getFields() as $field) {
+            if (!array_key_exists($field->getKey(), $modelData)) continue;
             $this->data[$field->getKey()] = $modelData[$field->getKey()];
         }
     }

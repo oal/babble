@@ -2,27 +2,37 @@
     <div class="field">
         <label>{{ label }}</label>
         <div class="ui left labeled primary icon button">
-            <i class="add icon"></i>
+            <i class="grid layout icon"></i>
             Choose image
         </div>
+
+        <div class="ui left labeled green icon button">
+            <i class="upload icon"></i>
+            Upload image
+        </div>
+
         <div class="ui segment">
             <div class="files-top">
                 <div class="ui breadcrumb">
-                    <a class="section">Uploads</a>
-                    <div class="divider"> /</div>
-                    <a class="section">Store</a>
-                    <div class="divider"> /</div>
-                    <div class="active section">T-Shirt</div>
+                    <a class="section" @click="popToDir(0)">Uploads</a>
+                    <span v-for="dir, $index in path">
+                        <span class="divider">/</span>
+                        <a class="section" @click="popToDir($index+1)">{{ dir }}</a>
+                    </span>
                 </div>
-                <div class="ui tiny icon button">
-                    <i class="ui remove icon"></i>
-                </div>
+                <i class="ui large grey window close icon"></i>
             </div>
 
             <div class="files">
-                <img src="https://semantic-ui.com/images/wireframe/white-image.png" alt="" class="file"
-                     v-for="image in images">
-                <div class="add file"><i class="ui huge add icon"></i></div>
+                <div class="file" v-for="file in files">
+                    <img :src="getURL(file)" alt="" v-if="file.type === 'file'">
+                    <div class="dir" v-else @click="goToDir(file)">
+                        <span>
+                            <i class="huge folder outline icon"></i>
+                            {{ file.name }}
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -38,13 +48,54 @@
 
         data() {
             return {
-                'images': new Array(9)
+                'path': [],
+                'files': []
             }
-        }
+        },
+
+        created() {
+            this.loadFiles();
+        },
+
+        watch: {
+            path() {
+                this.loadFiles();
+            }
+        },
+
+        methods: {
+            loadFiles() {
+                let path = '/files';
+                if (this.path.length) {
+                    path += '/' + this.path.join('/');
+                }
+                this.$http.get(path).then(response => {
+                    this.files = response.data;
+                });
+            },
+
+            getURL(file) {
+                return 'http://localhost:8000/uploads/' + this.path.join('/') + '/' + file.name;
+            },
+
+            goToDir(dir) {
+                if (dir.type !== 'dir') return false;
+                this.path.push(dir.name);
+            },
+
+            popToDir(index) {
+                if (index === this.path.length) return; // No change.
+
+                this.path = this.path.slice(0, index);
+            }
+        },
     }
 </script>
 
-<style scoped>
+<style lang="scss" type="text/scss" scoped>
+    .segment {
+        padding-bottom: 7px;
+    }
     .files-top {
         padding: 0.5rem 0.5rem 0 0.5rem;
         display: flex;
@@ -65,21 +116,41 @@
     .file {
         flex: 0 1 175px;
         height: 175px;
-        object-fit: contain;
-
+        border: 1px solid #eee;
+        background-color: #fafafa;
         margin: 0 0.5rem 1rem 0.5rem;
-        border: 1px solid #e2e2e2;
         border-radius: 2px;
         display: flex;
-    }
+        cursor: pointer;
 
-    .add.file {
-        background-color: #eee;
-    }
+        img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            border-radius: 2px;
+        }
 
-    .file .icon {
-        margin: auto;
-        color: #d2d2d2;
-        text-shadow: 0 1px 0 #bbb, 0 -1px 0 #bbb, -1px 0 0 #bbb, 1px 0 0 #bbb
+        .dir {
+            display: flex;
+            width: 100%;
+            color: #555;
+            text-shadow: 0 2px 0 #fff, 0 5px 10px rgba(#000, 0.3);
+            transition: all 0.2s;
+
+            span {
+                margin: auto;
+                font-weight: bold;
+                font-size: 120%;
+                text-align: center;
+            }
+
+            .icon {
+                display: block;
+            }
+
+            &:hover {
+                color: #000;
+            }
+        }
     }
 </style>
