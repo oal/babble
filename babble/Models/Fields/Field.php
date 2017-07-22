@@ -2,6 +2,7 @@
 
 namespace Babble\Models\Fields;
 
+use Babble\Record;
 use JsonSerializable;
 
 class Field implements JsonSerializable
@@ -34,9 +35,9 @@ class Field implements JsonSerializable
         return true;
     }
 
-    public function save(string $fieldKey, $data)
+    public function process(string $recordId, $data)
     {
-
+        return $data;
     }
 
     function jsonSerialize()
@@ -57,5 +58,10 @@ class Field implements JsonSerializable
     public function getModel(): string
     {
         return $this->model;
+    }
+
+    public function getView($data)
+    {
+        return $data;
     }
 }

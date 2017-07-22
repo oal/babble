@@ -43,9 +43,15 @@ class Record implements ArrayAccess, JsonSerializable
 
     public function save()
     {
-        foreach ($this->model->getFields() as $field) {
-            $field->validate($this->data[$field->getKey()]);
-            $field->save($this->id, $this->data[$field->getKey()]);
+        $fields = $this->model->getFields();
+        foreach ($fields as $field) {
+            $ok = $field->validate($this->data[$field->getKey()]);
+            if (!$ok) return;
+        }
+
+        foreach ($fields as $field) {
+            $processedData = $field->process($this->id, $this->data[$field->getKey()]);
+            $this->data[$field->getKey()] = $processedData;
         }
 
         $yaml = Yaml::dump($this->data, 2, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
@@ -69,7 +75,8 @@ class Record implements ArrayAccess, JsonSerializable
     public function offsetGet($offset)
     {
         if ($offset === 'id') return $this->id;
-        return $this->data[$offset];
+        $field = $this->model->getField($offset);
+        return $field->getView($this->data[$offset]);
     }
 
     public function offsetSet($key, $value)

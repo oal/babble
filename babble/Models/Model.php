@@ -5,6 +5,7 @@ namespace Babble\Models;
 use Babble\Exceptions\InvalidModelException;
 use Babble\Models\Fields\BooleanField;
 use Babble\Models\Fields\DatetimeField;
+use Babble\Models\Fields\Field;
 use Babble\Models\Fields\ImageField;
 use Babble\Models\Fields\TextField;
 use JsonSerializable;
@@ -53,7 +54,7 @@ class Model implements JsonSerializable
 
     public function getFields()
     {
-        return $this->fields;
+        return array_values($this->fields);
     }
 
     function jsonSerialize()
@@ -63,7 +64,7 @@ class Model implements JsonSerializable
             'name' => $this->name,
             'name_plural' => $this->namePlural,
             'options' => $this->options,
-            'fields' => $this->fields
+            'fields' => $this->getFields()
         ];
     }
 
@@ -108,16 +109,16 @@ class Model implements JsonSerializable
         foreach ($fields as $key => $data) {
             switch ($data['type']) {
                 case 'text':
-                    $this->fields[] = new TextField($this->getType(), $key, $data);
+                    $this->fields[$key] = new TextField($this->getType(), $key, $data);
                     break;
                 case 'boolean':
-                    $this->fields[] = new BooleanField($this->getType(),$key, $data);
+                    $this->fields[$key] = new BooleanField($this->getType(), $key, $data);
                     break;
                 case 'datetime':
-                    $this->fields[] = new DatetimeField($this->getType(),$key, $data);
+                    $this->fields[$key] = new DatetimeField($this->getType(), $key, $data);
                     break;
                 case 'image':
-                    $this->fields[] = new ImageField($this->getType(),$key, $data);
+                    $this->fields[$key] = new ImageField($this->getType(), $key, $data);
                     break;
             }
         }
@@ -143,13 +144,15 @@ class Model implements JsonSerializable
         return true;
     }
 
-    public function hasField($key)
+    public function hasField($key): bool
     {
-        // TODO: Cache field names / keys somewhere to avoid this loop?
-        foreach ($this->fields as $field) {
-            if ($field->getKey() === $key) return true;
-        }
-        return false;
+        return array_key_exists($key, $this->fields);
+    }
+
+    public function getField($key): Field
+    {
+        if(!array_key_exists($key, $this->fields)) return null;
+        return $this->fields[$key];
     }
 }
 
