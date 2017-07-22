@@ -1,5 +1,6 @@
 <template>
     <div class="ui fluid card" v-if="!selection">
+        <div class="ui basic very padded loading segment" v-if="progress < 100"></div>
         <div class="content">
             <div class="ui breadcrumb">
                 <a class="section" @click="popToDir(0)">Uploads</a>
@@ -11,25 +12,30 @@
         </div>
 
         <div class="content">
-            <div class="files">
-                <div class="file" v-for="file in files">
-                    <img :src="'/uploads/' + getURL(file)" alt="" v-if="file.type === 'file'"
-                         @click="selectFile(file)">
-                    <div class="dir" v-else @click="goToDir(file)">
-                        <span>
-                            <i class="huge folder outline icon"></i>
-                            {{ file.name }}
-                        </span>
+            <div class="ui cards files">
+                <div class="ui card file" v-for="file in files">
+                    <div class="preview content">
+                        <div class="image" :style="'background-image: url(/uploads/' + getURL(file) + ')'"
+                             v-if="file.type === 'file'"
+                             @click="selectFile(file)"></div>
+                        <div class="dir" v-else @click="goToDir(file)">
+                            <span>
+                                <i class="huge folder outline icon"></i>
+                                {{ file.name }}
+                            </span>
+                        </div>
                     </div>
                 </div>
+                <em v-if="files.length === 0" style="padding: 1rem 1rem 3rem 1rem">No files found.</em>
             </div>
         </div>
 
         <div class="extra content">
-            <a class="right floated">
+            <a class="right floated" @click="onCreateDirectory">
                 <i class="folder icon"></i>
                 Create new directory
             </a>
+
             <input type="file" id="upload" @change="onUploadChange">
             <a>
                 <label class="upload-label" for="upload">
@@ -37,6 +43,9 @@
                     Upload file
                 </label>
             </a>
+        </div>
+        <div class="ui bottom attached green progress" v-if="this.progress < 100">
+            <div class="bar" :style="'width:' + this.progress + '%'"></div>
         </div>
     </div>
 </template>
@@ -47,7 +56,8 @@
             return {
                 'path': [],
                 'files': [],
-                'selection': null
+                'selection': null,
+                'progress': 100
             }
         },
 
@@ -64,17 +74,19 @@
 
         methods: {
             loadFiles() {
+                this.loading = true;
                 let path = '/files';
                 if (this.path.length) {
                     path += '/' + this.path.join('/');
                 }
                 this.$http.get(path).then(response => {
                     this.files = response.data;
+                    this.loading = false;
                 });
             },
+
             getURL(file) {
-                let relativePath = [...this.path, file.name].join('/');
-                return relativePath;
+                return [...this.path, file.name].join('/');
             },
 
             popToDir(index) {
@@ -101,8 +113,22 @@
                 formData.append('file', files[0]);
 
                 let apiPath = ['/files', ...this.path].join('/');
-                this.$http.post(apiPath, formData).then(response => {
-                    console.log('success');
+                this.$http.post(apiPath, formData, {
+                    onUploadProgress: event => {
+                        this.progress = (event.loaded / event.total) * 100;
+                    }
+                }).then(response => {
+                    this.loadFiles();
+                }).catch(response => {
+                    console.log('fail');
+                });
+            },
+
+            onCreateDirectory() {
+                let name = prompt('Directory name:');
+                let apiPath = ['/files', ...this.path].join('/');
+                this.$http.post(apiPath, {directory: name}).then(response => {
+                    this.loadFiles();
                 }).catch(response => {
                     console.log('fail');
                 });
@@ -123,18 +149,25 @@
     .file {
         flex: 0 1 175px;
         height: 175px;
-        border: 1px solid #eee;
-        background-color: #fafafa;
-        margin: 0.5rem;
         border-radius: 2px;
-        display: flex;
         cursor: pointer;
 
-        img {
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-            border-radius: 2px;
+        .preview {
+            display: flex;
+
+            &.content {
+                padding: 0;
+            }
+        }
+
+        .image, .dir {
+            flex-grow: 1;
+            border-radius: 4px;
+        }
+
+        .image {
+            background-size: cover;
+            background-position: center;
         }
 
         .dir {
@@ -168,5 +201,15 @@
     #upload {
         position: absolute;
         top: -9999px;
+    }
+
+    .card {
+        position: relative;
+    }
+
+    .loading {
+        position: absolute !important;
+        height: 100%;
+        width: 100%;
     }
 </style>

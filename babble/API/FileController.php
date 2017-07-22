@@ -3,6 +3,7 @@
 namespace Babble\API;
 
 use JsonSerializable;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,10 +38,19 @@ class FileController extends Controller
         if (count($files) > 0) {
             $targetDir = './uploads/' . $path;
             foreach ($files as $file) {
-                $file->move($targetDir);
+                // Check if name already exists and rename.
+                $file->move($targetDir, $file->getClientOriginalName());
             }
         } else {
-            // Handle folder creation.
+            $data = json_decode($request->getContent(), true);
+            $dirName = $data['directory'] ?? null;
+
+            // Validate names.
+            if(!$dirName) return;
+            if(preg_match('/^[a-zA-Z0-9-_]+$/', $dirName) !== 1) return;
+
+            $fs = new Filesystem();
+            $fs->mkdir('./uploads/' . $path . '/' . $dirName);
         }
     }
 
@@ -54,6 +64,7 @@ class FileController extends Controller
         $files = $finder
             ->notName('_*')
             ->in('../public/uploads/' . $path)
+            ->sortByType()
             ->depth(0);
 
         $filenames = [];
