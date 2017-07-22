@@ -47,7 +47,7 @@ class ModelController extends Controller
         $data = json_decode($request->getContent(), true);
 
         // If ID was changed and new ID is already taken.
-        $oldId = $data['_old_id'];
+        $oldId = $data['_old_id'] ?? null;
         if (!empty($oldId) && $oldId !== $id && $this->model->exists($id)) {
             return null;
         }

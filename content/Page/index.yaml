@@ -1,7 +1,7 @@
 title: Welcome!
 image:
     filename: transport/railway-2439189_640.jpg
-    crop: { x: 64, 'y': 125.66666666667, width: 512, height: 170.66666666667 }
+    crop: { x: 64.622568093385, 'y': 47.845654993515, width: 512, height: 170.66666666667 }
     url: /uploads/_cache/Page/index/image.jpg
 body: |
     Lorem ipsum! Dolor sit amet, consectetur adipiscing elit. Nam scelerisque augue in urna posuere scelerisque. Proin vel congue libero. Aenean sagittis mollis ipsum, sed vulputate risus luctus id. Cras ac efficitur ipsum, sed porta dolor. Donec vehicula erat at arcu dignissim dictum. Curabitur urna velit, consectetur vel tempus cursus, pretium vitae nibh. Proin cursus lacinia lacus non imperdiet.

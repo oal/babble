@@ -31,13 +31,16 @@
         },
 
         mounted() {
-            this.cropper = new Cropper(this.$refs.image, {
-                rotatable: false,
-                zoomable: false,
-                scalable: false,
-                viewMode: 1,
-                aspectRatio: this.aspectRatio
-            });
+            // setTimeout so that the cropper gets initialized to the correct size.
+            setTimeout(() => {
+                this.cropper = new Cropper(this.$refs.image, {
+                    rotatable: false,
+                    zoomable: false,
+                    scalable: false,
+                    viewMode: 1,
+                    aspectRatio: this.aspectRatio
+                });
+            }, 0);
         },
 
         beforeDestroy() {

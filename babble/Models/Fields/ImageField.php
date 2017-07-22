@@ -28,7 +28,6 @@ class ImageField extends Field
         $ext = pathinfo($data['filename'], PATHINFO_EXTENSION);
         $targetFilename = $this->getKey() . '.' . $ext;
 
-        // TODO: Support rotation and zooming from the Cropper JS component.
         $targetFile = $relativeTargetDir . '/' . $targetFilename;
         $this->cropAndSave($data['filename'], $data['crop'], $targetFile);
 
@@ -43,6 +42,7 @@ class ImageField extends Field
         $imagine = new Imagine();
         $image = $imagine->open('./uploads/' . $filename);
 
+        // TODO: Support rotation and zooming from the Cropper JS component.
         $image
             ->crop(new Point($crop['x'], $crop['y']), new Box($crop['width'], $crop['height']))
             ->resize(new Box($this->getOption('width'), $this->getOption('height')))

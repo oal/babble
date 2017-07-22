@@ -95,8 +95,8 @@ class Router
                 return $controller->read($request, $path);
 //            case 'PUT':
 //                return $controller->update($request, $id);
-//            case 'POST':
-//                return $controller->create($request, $id);
+            case 'POST':
+                return $controller->create($request, $path);
 //            case 'DELETE':
 //                return $controller->delete($request, $id);
 //            case 'OPTIONS':

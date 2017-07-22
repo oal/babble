@@ -11,7 +11,7 @@
             <div class="ui form">
                 <div class="field">
                     <label>ID</label>
-                    <input type="text" v-model="changedId">
+                    <input v-model="changedId">
                 </div>
 
                 <div class="field" v-for="field in model.fields" v-bind:key="field.key">
@@ -59,7 +59,7 @@
             'id'
         ],
 
-        data () {
+        data() {
             return {
                 isNew: !!this.id,
                 changedId: this.id,
@@ -123,14 +123,22 @@
                 }
 
                 request('/models/' + this.modelType + '/' + this.changedId, data).then(response => {
-                    let location = {
-                        name: 'Edit',
-                        params: {
-                            modelType: this.model.type,
-                            id: this.changedId
-                        }
-                    };
-                    this.$router.push(location);
+                    // Redirect if page didn't already have an ID. Otherwise, update data.
+                    if (!this.id) {
+                        let location = {
+                            name: 'Edit',
+                            params: {
+                                modelType: this.model.type,
+                                id: this.changedId
+                            }
+                        };
+                        this.$router.push(location);
+                    } else {
+                        Object.keys(this.data).forEach(field => {
+                            this.data[field] = response.data[field];
+                        });
+                    }
+
                     this.loading = false;
                 }).catch(_ => {
                     this.loading = false

@@ -45,12 +45,14 @@ class Record implements ArrayAccess, JsonSerializable
     {
         $fields = $this->model->getFields();
         foreach ($fields as $field) {
-            $ok = $field->validate($this->data[$field->getKey()]);
+            $value = $this->data[$field->getKey()] ?? null;
+            $ok = $field->validate($value);
             if (!$ok) return;
         }
 
         foreach ($fields as $field) {
-            $processedData = $field->process($this->id, $this->data[$field->getKey()]);
+            $value = $this->data[$field->getKey()] ?? null;
+            $processedData = $field->process($this->id, $value);
             $this->data[$field->getKey()] = $processedData;
         }
 
