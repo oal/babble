@@ -46,7 +46,7 @@ class Router
         $modelRoute = new Route('/api/models/{model}/{id}', ['id' => null]);
         $this->router->add('resources', $modelRoute);
 
-        $fileRoute = new Route('/api/files/{path}', ['path' => null]);
+        $fileRoute = new Route('/api/files/{path}', ['path' => null], ['path' => '.+']);
         $this->router->add('files', $fileRoute);
     }
 

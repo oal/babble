@@ -5,7 +5,9 @@
         "symfony/http-foundation": "^3.3",
         "symfony/finder": "^3.3",
         "yosymfony/toml": "^0.3.3",
-        "symfony/routing": "^3.3"
+        "symfony/routing": "^3.3",
+        "symfony/yaml": "^3.3",
+        "imagine/imagine": "^0.7.1"
     },
     "autoload": {
         "psr-4": {

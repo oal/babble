@@ -7,8 +7,7 @@ use Babble\Models\Model;
 use InvalidModelFieldException;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
-use Yosymfony\Toml\Toml;
-use Yosymfony\Toml\TomlBuilder;
+use Symfony\Component\Yaml\Yaml;
 
 class Record implements ArrayAccess, JsonSerializable
 {
@@ -30,7 +29,7 @@ class Record implements ArrayAccess, JsonSerializable
 
     private function loadFromDisk()
     {
-        $modelData = Toml::Parse($this->getContentFilePath());
+        $modelData = Yaml::parse(file_get_contents($this->getContentFilePath()));
         foreach ($this->model->getFields() as $field) {
             if (!array_key_exists($field->getKey(), $modelData)) continue;
             $this->data[$field->getKey()] = $modelData[$field->getKey()];
@@ -44,14 +43,15 @@ class Record implements ArrayAccess, JsonSerializable
 
     public function save()
     {
-        $builder = new TomlBuilder();
-        foreach ($this->data as $key => $value) {
-            $builder->addValue($key, $value);
+        foreach ($this->model->getFields() as $field) {
+            $field->validate($this->data[$field->getKey()]);
+            $field->save($this->id, $this->data[$field->getKey()]);
         }
-        $toml = $builder->getTomlString();
+
+        $yaml = Yaml::dump($this->data, 2, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
 
         $fs = new Filesystem();
-        $fs->dumpFile($this->getContentFilePath(), $toml);
+        $fs->dumpFile($this->getContentFilePath(), $yaml);
     }
 
     public function delete()
@@ -115,6 +115,6 @@ class Record implements ArrayAccess, JsonSerializable
      */
     private function getContentFilePath(): string
     {
-        return '../content/' . $this->getType() . '/' . $this->id . '.toml';
+        return '../content/' . $this->getType() . '/' . $this->id . '.yaml';
     }
 }

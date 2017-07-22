@@ -8,6 +8,10 @@ name = "Page"
     name = "Header image"
     type = "image"
 
+    [fields.image.options]
+    width = 900
+    height = 300
+
 [fields.body]
     name = "Body"
     type = "text"

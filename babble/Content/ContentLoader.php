@@ -93,7 +93,7 @@ class ContentLoader
     private function idToRecord(string $id)
     {
         $fs = new Filesystem();
-        $dataFileExists = $fs->exists($this->getModelDirectory() . $id . '.toml');
+        $dataFileExists = $fs->exists($this->getModelDirectory() . $id . '.yaml');
 
         if ($dataFileExists) return Record::fromDisk($this->model, $id);
         return null;

@@ -3,6 +3,10 @@
 namespace Babble\Models;
 
 use Babble\Exceptions\InvalidModelException;
+use Babble\Models\Fields\BooleanField;
+use Babble\Models\Fields\DatetimeField;
+use Babble\Models\Fields\ImageField;
+use Babble\Models\Fields\TextField;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -66,7 +70,7 @@ class Model implements JsonSerializable
     public function exists(string $id)
     {
         $fs = new Filesystem();
-        return $fs->exists('../content/' . $this->getType() . '/' . $id . '.toml');
+        return $fs->exists('../content/' . $this->getType() . '/' . $id . '.yaml');
     }
 
     static function all()
@@ -102,7 +106,20 @@ class Model implements JsonSerializable
     private function initFields($fields)
     {
         foreach ($fields as $key => $data) {
-            $this->fields[] = new Field($key, $data);
+            switch ($data['type']) {
+                case 'text':
+                    $this->fields[] = new TextField($this->getType(), $key, $data);
+                    break;
+                case 'boolean':
+                    $this->fields[] = new BooleanField($this->getType(),$key, $data);
+                    break;
+                case 'datetime':
+                    $this->fields[] = new DatetimeField($this->getType(),$key, $data);
+                    break;
+                case 'image':
+                    $this->fields[] = new ImageField($this->getType(),$key, $data);
+                    break;
+            }
         }
     }
 
@@ -136,41 +153,3 @@ class Model implements JsonSerializable
     }
 }
 
-class Field implements JsonSerializable
-{
-    private $key;
-    private $name;
-    private $type;
-    private $options = [];
-
-    public function __construct($key, $data)
-    {
-        $this->key = $key;
-        $this->name = $data['name'];
-        $this->type = $data['type'];
-        if (array_key_exists('options', $data)) $this->options = $data['options'];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey()
-    {
-        return $this->key;
-    }
-
-    public function validate($value)
-    {
-        return count($value) > 2; // TODO: Add proper validation.
-    }
-
-    function jsonSerialize()
-    {
-        return [
-            'key' => $this->key,
-            'name' => $this->name,
-            'type' => $this->type,
-            'options' => $this->options
-        ];
-    }
-}

@@ -6,6 +6,7 @@ use Babble\Content\ContentLoader;
 use Babble\Record;
 use Babble\Models\Model;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Yaml\Yaml;
 
 class ModelController extends Controller
 {
@@ -19,11 +20,12 @@ class ModelController extends Controller
     public function create(Request $request, $id)
     {
         // If ID is already taken.
-        if($this->model->exists($id)) {
+        if ($this->model->exists($id)) {
             return null;
         }
 
         $data = json_decode($request->getContent(), true);
+        error_log(Yaml::dump($data, 2, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
 
         // Save model instance.
         $modelInstance = Record::fromData($this->model, $id, $data);
@@ -46,7 +48,7 @@ class ModelController extends Controller
 
         // If ID was changed and new ID is already taken.
         $oldId = $data['_old_id'];
-        if(!empty($oldId) && $oldId !== $id && $this->model->exists($id)) {
+        if (!empty($oldId) && $oldId !== $id && $this->model->exists($id)) {
             return null;
         }
 

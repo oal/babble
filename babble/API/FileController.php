@@ -37,13 +37,15 @@ class FileController extends Controller
 
     public function read(Request $request, $path)
     {
-        if(strpos($path, '..') !== false) return;
+        if (strpos($path, '..') !== false) return;
 
         $finder = new Finder();
 
         if (!$path) $path = '';
-        $files = $finder->in('../public/uploads/' . $path)->depth(0);
-
+        $files = $finder
+            ->notName('_*')
+            ->in('../public/uploads/' . $path)
+            ->depth(0);
 
         $filenames = [];
         foreach ($files as $file) {
