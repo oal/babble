@@ -41,7 +41,11 @@ class ContentLoader
     public function get()
     {
         $finder = new Finder();
-        $files = $finder->files()->in($this->getModelDirectory());
+        $files = $finder
+            ->files()
+            ->depth(0)
+            ->name('*.yaml')
+            ->in($this->getModelDirectory());
 
         $result = [];
         foreach ($files as $file) {
@@ -67,7 +71,11 @@ class ContentLoader
         if (empty($id)) $id = 'index';
 
         $templateFinder = new Finder();
-        $templateFinder->files()->depth('== 0')->in('../templates/' . $basePath);
+        $templateFinder
+            ->files()
+            ->depth(0)
+            ->name('/^[A-Z].+\.twig/')
+            ->in('../templates/' . $basePath);
 
         foreach ($templateFinder as $file) {
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
@@ -93,7 +101,8 @@ class ContentLoader
     private function idToRecord(string $id)
     {
         $fs = new Filesystem();
-        $dataFileExists = $fs->exists($this->getModelDirectory() . $id . '.yaml');
+        $filePath = $this->getModelDirectory() . $id . '.yaml';
+        $dataFileExists = $fs->exists($filePath);
 
         if ($dataFileExists) return Record::fromDisk($this->model, $id);
         return null;
@@ -108,7 +117,11 @@ class ContentLoader
     {
         $models = [];
         $finder = new Finder();
-        $files = $finder->files()->in('../models/');
+        $files = $finder
+            ->files()
+            ->depth(0)
+            ->name('/^[A-Z].+\.yaml$/')
+            ->in('../models/');
 
         foreach ($files as $filename) {
             $modelName = pathinfo($filename, PATHINFO_FILENAME);

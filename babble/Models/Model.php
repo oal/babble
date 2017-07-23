@@ -11,8 +11,8 @@ use Babble\Models\Fields\TextField;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Yosymfony\Toml\Exception\ParseException;
-use Yosymfony\Toml\Toml;
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 class Model implements JsonSerializable
 {
@@ -37,7 +37,13 @@ class Model implements JsonSerializable
     private function init($modelType)
     {
         $this->type = $modelType;
-        $modelFormat = Toml::Parse('../models/' . $modelType . '.toml');
+
+        $modelFile = '../models/' . $modelType . '.yaml';
+
+        $fs = new Filesystem();
+        if(!$fs->exists($modelFile)) throw new InvalidModelException('Invalid model: ' . $modelType);
+
+        $modelFormat = Yaml::parse(file_get_contents($modelFile));
 
         $this->initName($modelFormat);
         $this->initOptions($modelFormat);
@@ -151,7 +157,7 @@ class Model implements JsonSerializable
 
     public function getField($key): Field
     {
-        if(!array_key_exists($key, $this->fields)) return null;
+        if (!array_key_exists($key, $this->fields)) return null;
         return $this->fields[$key];
     }
 }

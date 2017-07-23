@@ -1,0 +1,26 @@
+name: Blog post
+options:
+    admin:
+        list_display:
+        - title
+        - is_draft
+        - published
+
+fields:
+    title:
+        name: Title
+        type: text
+
+    published:
+        name: Published at
+        type: datetime
+
+    is_draft:
+        name: Draft
+        type: boolean
+
+    body:
+        name: Body
+        type: text
+        options:
+            multiline: true

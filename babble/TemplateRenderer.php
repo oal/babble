@@ -49,7 +49,13 @@ class TemplateRenderer
 
     function renderTemplate()
     {
-        $templateFile = $this->request->getPathInfo() . '.twig';
+        $path = $this->request->getPathInfo();
+        $isHidden = array_filter(explode('/', $path), function ($dir) {
+            return strlen($dir) > 0 && $dir[0] === '_';
+        });
+        if ($isHidden) return;
+
+        $templateFile = $path . '.twig';
 
         $fs = new Filesystem();
         if ($fs->exists('../templates' . $templateFile)) {

@@ -1,0 +1,26 @@
+name: Page
+
+fields:
+    title:
+        name: Title
+        type: text
+
+    image:
+        name: Header image
+        type: image
+        options:
+            width: 900
+            height: 300
+
+    body:
+        name: Body
+        type: text
+        options:
+            multiline: true
+
+    archive_image:
+        name: Archive image
+        type: image
+        options:
+            width: 125
+            height: 125
