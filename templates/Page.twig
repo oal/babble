@@ -1,7 +1,9 @@
 {% extends 'base.twig' %}
 
 {% block body %}
-    <img src="{{ this.image }}" id="header-image">
+    {% if this.image %}
+        <img src="{{ this.image }}" id="header-image">
+    {% endif %}
 
     <div id="content">
         <h1>{{ this.title }}</h1>

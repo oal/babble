@@ -35,6 +35,7 @@ class FileController extends Controller
     {
         var_dump($path);
         $files = $request->files->all();
+        var_export($files);
         if (count($files) > 0) {
             $targetDir = './uploads/' . $path;
             foreach ($files as $file) {

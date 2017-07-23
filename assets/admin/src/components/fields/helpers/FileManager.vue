@@ -36,7 +36,8 @@
                 Create new directory
             </a>
 
-            <input type="file" :id="uploadId" @change="onUploadChange" style="position: absolute; top: -9999px;">
+            <input type="file" multiple :id="uploadId" @change="onUploadChange"
+                   style="position: absolute; top: -99999px">
             <a>
                 <label class="upload-label" :for="uploadId">
                     <i class="add icon"></i>
@@ -110,7 +111,9 @@
                 let files = event.target.files;
 
                 let formData = new FormData();
-                formData.append('file', files[0]);
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('file-' + i, files[i]);
+                }
 
                 let apiPath = ['/files', ...this.path].join('/');
                 this.$http.post(apiPath, formData, {
@@ -118,6 +121,7 @@
                         this.progress = (event.loaded / event.total) * 100;
                     }
                 }).then(response => {
+                    event.target.value = '';
                     this.loadFiles();
                 }).catch(response => {
                     console.log('fail');
