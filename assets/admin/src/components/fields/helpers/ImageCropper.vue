@@ -1,7 +1,7 @@
 <template>
     <div>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/0.8.1/cropper.css">
-        <img ref="image" :src="src">
+        <img ref="image" :src="src" style="max-width: 100%">
 
         <div class="ui basic segment">
             <div class="ui menu">

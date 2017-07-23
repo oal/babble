@@ -11,7 +11,7 @@
             <div class="ui form">
                 <div class="field">
                     <label>ID</label>
-                    <input v-model="changedId">
+                    <input v-model="changedId" pattern="[A-Za-z0-9-]+" required>
                 </div>
 
                 <div class="field" v-for="field in model.fields" v-bind:key="field.key">
@@ -27,6 +27,8 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="ui divider"></div>
 
                 <div class="ui green left labeled icon button" v-on:click="save">
                     <i class="save icon"></i>
@@ -124,7 +126,7 @@
 
                 request('/models/' + this.modelType + '/' + this.changedId, data).then(response => {
                     // Redirect if page didn't already have an ID. Otherwise, update data.
-                    if (!this.id) {
+                    if (this.id !== response.data.id) {
                         let location = {
                             name: 'Edit',
                             params: {

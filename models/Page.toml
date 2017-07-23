@@ -18,3 +18,11 @@ name = "Page"
 
     [fields.body.options]
     multiline = true
+
+[fields.archive_image]
+    name = "Archive image"
+    type = "image"
+
+    [fields.archive_image.options]
+    width = 125
+    height = 125

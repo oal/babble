@@ -16,6 +16,7 @@
         margin: 0;
         display: flex;
         min-height: 100%;
+        height: auto;
     }
 
     body {

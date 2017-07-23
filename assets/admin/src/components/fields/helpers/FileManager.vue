@@ -36,9 +36,9 @@
                 Create new directory
             </a>
 
-            <input type="file" id="upload" @change="onUploadChange">
+            <input type="file" :id="uploadId" @change="onUploadChange" style="position: absolute; top: -9999px;">
             <a>
-                <label class="upload-label" for="upload">
+                <label class="upload-label" :for="uploadId">
                     <i class="add icon"></i>
                     Upload file
                 </label>
@@ -133,6 +133,12 @@
                     console.log('fail');
                 });
             }
+        },
+
+        computed: {
+            uploadId() {
+                return 'upload-' + ((Math.random() * 99999) | 0).toString(16);
+            }
         }
     }
 </script>
@@ -196,11 +202,6 @@
 
     .upload-label {
         cursor: pointer;
-    }
-
-    #upload {
-        position: absolute;
-        top: -9999px;
     }
 
     .card {

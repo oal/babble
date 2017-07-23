@@ -1,3 +1,4 @@
 .idea/
 vendor/
 public/admin/
+public/uploads/_*

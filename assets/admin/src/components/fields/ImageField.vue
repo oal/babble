@@ -2,8 +2,7 @@
     <div class="field">
         <label>{{ label }}</label>
 
-        <file-manager v-if="!selection" @input="onSelectFile"></file-manager>
-        <div v-else>
+        <div v-if="selection">
             <div class="field">
                 <div class="ui fluid card">
                     <div class="image">
@@ -11,25 +10,26 @@
                         <image-cropper v-else :src="'/uploads/' + selection" :width="width"
                                        :height="height" @crop="onCrop"></image-cropper>
                     </div>
-                    <div class="extra content" v-if="croppedImage">
+                    <div class="extra content" v-if="selection">
                         <a class="right floated" @click="onDeselectFile">
                             <i class="folder icon"></i>
                             Choose another file
                         </a>
-                        <a @click="onReCrop">
+                        <a @click="onReCrop" v-if="croppedImage">
                             <i class="crop icon"></i>
                             Re-crop
-                        </a>
-                    </div>
-                    <div class="extra content" v-else-if="selection">
-                        <a class="right floated" @click="onDeselectFile">
-                            <i class="folder icon"></i>
-                            Choose another file
                         </a>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="ui primary left labeled icon button" v-else-if="!openFileManager" @click="onOpenFileManager">
+            <i class="folder icon"></i>
+            Choose image
+        </div>
+
+        <file-manager v-else @input="onSelectFile"></file-manager>
     </div>
 </template>
 
@@ -56,12 +56,17 @@
                 uncachedURL = this.value.url + '?' + ((Math.random() * 99999).toString(16));
             }
             return {
+                'openFileManager': false,
                 'selection': this.value.filename || null,
                 'croppedImage': uncachedURL,
             }
         },
 
         methods: {
+            onOpenFileManager() {
+                this.openFileManager = true;
+            },
+
             onSelectFile(file) {
                 this.selection = file;
             },
@@ -102,3 +107,20 @@
         }
     }
 </script>
+
+<style lang="scss" type="text/scss" scoped>
+    .card {
+        overflow: hidden;
+    }
+
+    .card .image {
+        background: #333 url('/static/checkerboard.png');
+        width: auto !important;
+
+        img {
+            margin: auto;
+            border-radius: 0;
+            box-shadow: 0 0 25px rgba(#000, 0.25);
+        }
+    }
+</style>

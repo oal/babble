@@ -58,6 +58,12 @@
         flex-grow: 1;
     }
 
+    @media(max-width: 600px) {
+        #main {
+            flex-direction: column;
+        }
+    }
+
     #sidebar {
         background-color: #eee;
         flex-basis: 300px;
