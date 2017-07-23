@@ -6,7 +6,11 @@
                 <a class="section" @click="popToDir(0)">Uploads</a>
                 <span v-for="dir, $index in path">
                         <span class="divider">/</span>
-                        <a class="section" @click="popToDir($index+1)">{{ dir }}</a>
+                        <strong v-if="$index === path.length-1">
+                            {{ dir }}
+                            <a @click="onRenameDirectory($index)"><i class="pencil icon"></i></a>
+                        </strong>
+                        <a @click="popToDir($index+1)" v-else>{{ dir }}</a>
                     </span>
             </div>
         </div>
@@ -131,11 +135,25 @@
             onCreateDirectory() {
                 let name = prompt('Directory name:');
                 let apiPath = ['/files', ...this.path].join('/');
+
                 this.$http.post(apiPath, {directory: name}).then(response => {
                     this.loadFiles();
                 }).catch(response => {
                     console.log('fail');
                 });
+            },
+
+            onRenameDirectory(index) {
+                let name = prompt('New directory name:');
+                let apiPath = ['/files', ...this.path.slice(0, index+1)].join('/');
+
+                this.$http.put(apiPath, {directory: name}).then(response => {
+                    this.path = this.path.slice(0, index); // Move up to the directory that contains the renamed directory.
+                    this.loadFiles();
+                }).catch(response => {
+                    console.log('fail');
+                });
+                console.log('Rename ', this.path[index], apiPath);
             }
         },
 

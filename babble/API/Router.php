@@ -93,8 +93,8 @@ class Router
         switch ($method) {
             case 'GET':
                 return $controller->read($request, $path);
-//            case 'PUT':
-//                return $controller->update($request, $id);
+            case 'PUT':
+                return $controller->update($request, $path);
             case 'POST':
                 return $controller->create($request, $path);
 //            case 'DELETE':
