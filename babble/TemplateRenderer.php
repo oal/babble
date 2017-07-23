@@ -3,23 +3,24 @@
 namespace Babble;
 
 use Babble\Content\ContentLoader;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Twig_Environment;
 use Twig_Function;
 use Twig_Loader_Filesystem;
 
-class Page
+class TemplateRenderer
 {
+    private $twig;
     private $request;
-    private $record;
 
-    public function __construct(Request $request, Record $record)
+    public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->record = $record;
+        $this->initTwig();
     }
 
-    function render()
+    private function initTwig()
     {
         $loader = new Twig_Loader_Filesystem('../templates');
         $twig = new Twig_Environment($loader, ['debug' => true]);
@@ -31,12 +32,30 @@ class Page
             }));
         }
 
+        $this->twig = $twig;
+    }
+
+    function renderRecord(Record $record)
+    {
         $path = $this->request->getPathInfo();
         $basePath = substr($path, 0, strrpos($path, '/'));
 
-        $modelType = $this->record->getType();
-        return $twig->render($basePath . '/' . $modelType . '.twig', [
-            'this' => $this->record
+        $modelType = $record->getType();
+        $templateFile = $basePath . '/' . $modelType . '.twig';
+        return $this->twig->render($templateFile, [
+            'this' => $record
         ]);
+    }
+
+    function renderTemplate()
+    {
+        $templateFile = $this->request->getPathInfo() . '.twig';
+
+        $fs = new Filesystem();
+        if ($fs->exists('../templates' . $templateFile)) {
+            return $this->twig->render($templateFile, []);
+        }
+
+        return '404';
     }
 }

@@ -1,12 +1,12 @@
 {% extends 'base.twig' %}
 
 {% block body %}
-    <h1>
-        {{ this.title }}
-    </h1>
+    <img src="{{ this.image }}" id="header-image">
 
-    <img src="{{ this.image }}" alt="">
-    <div>
-        {{ this.body }}
+    <div id="content">
+        <h1>{{ this.title }}</h1>
+        <div>
+            {{ this.body }}
+        </div>
     </div>
 {% endblock %}

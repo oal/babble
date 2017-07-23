@@ -14,6 +14,14 @@
                         Add new
                     </router-link>
                 </div>
+
+                <div class="ui vertical text menu">
+                    <div class="header item">File manager</div>
+
+                    <router-link v-bind:to="{name: 'Files'}" class="item">
+                        All files
+                    </router-link>
+                </div>
             </aside>
             <article id="content">
                 <router-view></router-view>
@@ -30,7 +38,7 @@
                 this.models = response.data;
             });
         },
-        data () {
+        data() {
             return {
                 models: [],
                 msg: 'Welcome to Babble CMS Admin'
@@ -58,7 +66,7 @@
         flex-grow: 1;
     }
 
-    @media(max-width: 600px) {
+    @media (max-width: 600px) {
         #main {
             flex-direction: column;
         }

@@ -5,6 +5,7 @@ import axios from 'axios';
 import Panel from '@/components/Panel';
 import List from '@/components/List';
 import Edit from '@/components/Edit';
+import Files from '@/components/Files';
 
 Vue.use(Router);
 Vue.prototype.$http = axios.create({
@@ -19,21 +20,27 @@ export default new Router({
             component: Panel,
             children: [
                 {
-                    path: '/model/:modelType',
+                    path: '/models/:modelType',
                     name: 'List',
                     component: List,
                     props: true
                 },
                 {
-                    path: '/model/:modelType/create',
+                    path: '/models/:modelType/create',
                     name: 'Create',
                     component: Edit,
                     props: true
                 },
                 {
-                    path: '/model/:modelType/edit/:id',
+                    path: '/models/:modelType/edit/:id',
                     name: 'Edit',
                     component: Edit,
+                    props: true
+                },
+                {
+                    path: '/files',
+                    name: 'Files',
+                    component: Files,
                     props: true
                 }
             ]

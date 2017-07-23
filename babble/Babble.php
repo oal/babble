@@ -5,6 +5,7 @@ namespace Babble;
 use Babble\API;
 use Babble\Content\ContentLoader;
 use Babble\Models\Model;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 
 class Babble
@@ -37,10 +38,13 @@ class Babble
 
     private function routeRequestToPage(Request $request)
     {
-        $record = ContentLoader::matchPath($request->getPathInfo());
-        if($record === null) return;
+        $renderer = new TemplateRenderer($request);
 
-        $page = new Page($request, $record);
-        echo $page->render();
+        $record = ContentLoader::matchPath($request->getPathInfo());
+        if ($record !== null) {
+            echo $renderer->renderRecord($record);
+            return;
+        }
+        echo $renderer->renderTemplate();
     }
 }
