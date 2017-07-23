@@ -20,13 +20,11 @@
                 <div class="ui card file" v-for="file in files">
                     <div class="preview content">
                         <div class="image" :style="'background-image: url(/uploads/' + getURL(file) + ')'"
-                             v-if="file.type === 'file'"
+                             v-if="file.type.indexOf('image') === 0"
                              @click="selectFile(file)"></div>
                         <div class="dir" v-else @click="goToDir(file)">
-                            <span>
-                                <i class="huge folder outline icon"></i>
-                                {{ file.name }}
-                            </span>
+                            <i :class="'huge ' + getIconClass(file.type) + ' icon'"></i>
+                            <span>{{ file.name }}</span>
                         </div>
                     </div>
                 </div>
@@ -101,7 +99,7 @@
             },
 
             goToDir(dir) {
-                if (dir.type !== 'dir') return false;
+                if (dir.type !== 'directory') return false;
                 this.path.push(dir.name);
             },
 
@@ -136,7 +134,7 @@
                 let name = prompt('Directory name:');
                 let apiPath = ['/files', ...this.path].join('/');
 
-                this.$http.post(apiPath, {directory: name}).then(response => {
+                this.$http.post(apiPath, {name: name}).then(response => {
                     this.loadFiles();
                 }).catch(response => {
                     console.log('fail');
@@ -145,15 +143,24 @@
 
             onRenameDirectory(index) {
                 let name = prompt('New directory name:');
-                let apiPath = ['/files', ...this.path.slice(0, index+1)].join('/');
+                let apiPath = ['/files', ...this.path.slice(0, index + 1)].join('/');
 
-                this.$http.put(apiPath, {directory: name}).then(response => {
-                    this.path = this.path.slice(0, index); // Move up to the directory that contains the renamed directory.
+                this.$http.put(apiPath, {name: name}).then(response => {
+                    this.path = [...this.path.slice(0, index), name]; // Move up to the directory that contains the renamed directory.
                     this.loadFiles();
                 }).catch(response => {
                     console.log('fail');
                 });
                 console.log('Rename ', this.path[index], apiPath);
+            },
+
+            getIconClass(contentType) {
+                if (contentType === 'directory') return 'folder outline';
+                if (contentType.indexOf('text') === 0) return 'text file outline';
+                if (contentType.indexOf('video') === 0) return 'video file outline';
+                if (contentType.indexOf('audio') === 0) return 'video file outline';
+                if (contentType === 'application/pdf') return 'pdf file outline';
+                return 'file outline';
             }
         },
 
@@ -174,7 +181,7 @@
         max-height: 400px;
     }
 
-    .file {
+    .card.file {
         flex: 0 1 175px;
         height: 175px;
         border-radius: 2px;
@@ -188,7 +195,7 @@
             }
         }
 
-        .image, .dir {
+        .image{
             flex-grow: 1;
             border-radius: 4px;
         }
@@ -202,18 +209,18 @@
             display: flex;
             width: 100%;
             color: #555;
+            font-size: 120%;
             text-shadow: 0 2px 0 #fff, 0 5px 10px rgba(#000, 0.3);
             transition: all 0.2s;
 
-            span {
-                margin: auto;
-                font-weight: bold;
-                font-size: 120%;
-                text-align: center;
-            }
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
 
-            .icon {
-                display: block;
+            span {
+                font-weight: bold;
+                text-align: center;
+                padding-top: 1rem;
             }
 
             &:hover {
