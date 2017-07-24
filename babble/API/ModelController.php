@@ -5,8 +5,10 @@ namespace Babble\API;
 use Babble\Content\ContentLoader;
 use Babble\Record;
 use Babble\Models\Model;
+use Exception;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\HttpFoundation\Response;
 
 class ModelController extends Controller
 {
@@ -21,25 +23,47 @@ class ModelController extends Controller
     {
         // If ID is already taken.
         if ($this->model->exists($id)) {
-            return null;
+            return new JsonResponse([
+                'error' => 'Provided ID is already taken.'
+            ], 400);
         }
 
         $data = json_decode($request->getContent(), true);
-        error_log(Yaml::dump($data, 2, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
 
         // Save model instance.
         $modelInstance = Record::fromData($this->model, $id, $data);
         $modelInstance->save();
-        return json_encode($modelInstance);
+        return new JsonResponse($modelInstance);
     }
 
     public function read(Request $request, $id)
     {
         $loader = new ContentLoader($this->model->getType());
-        if (!empty($id)) {
-            return $loader->find($id);
+
+        if (!empty($id)) return $this->readOne($loader, $id);
+        return $this->readMany($loader);
+    }
+
+    private function readOne(ContentLoader $loader, $id)
+    {
+        try {
+            $record = $loader->find($id);
+            return new JsonResponse($record);
+        } catch (Exception $e) {
         }
-        return json_encode($loader->get());
+
+        return new Response(null, 404);
+    }
+
+    private function readMany(ContentLoader $loader)
+    {
+        try {
+            $records = $loader->get();
+            return new JsonResponse($records);
+        } catch (Exception $e) {
+        }
+
+        return new JsonResponse([]);
     }
 
     public function update(Request $request, $id)
@@ -49,7 +73,9 @@ class ModelController extends Controller
         // If ID was changed and new ID is already taken.
         $oldId = $data['_old_id'] ?? null;
         if (!empty($oldId) && $oldId !== $id && $this->model->exists($id)) {
-            return null;
+            return new JsonResponse([
+                'error' => 'Provided ID is already in use.'
+            ], 400);
         }
 
         // Save model instance.
@@ -62,16 +88,18 @@ class ModelController extends Controller
             $deleteInstance->delete();
         }
 
-        return json_encode($modelInstance);
+        return new JsonResponse($modelInstance);
     }
 
     public function delete(Request $request, $id)
     {
-        return 'DELETE';
+        return new JsonResponse([
+            'error' => 'Not implemented'
+        ], 400);
     }
 
     public function describe(Request $request)
     {
-        return json_encode($this->model);
+        return new JsonResponse($this->model);
     }
 }

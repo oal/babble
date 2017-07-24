@@ -1,0 +1,19 @@
+name: User
+options:
+    admin:
+        list_display:
+        - username
+        - is_active
+
+fields:
+    name:
+        name: Name
+        type: text
+
+    password:
+        name: Password
+        type: password
+
+    is_active:
+        name: Active
+        type: boolean

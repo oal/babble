@@ -33,7 +33,7 @@ class Babble
     private function routeRequestToAPI(Request $request)
     {
         $router = new API\Router();
-        echo $router->handleRequest($request);
+        $router->handleRequest($request)->send();
     }
 
     private function routeRequestToPage(Request $request)

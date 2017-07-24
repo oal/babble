@@ -4,5 +4,5 @@ namespace Babble\Exceptions;
 
 use Exception;
 
-class InvalidModelFieldException extends Exception {
+class RecordNotFoundException extends Exception {
 }

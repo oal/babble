@@ -4,6 +4,7 @@ namespace Babble\API;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
@@ -19,7 +20,7 @@ class Router
         $this->addRoutes();
     }
 
-    public function handleRequest(Request $request)
+    public function handleRequest(Request $request): Response
     {
         $context = new RequestContext($request);
         $matcher = new UrlMatcher($this->router, $context);

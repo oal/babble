@@ -7,6 +7,7 @@ use Babble\Models\Fields\BooleanField;
 use Babble\Models\Fields\DatetimeField;
 use Babble\Models\Fields\Field;
 use Babble\Models\Fields\ImageField;
+use Babble\Models\Fields\PasswordField;
 use Babble\Models\Fields\TextField;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
@@ -41,7 +42,7 @@ class Model implements JsonSerializable
         $modelFile = '../models/' . $modelType . '.yaml';
 
         $fs = new Filesystem();
-        if(!$fs->exists($modelFile)) throw new InvalidModelException('Invalid model: ' . $modelType);
+        if (!$fs->exists($modelFile)) throw new InvalidModelException('Invalid model: ' . $modelType);
 
         $modelFormat = Yaml::parse(file_get_contents($modelFile));
 
@@ -112,6 +113,7 @@ class Model implements JsonSerializable
 
     private function initFields($fields)
     {
+        // TODO: Add a field registry and do this dynamically.
         foreach ($fields as $key => $data) {
             switch ($data['type']) {
                 case 'text':
@@ -125,6 +127,9 @@ class Model implements JsonSerializable
                     break;
                 case 'image':
                     $this->fields[$key] = new ImageField($this->getType(), $key, $data);
+                    break;
+                case 'password':
+                    $this->fields[$key] = new PasswordField($this->getType(), $key, $data);
                     break;
             }
         }

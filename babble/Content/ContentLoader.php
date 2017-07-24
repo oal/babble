@@ -3,8 +3,10 @@
 namespace Babble\Content;
 
 use Babble\Exceptions\InvalidModelException;
+use Babble\Exceptions\RecordNotFoundException;
 use Babble\Record;
 use Babble\Models\Model;
+use Imagine\Exception\InvalidArgumentException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -41,11 +43,15 @@ class ContentLoader
     public function get()
     {
         $finder = new Finder();
-        $files = $finder
-            ->files()
-            ->depth(0)
-            ->name('*.yaml')
-            ->in($this->getModelDirectory());
+        try {
+            $files = $finder
+                ->files()
+                ->depth(0)
+                ->name('*.yaml')
+                ->in($this->getModelDirectory());
+        } catch (InvalidArgumentException $e) {
+            return [];
+        }
 
         $result = [];
         foreach ($files as $file) {
@@ -105,7 +111,7 @@ class ContentLoader
         $dataFileExists = $fs->exists($filePath);
 
         if ($dataFileExists) return Record::fromDisk($this->model, $id);
-        return null;
+        throw new RecordNotFoundException('Record with the given ID does not exist.');
     }
 
     private function filenameToId(string $filename): string

@@ -45,6 +45,7 @@
     import BooleanField from '@/components/fields/BooleanField';
     import DatetimeField from '@/components/fields/DatetimeField';
     import ImageField from '@/components/fields/ImageField';
+    import PasswordField from '@/components/fields/PasswordField';
 
     export default {
         name: 'panel',
@@ -53,7 +54,8 @@
             BooleanField,
             DatetimeField,
             TextField,
-            ImageField
+            ImageField,
+            PasswordField
         },
 
         props: [
