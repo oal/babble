@@ -4,15 +4,15 @@ namespace Babble;
 
 use Babble\API;
 use Babble\Content\ContentLoader;
-use Babble\Models\Model;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Debug\Debug;
 use Symfony\Component\HttpFoundation\Request;
+
+Debug::enable();
 
 class Babble
 {
     public function __construct()
     {
-        new Model('Post');
         $request = Request::createFromGlobals();
         $this->routeRequest($request);
     }

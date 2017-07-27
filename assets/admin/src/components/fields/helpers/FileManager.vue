@@ -132,6 +132,8 @@
 
             onCreateDirectory() {
                 let name = prompt('Directory name:');
+                if(!name) return;
+
                 let apiPath = ['/files', ...this.path].join('/');
 
                 this.$http.post(apiPath, {name: name}).then(response => {
@@ -143,6 +145,8 @@
 
             onRenameDirectory(index) {
                 let name = prompt('New directory name:');
+                if(!name) return;
+
                 let apiPath = ['/files', ...this.path.slice(0, index + 1)].join('/');
 
                 this.$http.put(apiPath, {name: name}).then(response => {

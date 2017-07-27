@@ -117,19 +117,19 @@ class Model implements JsonSerializable
         foreach ($fields as $key => $data) {
             switch ($data['type']) {
                 case 'text':
-                    $this->fields[$key] = new TextField($this->getType(), $key, $data);
+                    $this->fields[$key] = new TextField($this, $key, $data);
                     break;
                 case 'boolean':
-                    $this->fields[$key] = new BooleanField($this->getType(), $key, $data);
+                    $this->fields[$key] = new BooleanField($this, $key, $data);
                     break;
                 case 'datetime':
-                    $this->fields[$key] = new DatetimeField($this->getType(), $key, $data);
+                    $this->fields[$key] = new DatetimeField($this, $key, $data);
                     break;
                 case 'image':
-                    $this->fields[$key] = new ImageField($this->getType(), $key, $data);
+                    $this->fields[$key] = new ImageField($this, $key, $data);
                     break;
                 case 'password':
-                    $this->fields[$key] = new PasswordField($this->getType(), $key, $data);
+                    $this->fields[$key] = new PasswordField($this, $key, $data);
                     break;
             }
         }

@@ -3,6 +3,7 @@
 namespace Babble;
 
 use Babble\Content\ContentLoader;
+use Babble\Models\ArrayAccessRecord;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Twig_Environment;
@@ -35,7 +36,7 @@ class TemplateRenderer
         $this->twig = $twig;
     }
 
-    function renderRecord(Record $record)
+    function renderRecord(ArrayAccessRecord $record)
     {
         $path = $this->request->getPathInfo();
         $basePath = substr($path, 0, strrpos($path, '/'));

@@ -2,7 +2,8 @@ name: User
 options:
     admin:
         list_display:
-        - username
+        - id
+        - name
         - is_active
 
 fields:

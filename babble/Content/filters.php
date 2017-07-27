@@ -2,12 +2,12 @@
 
 namespace Babble\Content;
 
-use Babble\Record;
+use Babble\Models\Record;
 use Exception;
 
 interface ContentFilter
 {
-    public function isMatch(Record $model): bool;
+    public function isMatch(Record $record): bool;
 }
 
 class WhereFilter implements ContentFilter
@@ -23,9 +23,9 @@ class WhereFilter implements ContentFilter
         $this->value = $value;
     }
 
-    public function isMatch(Record $model): bool
+    public function isMatch(Record $record): bool
     {
-        $key = $model[$this->key];
+        $key = $record->getValue($this->key);
         $value = $this->value;
 
         switch ($this->comparison) {
@@ -63,19 +63,19 @@ class FilterContainer
         return $this;
     }
 
-    public function isMatch(Record $model): bool
+    public function isMatch(Record $record): bool
     {
         $numFilters = count($this->filters);
         if ($numFilters === 0) return true;
 
-        $matchedPrevious = $this->filters[0][1]->isMatch($model);
+        $matchedPrevious = $this->filters[0][1]->isMatch($record);
         if ($numFilters === 1) return $matchedPrevious;
 
         for ($i = 1; $i < $numFilters; $i++) {
             $filter = $this->filters[$i];
             $andOr = $filter[0];
             $filter = $filter[1];
-            $matchedCurrent = $filter->isMatch($model);
+            $matchedCurrent = $filter->isMatch($record);
 
             if ($andOr === 'AND') $matchedCurrent = $matchedCurrent & $matchedPrevious;
             if ($andOr === 'OR') $matchedCurrent = $matchedCurrent | $matchedPrevious;

@@ -2,6 +2,7 @@
 
 namespace Babble\Models\Fields;
 
+use Babble\Models\Record;
 use Imagine\Imagick\Imagine;
 use Imagine\Image\Box;
 use Imagine\Image\Point;
@@ -9,16 +10,16 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class ImageField extends Field
 {
-    public function validate($data)
+    public function validate(Record $record, $data)
     {
         $fs = new Filesystem();
         return $fs->exists('./uploads/' . $data['filename']);
     }
 
-    public function process(string $recordId, $data)
+    public function process(Record $record, $data)
     {
         // Directory part of the URL.
-        $targetDir = '/uploads/_cache/' . $this->getModel() . '/' . $recordId;
+        $targetDir = '/uploads/_cache/' . $this->getModel()->getType() . '/' . $record->getValue('id');
 
         $fs = new Filesystem();
         $relativeTargetDir = '.' . $targetDir; // Make relative for file system access.

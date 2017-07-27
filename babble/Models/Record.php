@@ -1,25 +1,30 @@
 <?php
 
-namespace Babble;
+namespace Babble\Models;
 
 use ArrayAccess;
-use Babble\Models\Model;
-use InvalidModelFieldException;
+use Babble\Models\Fields\Field;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
-class Record implements ArrayAccess, JsonSerializable
+class Record implements JsonSerializable
 {
     private $model;
 
     private $id;
     private $data = [];
 
-    public function __construct(Model $model, $id)
+    public function __construct(Model $model, $id, array $data = [])
     {
         $this->model = $model;
         $this->id = $id;
+
+        foreach ($this->model->getFields() as $field) {
+            $key = $field->getKey();
+            $value = $data[$key] ?? null;
+            $this->data[$key] = new Column($this, $field, $value);
+        }
     }
 
     public function __toString()
@@ -27,39 +32,26 @@ class Record implements ArrayAccess, JsonSerializable
         return json_encode($this->data);
     }
 
-    private function loadFromDisk()
-    {
-        $modelData = Yaml::parse(file_get_contents($this->getContentFilePath()));
-        foreach ($this->model->getFields() as $field) {
-            if (!array_key_exists($field->getKey(), $modelData)) continue;
-            $this->data[$field->getKey()] = $modelData[$field->getKey()];
-        }
-    }
-
-    public function getType()
-    {
-        return $this->model->getType();
-    }
-
     public function save()
     {
-        $fields = $this->model->getFields();
-        foreach ($fields as $field) {
-            $value = $this->data[$field->getKey()] ?? null;
-            $ok = $field->validate($value);
+        $columns = $this->data;
+        foreach ($columns as $key => $column) {
+            $ok = $column->validate();
             if (!$ok) return;
         }
 
-        foreach ($fields as $field) {
-            $value = $this->data[$field->getKey()] ?? null;
-            $processedData = $field->process($this->id, $value);
-            $this->data[$field->getKey()] = $processedData;
-        }
-
-        $yaml = Yaml::dump($this->data, 2, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+        $yaml = Yaml::dump($this->getData(), 2, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
 
         $fs = new Filesystem();
         $fs->dumpFile($this->getContentFilePath(), $yaml);
+    }
+
+    public function update(array $data)
+    {
+        foreach ($this->data as $key => $column) {
+            $column->setValue($data[$key] ?? null);
+        }
+        return $this->save();
     }
 
     public function delete()
@@ -68,30 +60,34 @@ class Record implements ArrayAccess, JsonSerializable
         $fs->remove($this->getContentFilePath());
     }
 
-    public function offsetExists($offset)
+    public function getValue($column)
     {
-        if ($offset === 'id') return true;
-        return isset($this->data[$offset]);
+        if ($column === 'id') return $this->id;
+        return $this->data[$column]->getValue();
     }
 
-    public function offsetGet($offset)
+    public function setValue($column, $value)
     {
-        if ($offset === 'id') return $this->id;
-        $field = $this->model->getField($offset);
-        return $field->getView($this->data[$offset]);
-    }
-
-    public function offsetSet($key, $value)
-    {
-        if (!$this->model->hasField($key)) {
-            $modelName = $this->model->getName();
-            throw new InvalidModelFieldException("Field \"$key\" does not exist on model \"$modelName\"");
+        if ($column === 'id') {
+            $this->id = $value;
+        } else {
+            $this->data[$column]->setValue($value);
         }
-        $this->data[$key] = $value;
     }
 
-    public function offsetUnset($offset)
+    private function loadFromDisk()
     {
+        $modelData = Yaml::parse(file_get_contents($this->getContentFilePath()));
+        foreach ($this->model->getFields() as $field) {
+            $key = $field->getKey();
+            if (!array_key_exists($key, $modelData)) continue;
+            $this->data[$key]->setValue($modelData[$key]);
+        }
+    }
+
+    public function getType()
+    {
+        return $this->model->getType();
     }
 
     function jsonSerialize()
@@ -101,22 +97,10 @@ class Record implements ArrayAccess, JsonSerializable
 
     static function fromDisk(Model $model, string $id)
     {
-        $modelInstance = new Record($model, $id);
-        $modelInstance->loadFromDisk();
+        $record = new Record($model, $id);
+        $record->loadFromDisk();
 
-        return $modelInstance;
-    }
-
-    static function fromData(Model $model, string $id, array $data)
-    {
-        $modelInstance = new Record($model, $id);
-        foreach ($model->getFields() as $field) {
-            $key = $field->getKey();
-            $value = $data[$key];
-            if (!empty($value)) $modelInstance[$key] = $value;
-        }
-
-        return $modelInstance;
+        return $record;
     }
 
     /**
@@ -125,5 +109,100 @@ class Record implements ArrayAccess, JsonSerializable
     private function getContentFilePath(): string
     {
         return '../content/' . $this->getType() . '/' . $this->id . '.yaml';
+    }
+
+    private function getData()
+    {
+        $data = [];
+        foreach ($this->data as $key => $column) {
+            $data[$key] = $column->getValue();
+        }
+        return $data;
+    }
+
+    public function getView($column)
+    {
+        if ($column === 'id') return $this->id;
+        if (!array_key_exists($column, $this->data)) return null;
+        return $this->data[$column]->getView();
+    }
+}
+
+class Column implements JsonSerializable
+{
+    private $record;
+    private $field;
+    private $value;
+
+    public function __construct(Record $record, Field $field, $value)
+    {
+        $this->record = $record;
+        $this->field = $field;
+        $this->value = $value;
+    }
+
+    function validate()
+    {
+        return $this->field->validate($this->record, $this->value);
+    }
+
+    function jsonSerialize()
+    {
+        return $this->field->toJSON($this->value);
+    }
+
+    function getValue()
+    {
+        return $this->value;
+    }
+
+    function getView()
+    {
+        return $this->field->getView($this->value);
+    }
+
+    function setValue($value)
+    {
+        $this->value = $value;
+    }
+}
+
+
+class ArrayAccessRecord implements ArrayAccess, JsonSerializable
+{
+    private $record;
+
+    public function __construct(Record $record)
+    {
+        $this->record = $record;
+    }
+
+    public function getType()
+    {
+        return $this->record->getType();
+    }
+
+
+    public function offsetExists($offset)
+    {
+        return !!$this->record->getView($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->record->getView($offset);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+    }
+
+    public function offsetUnset($offset)
+    {
+    }
+
+    function jsonSerialize()
+    {
+        return $this->record;
     }
 }

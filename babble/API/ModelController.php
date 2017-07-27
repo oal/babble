@@ -3,8 +3,8 @@
 namespace Babble\API;
 
 use Babble\Content\ContentLoader;
-use Babble\Record;
 use Babble\Models\Model;
+use Babble\Models\Record;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,9 +31,9 @@ class ModelController extends Controller
         $data = json_decode($request->getContent(), true);
 
         // Save model instance.
-        $modelInstance = Record::fromData($this->model, $id, $data);
-        $modelInstance->save();
-        return new JsonResponse($modelInstance);
+        $record = new Record($this->model, $id, $data);
+        $record->save();
+        return new JsonResponse($record);
     }
 
     public function read(Request $request, $id)
@@ -79,7 +79,10 @@ class ModelController extends Controller
         }
 
         // Save model instance.
-        $modelInstance = Record::fromData($this->model, $id, $data);
+        $record = Record::fromDisk($this->model, $id);
+        $record->update($data);
+
+        $modelInstance = new Record($this->model, $id, $data);
         $modelInstance->save();
 
         // If ID was changed, delete old version.

@@ -4,11 +4,13 @@ namespace Babble\Content;
 
 use Babble\Exceptions\InvalidModelException;
 use Babble\Exceptions\RecordNotFoundException;
-use Babble\Record;
+use Babble\Models\ArrayAccessRecord;
+use Babble\Models\Record;
 use Babble\Models\Model;
 use Imagine\Exception\InvalidArgumentException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+
 
 class ContentLoader
 {
@@ -23,7 +25,12 @@ class ContentLoader
 
     public function find($id)
     {
-        return $this->idToRecord($id);
+        $fs = new Filesystem();
+        $filePath = $this->getModelDirectory() . $id . '.yaml';
+        $dataFileExists = $fs->exists($filePath);
+
+        if ($dataFileExists) return new ArrayAccessRecord(Record::fromDisk($this->model, $id));
+        throw new RecordNotFoundException($this->model->getType() . ' record with ID "' . $id . '" does not exist.');
     }
 
     public function where($key, $comparison, $value)
@@ -58,7 +65,7 @@ class ContentLoader
             $id = $this->filenameToId($file->getFilename());
             $record = Record::fromDisk($this->model, $id);
             if (!$this->filters->isMatch($record)) continue;
-            $result[] = $record;
+            $result[] = new ArrayAccessRecord($record);
         }
 
         return $result;
@@ -83,6 +90,7 @@ class ContentLoader
             ->name('/^[A-Z].+\.twig/')
             ->in('../templates/' . $basePath);
 
+
         foreach ($templateFinder as $file) {
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
             try {
@@ -90,6 +98,7 @@ class ContentLoader
                 $record = $loader->find($id);
                 if ($record) return $record;
             } catch (InvalidModelException $e) {
+            } catch (RecordNotFoundException $e) {
             }
         }
 
@@ -102,16 +111,6 @@ class ContentLoader
     private function getModelDirectory(): string
     {
         return '../content/' . $this->model->getType() . '/';
-    }
-
-    private function idToRecord(string $id)
-    {
-        $fs = new Filesystem();
-        $filePath = $this->getModelDirectory() . $id . '.yaml';
-        $dataFileExists = $fs->exists($filePath);
-
-        if ($dataFileExists) return Record::fromDisk($this->model, $id);
-        throw new RecordNotFoundException('Record with the given ID does not exist.');
     }
 
     private function filenameToId(string $filename): string

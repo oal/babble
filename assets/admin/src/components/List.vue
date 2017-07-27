@@ -64,7 +64,7 @@
             'modelType'
         ],
 
-        data () {
+        data() {
             return {
                 loading: true,
                 model: {},
@@ -117,7 +117,24 @@
                 return fields;
             },
             listDisplay() {
-                return this.options['list_display'].map(fieldKey => this.fieldsByKey[fieldKey]);
+                let columnKeys = this.options['list_display'];
+
+                let columns = columnKeys.filter(fieldKey => fieldKey !== 'id').map(fieldKey => this.fieldsByKey[fieldKey]);
+
+                let idIndex = columnKeys.indexOf('id');
+                if (idIndex !== -1) {
+                    columns = [
+                        {
+                            key: 'id',
+                            name: 'ID',
+                            type: 'text',
+                            options: []
+                        },
+                        ...columns
+                    ];
+                }
+
+                return columns;
             },
         }
     }
