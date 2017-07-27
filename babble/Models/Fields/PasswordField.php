@@ -15,7 +15,7 @@ class PasswordField extends Field
     public function process(Record $record, $data)
     {
         // If password provided, hash and return hash. If null, return original value (password unchanged).
-        if ($data) return password_hash($data, PASSWORD_DEFAULT);
+        if ($data !== null) return password_hash($data, PASSWORD_DEFAULT);
         return $record->getValue($this->getKey());
     }
 

@@ -23,10 +23,7 @@ class Field implements JsonSerializable
         if (array_key_exists('options', $data)) $this->options = $data['options'];
     }
 
-    /**
-     * @return mixed
-     */
-    public function getKey()
+    public function getKey() : string
     {
         return $this->key;
     }

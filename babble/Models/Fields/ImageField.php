@@ -52,7 +52,7 @@ class ImageField extends Field
 
     public function getView($data)
     {
-        if (!array_key_exists('url', $data)) return '';
+        if (!$data || !array_key_exists('url', $data)) return '';
         return $data['url'];
     }
 }

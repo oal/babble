@@ -64,16 +64,6 @@ class Model implements JsonSerializable
         return array_values($this->fields);
     }
 
-    function jsonSerialize()
-    {
-        return [
-            'type' => $this->type,
-            'name' => $this->name,
-            'name_plural' => $this->namePlural,
-            'options' => $this->options,
-            'fields' => $this->getFields()
-        ];
-    }
 
     public function exists(string $id)
     {
@@ -95,11 +85,7 @@ class Model implements JsonSerializable
         return $models;
     }
 
-    /**
-     * @param $modelFormat
-     * @return mixed
-     */
-    private function initName($modelFormat)
+    private function initName(array $modelFormat)
     {
         $this->name = $modelFormat['name'];
         if (!empty($modelFormat['name_plural'])) {
@@ -135,10 +121,7 @@ class Model implements JsonSerializable
         }
     }
 
-    /**
-     * @param $modelFormat
-     */
-    private function initOptions($modelFormat)
+    private function initOptions(array $modelFormat)
     {
         if (empty($modelFormat['options'])) return;
 
@@ -146,24 +129,15 @@ class Model implements JsonSerializable
         if (is_array($options)) $this->options = $options;
     }
 
-    public function validate(array $data)
+    function jsonSerialize()
     {
-        foreach ($this->getFields() as $field) {
-            $value = $data[$field->getKey()];
-            if (!$field->validate($value)) return false;
-        }
-        return true;
-    }
-
-    public function hasField($key): bool
-    {
-        return array_key_exists($key, $this->fields);
-    }
-
-    public function getField($key): Field
-    {
-        if (!array_key_exists($key, $this->fields)) return null;
-        return $this->fields[$key];
+        return [
+            'type' => $this->type,
+            'name' => $this->name,
+            'name_plural' => $this->namePlural,
+            'options' => $this->options,
+            'fields' => $this->getFields()
+        ];
     }
 }
 

@@ -10,4 +10,9 @@ class BooleanField extends Field
     {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN) || $value === null;
     }
+
+    public function process(Record $record, $data)
+    {
+        return $data === true;
+    }
 }
