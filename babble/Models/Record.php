@@ -38,6 +38,9 @@ class Record implements JsonSerializable
      */
     public function save(array $data)
     {
+        $id = $data['id'] ?? $this->id;
+        $this->id = $id;
+
         $columns = $this->data;
         foreach ($columns as $key => $column) {
 //            $ok = $column->validate();

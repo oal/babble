@@ -74,7 +74,7 @@ class Router
         $modelsRoute = new Route('/api/models');
         $this->router->add('models', $modelsRoute);
 
-        $modelRoute = new Route('/api/models/{model}/{id}', ['id' => null]);
+        $modelRoute = new Route('/api/models/{model}/{id}', ['id' => null], ['id' => '.+']); // TODO: Limit to safe characters.
         $this->router->add('resources', $modelRoute);
 
         $fileRoute = new Route('/api/files/{path}', ['path' => null], ['path' => '.+']);

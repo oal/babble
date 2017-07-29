@@ -68,6 +68,7 @@
             },
 
             onSelectFile(file) {
+                console.log(file);
                 this.selection = file;
             },
 

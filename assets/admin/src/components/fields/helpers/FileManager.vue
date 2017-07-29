@@ -104,7 +104,7 @@
             },
 
             selectFile(file) {
-                if (file.type !== 'file') return false;
+                if (file.type === 'directory') return false;
                 this.selection = this.getURL(file);
                 this.$emit('input', this.selection);
             },

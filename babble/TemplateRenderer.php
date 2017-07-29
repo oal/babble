@@ -39,7 +39,19 @@ class TemplateRenderer
     function renderRecord(ArrayAccessRecord $record)
     {
         $path = $this->request->getPathInfo();
+        // TODO: Extract (same as in ContentLoader)
         $basePath = substr($path, 0, strrpos($path, '/'));
+        if ($basePath) {
+            $fs = new Filesystem();
+            while (strlen($basePath) > 0) {
+                if($fs->exists('../templates/' . $basePath)) {
+                    break;
+                }
+                $pathParts = explode('/', $basePath);
+                array_pop($pathParts);
+                $basePath = implode('/', $pathParts);
+            }
+        }
 
         $modelType = $record->getType();
         $templateFile = $basePath . '/' . $modelType . '.twig';

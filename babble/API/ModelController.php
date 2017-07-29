@@ -78,15 +78,17 @@ class ModelController extends Controller
             ], 400);
         }
 
-        // Save model instance.
-        $record = Record::fromDisk($this->model, $id);
-        $record->save($data);
+        $loadId = $oldId ?? $id;
+        $record = Record::fromDisk($this->model, $loadId);
 
         // If ID was changed, delete old version.
         if (!empty($oldId) && $oldId !== $id) {
             $deleteInstance = Record::fromDisk($this->model, $oldId);
             $deleteInstance->delete();
+            $data['id'] = $id;
         }
+
+        $record->save($data);
 
         return new JsonResponse($record);
     }

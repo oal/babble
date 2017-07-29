@@ -51,18 +51,20 @@ class ContentLoader
     {
         $finder = new Finder();
         try {
-            $files = $finder
-                ->files()
-                ->depth(0)
-                ->name('*.yaml')
+            $finder->files()->name('*.yaml')
                 ->in($this->getModelDirectory());
+
+            // Can model have child records?
+            if (!$this->model->isHierarchical()) {
+                $finder->depth(0);
+            }
         } catch (InvalidArgumentException $e) {
             return [];
         }
 
         $result = [];
-        foreach ($files as $file) {
-            $id = $this->filenameToId($file->getFilename());
+        foreach ($finder as $file) {
+            $id = $this->filenameToId($file->getRelativePathname());
             $record = Record::fromDisk($this->model, $id);
             if (!$this->filters->isMatch($record)) continue;
             $result[] = new ArrayAccessRecord($record);
@@ -79,8 +81,19 @@ class ContentLoader
     static function matchPath(string $path)
     {
         $basePath = substr($path, 0, strrpos($path, '/'));
-
-        $id = substr($path, strrpos($path, '/') + 1);
+        if ($basePath) {
+            $fs = new Filesystem();
+            while (strlen($basePath) > 0) {
+                if($fs->exists('../templates/' . $basePath)) {
+                    break;
+                }
+                $pathParts = explode('/', $basePath);
+                array_pop($pathParts);
+                $basePath = implode('/', $pathParts);
+            }
+        }
+        $id = substr($path, strlen($basePath) + 1);
+        error_log($basePath . "|" . $path. "|" .$id);
         if (empty($id)) $id = 'index';
 
         $templateFinder = new Finder();
@@ -89,7 +102,6 @@ class ContentLoader
             ->depth(0)
             ->name('/^[A-Z].+\.twig/')
             ->in('../templates/' . $basePath);
-
 
         foreach ($templateFinder as $file) {
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
@@ -115,7 +127,8 @@ class ContentLoader
 
     private function filenameToId(string $filename): string
     {
-        return pathinfo($filename, PATHINFO_FILENAME);
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        return substr($filename, 0, strlen($filename) - strlen($ext) - 1);
     }
 
     static function getModelNames()

@@ -21,6 +21,7 @@ class Model implements JsonSerializable
 
     private $name;
     private $namePlural;
+    private $hierarchical;
 
     private $options = [];
 
@@ -47,6 +48,7 @@ class Model implements JsonSerializable
         $modelFormat = Yaml::parse(file_get_contents($modelFile));
 
         $this->initName($modelFormat);
+        $this->hierarchical = ($modelFormat['hierarchical'] ?? false) === true;
         $this->initOptions($modelFormat);
         $this->initFields($modelFormat['fields']);
     }
@@ -138,6 +140,11 @@ class Model implements JsonSerializable
             'options' => $this->options,
             'fields' => $this->getFields()
         ];
+    }
+
+    public function isHierarchical()
+    {
+        return $this->hierarchical;
     }
 }
 
