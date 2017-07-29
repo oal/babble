@@ -5,7 +5,7 @@ namespace Babble;
 use Babble\Content\ContentLoader;
 use Babble\Exceptions\InvalidModelException;
 use Babble\Exceptions\RecordNotFoundException;
-use Babble\Models\ArrayAccessRecord;
+use Babble\Models\TemplateRecord;
 use Babble\Models\Model;
 use Babble\Models\Record;
 use Symfony\Component\Filesystem\Filesystem;
@@ -70,7 +70,7 @@ class TemplateRenderer
         $templateFile = $basePath . '/' . $modelType . '.twig';
 
         $html = $this->twig->render($templateFile, [
-            'this' => new ArrayAccessRecord($record)
+            'this' => new TemplateRecord($record)
         ]);
 
         return $html;

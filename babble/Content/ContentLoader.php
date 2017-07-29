@@ -3,10 +3,10 @@
 namespace Babble\Content;
 
 use Babble\Exceptions\RecordNotFoundException;
-use Babble\Models\ArrayAccessRecord;
+use Babble\Models\TemplateRecord;
 use Babble\Models\Record;
 use Babble\Models\Model;
-use Imagine\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -14,6 +14,8 @@ class ContentLoader
 {
     private $model;
     private $filters;
+    private $withChildren = false;
+    private $parentId;
 
     public function __construct(string $modelType)
     {
@@ -27,7 +29,7 @@ class ContentLoader
         $filePath = $this->getModelDirectory() . $id . '.yaml';
         $dataFileExists = $fs->exists($filePath);
 
-        if ($dataFileExists) return new ArrayAccessRecord(Record::fromDisk($this->model, $id));
+        if ($dataFileExists) return new TemplateRecord(Record::fromDisk($this->model, $id));
         throw new RecordNotFoundException($this->model->getType() . ' record with ID "' . $id . '" does not exist.');
     }
 
@@ -45,12 +47,30 @@ class ContentLoader
         return $this;
     }
 
+    public function withChildren()
+    {
+        // TODO: Warn if not hierarchical?
+        $this->withChildren = true;
+        return $this;
+    }
+
+    public function childrenOf(string $id)
+    {
+        // TODO: Warn if not hierarchical?
+        $this->parentId = $id;
+        return $this;
+    }
+
     public function get()
     {
         $finder = new Finder();
         try {
             $finder->files()->name('*.yaml')
                 ->in($this->getModelDirectory());
+
+            if (!$this->withChildren) {
+                $finder->depth(0);
+            }
 
             // Can model have child records?
             if (!$this->model->isHierarchical()) {
@@ -59,13 +79,13 @@ class ContentLoader
         } catch (InvalidArgumentException $e) {
             return [];
         }
-
         $result = [];
         foreach ($finder as $file) {
             $id = $this->filenameToId($file->getRelativePathname());
+            error_log($id);
             $record = Record::fromDisk($this->model, $id);
             if (!$this->filters->isMatch($record)) continue;
-            $result[] = new ArrayAccessRecord($record);
+            $result[] = new TemplateRecord($record);
         }
 
         return $result;
@@ -76,13 +96,28 @@ class ContentLoader
      */
     private function getModelDirectory(): string
     {
-        return '../content/' . $this->model->getType() . '/';
+        $type = $this->model->getType();
+        $path = '../content/' . $type . '/';
+
+        // Add parent ID to loader path.
+        if ($this->parentId) {
+            $path .= $this->parentId . '/';
+        }
+
+        return $path;
     }
 
     private function filenameToId(string $filename): string
     {
         $ext = pathinfo($filename, PATHINFO_EXTENSION);
-        return substr($filename, 0, strlen($filename) - strlen($ext) - 1);
+        $id = substr($filename, 0, strlen($filename) - strlen($ext) - 1);
+
+        // Add parent ID.
+        if($this->parentId) {
+            $id = $this->parentId . '/' . $id;
+        }
+
+        return $id;
     }
 
     static function getModelNames()

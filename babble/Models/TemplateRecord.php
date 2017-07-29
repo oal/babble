@@ -3,9 +3,10 @@
 namespace Babble\Models;
 
 use ArrayAccess;
+use Babble\Content\ContentLoader;
 use JsonSerializable;
 
-class ArrayAccessRecord implements ArrayAccess, JsonSerializable
+class TemplateRecord implements ArrayAccess, JsonSerializable
 {
     private $record;
 
@@ -14,9 +15,21 @@ class ArrayAccessRecord implements ArrayAccess, JsonSerializable
         $this->record = $record;
     }
 
+    public function __toString()
+    {
+        return json_encode($this->record);
+    }
+
+
     public function getType()
     {
         return $this->record->getType();
+    }
+
+    public function children()
+    {
+        $loader = new ContentLoader($this->record->getType());
+        return $loader->childrenOf($this->record->getValue('id'));
     }
 
 
