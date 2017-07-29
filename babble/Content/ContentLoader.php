@@ -2,7 +2,6 @@
 
 namespace Babble\Content;
 
-use Babble\Exceptions\InvalidModelException;
 use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\ArrayAccessRecord;
 use Babble\Models\Record;
@@ -10,7 +9,6 @@ use Babble\Models\Model;
 use Imagine\Exception\InvalidArgumentException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-
 
 class ContentLoader
 {
@@ -71,50 +69,6 @@ class ContentLoader
         }
 
         return $result;
-    }
-
-
-    /**
-     * @param $path
-     * @return null|Record
-     */
-    static function matchPath(string $path)
-    {
-        $basePath = substr($path, 0, strrpos($path, '/'));
-        if ($basePath) {
-            $fs = new Filesystem();
-            while (strlen($basePath) > 0) {
-                if($fs->exists('../templates/' . $basePath)) {
-                    break;
-                }
-                $pathParts = explode('/', $basePath);
-                array_pop($pathParts);
-                $basePath = implode('/', $pathParts);
-            }
-        }
-        $id = substr($path, strlen($basePath) + 1);
-        error_log($basePath . "|" . $path. "|" .$id);
-        if (empty($id)) $id = 'index';
-
-        $templateFinder = new Finder();
-        $templateFinder
-            ->files()
-            ->depth(0)
-            ->name('/^[A-Z].+\.twig/')
-            ->in('../templates/' . $basePath);
-
-        foreach ($templateFinder as $file) {
-            $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-            try {
-                $loader = new ContentLoader($modelNameMaybe);
-                $record = $loader->find($id);
-                if ($record) return $record;
-            } catch (InvalidModelException $e) {
-            } catch (RecordNotFoundException $e) {
-            }
-        }
-
-        return null;
     }
 
     /**

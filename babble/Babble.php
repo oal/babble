@@ -3,48 +3,58 @@
 namespace Babble;
 
 use Babble\API;
-use Babble\Content\ContentLoader;
 use Symfony\Component\Debug\Debug;
 use Symfony\Component\HttpFoundation\Request;
-
-Debug::enable();
+use Symfony\Component\HttpFoundation\Response;
 
 class Babble
 {
+    private $debug = false;
+    private $renderer;
+
     public function __construct()
     {
-        $request = Request::createFromGlobals();
-        $this->routeRequest($request);
+        $this->renderer = new TemplateRenderer();
     }
 
-    private function routeRequest(Request $request)
+    /**
+     * Debug enables Babble's debug mode, and also enables Symfony's Debug component for prettier stack traces etc.
+     */
+    public function debug()
+    {
+        $this->debug = true;
+        Debug::enable();
+    }
+
+    /**
+     * Serves a response based on the request received from the client.
+     */
+    public function serve()
+    {
+        $request = Request::createFromGlobals();
+        $response = $this->handleRequest($request);
+        $response->send();
+    }
+
+    private function handleRequest(Request $request): Response
     {
         $path = $request->getPathInfo();
 
         if (preg_match('/api/', $path)) {
-            $this->routeRequestToAPI($request);
-        } else {
-            $this->routeRequestToPage($request);
+            return $this->handleAPIRequest($request);
         }
-
-        return true;
+        return $this->handlePageRequest($request);
     }
 
-    private function routeRequestToAPI(Request $request)
+    private function handleAPIRequest(Request $request): Response
     {
         $router = new API\Router();
-        $router->handleRequest($request)->send();
+        return $router->handleRequest($request);
     }
 
-    private function routeRequestToPage(Request $request)
+    private function handlePageRequest(Request $request): Response
     {
-        $renderer = new TemplateRenderer($request);
-
-        $record = ContentLoader::matchPath($request->getPathInfo());
-        if ($record !== null) {
-            echo $renderer->renderRecord($record);
-            return;
-        }
-        echo $renderer->renderTemplate();
+        $path = $request->getPathInfo();
+        return $this->renderer->render($path);
     }
 }
