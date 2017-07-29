@@ -1,10 +1,15 @@
 <template>
     <div id="panel">
-        <header id="top">Babble CMS Admin</header>
+        <header id="top">
+            <router-link :to="{name: 'Index'}">Babble CMS Admin</router-link>
+        </header>
         <div id="main">
             <aside id="sidebar">
                 <div class="ui vertical text menu" v-for="model in models" v-bind:key="model.type">
-                    <div class="header item">{{ model.name_plural }}</div>
+                    <div class="header item">
+                        <i class="icon" :class="model.options.admin.icon" v-if="model.options && model.options.admin && model.options.admin.icon"></i>
+                        {{ model.name_plural }}
+                    </div>
 
                     <router-link v-bind:to="{name: 'List', params: {modelType: model.type}}" class="item">
                         All {{ model.name_plural }}
@@ -34,6 +39,10 @@
     export default {
         name: 'panel',
         created: function () {
+            if(!this.$http.defaults.auth) {
+                this.$router.push({name: 'Login'});
+            }
+
             this.$http.options('/models').then(response => {
                 this.models = response.data;
             });
@@ -59,6 +68,11 @@
         background-color: #111;
         padding: 1.2rem 2rem;
         color: #fff;
+    }
+
+    #top a {
+        color: #fff;
+        font-weight: bold;
     }
 
     #main {

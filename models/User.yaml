@@ -1,6 +1,7 @@
 name: User
 options:
     admin:
+        icon: users
         list_display:
         - id
         - name

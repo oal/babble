@@ -2,7 +2,9 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import axios from 'axios';
 
+import Login from '@/components/Login';
 import Panel from '@/components/Panel';
+import Index from '@/components/Index';
 import List from '@/components/List';
 import Edit from '@/components/Edit';
 import Files from '@/components/Files';
@@ -15,10 +17,21 @@ Vue.prototype.$http = axios.create({
 export default new Router({
     routes: [
         {
+            path: '/login',
+            name: 'Login',
+            component: Login
+        },
+        {
             path: '/',
             name: 'Panel',
             component: Panel,
             children: [
+                {
+                    path: '/',
+                    name: 'Index',
+                    component: Index,
+                    props: true
+                },
                 {
                     path: '/models/:modelType',
                     name: 'List',

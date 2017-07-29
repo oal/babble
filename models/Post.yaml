@@ -1,6 +1,7 @@
 name: Blog post
 options:
     admin:
+        icon: pencil
         list_display:
         - title
         - is_draft

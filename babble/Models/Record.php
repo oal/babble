@@ -2,6 +2,8 @@
 
 namespace Babble\Models;
 
+use Babble\Exceptions\RecordNotFoundException;
+use Exception;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
@@ -109,9 +111,17 @@ class Record implements JsonSerializable
 
     static function fromDisk(Model $model, string $id)
     {
+        if (!$id) throw new RecordNotFoundException();
+
         $path = '../content/' . $model->getType() . '/' . $id . '.yaml';
-        $data = Yaml::parse(file_get_contents($path));
-        $record = new Record($model, $id, $data);
+        try {
+            $data = file_get_contents($path);
+        } catch (Exception $e) {
+            throw new RecordNotFoundException();
+        }
+
+        $dataArray = Yaml::parse($data);
+        $record = new Record($model, $id, $dataArray);
 
         return $record;
     }

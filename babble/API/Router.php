@@ -2,7 +2,11 @@
 
 namespace Babble\API;
 
+use Babble\Exceptions\RecordNotFoundException;
+use Babble\Models\Model;
+use Babble\Models\Record;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
@@ -22,6 +26,10 @@ class Router
 
     public function handleRequest(Request $request): Response
     {
+        if (!$this->checkAuth($request)) {
+            return new JsonResponse(['error' => 'Access denied'], 401);
+        }
+
         $context = new RequestContext($request);
         $matcher = new UrlMatcher($this->router, $context);
         $parameters = $matcher->match($request->getPathInfo());
@@ -35,8 +43,30 @@ class Router
             case 'files':
                 return $this->handleFileRoute($request, $parameters);
         }
+    }
 
-        var_export($parameters);
+    private function checkAuth(Request $request): bool
+    {
+        $authHeader = $request->headers->get('Authorization');
+        $authParts = explode(' ', $authHeader, 2);
+        if ($authParts[0] !== 'Basic' || count($authParts) !== 2) return false;
+
+        $usernamePassword = explode(':', base64_decode($authParts[1]), 2);
+        if (count($usernamePassword) !== 2) return false;
+
+        $username = $usernamePassword[0];
+        $password = $usernamePassword[1];
+
+        $model = new Model('User');
+        try {
+            $user = Record::fromDisk($model, $username);
+        } catch (RecordNotFoundException $e) {
+            return false;
+        }
+        if (!$user->getValue('is_active')) return false;
+
+        $storedHash = $user->getValue('password');
+        return password_verify($password, $storedHash);
     }
 
     private function addRoutes()
