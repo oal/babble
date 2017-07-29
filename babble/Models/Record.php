@@ -45,7 +45,9 @@ class Record implements JsonSerializable
         foreach ($columns as $key => $column) {
 //            $ok = $column->validate();
 //            if (!$ok) return;
-            $column->setValue($data[$key] ?? null);
+            if (array_key_exists($key, $data)) {
+                $column->setValue($data[$key]);
+            }
         }
 
         $yaml = Yaml::dump($this->getData(), 2, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
@@ -95,11 +97,7 @@ class Record implements JsonSerializable
      */
     public function setValue(string $column, $value)
     {
-        if ($column === 'id') {
-            $this->id = $value;
-        } else {
-            $this->data[$column]->setValue($value);
-        }
+        $this->data[$column]->setValue($value);
     }
 
     /**

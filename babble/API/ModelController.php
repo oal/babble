@@ -29,6 +29,7 @@ class ModelController extends Controller
         }
 
         $data = json_decode($request->getContent(), true);
+        error_log(json_encode($data));
 
         // Save model instance.
         $record = new Record($this->model, $id);
@@ -78,8 +79,8 @@ class ModelController extends Controller
             ], 400);
         }
 
-        $loadId = $oldId ?? $id;
-        $record = Record::fromDisk($this->model, $loadId);
+        $record = new Record($this->model, $id, $data);
+        $record->save($data);
 
         // If ID was changed, delete old version.
         if (!empty($oldId) && $oldId !== $id) {
@@ -87,8 +88,6 @@ class ModelController extends Controller
             $deleteInstance->delete();
             $data['id'] = $id;
         }
-
-        $record->save($data);
 
         return new JsonResponse($record);
     }

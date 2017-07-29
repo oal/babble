@@ -121,9 +121,10 @@
 
                 let data = this.data;
                 if (this.id !== this.changedId) {
-                    data = Object.assign({}, this.data, {
+                    data = {
+                        ...this.data,
                         '_old_id': this.id
-                    });
+                    };
                 }
 
                 request('/models/' + this.modelType + '/' + this.changedId, data).then(response => {
