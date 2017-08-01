@@ -11,11 +11,11 @@
     </h2>
     <nav>
         <ul>
-            {% for page in Page().get() %}
+            {% for page in Page() %}
                 <li>
                     <a href="/{{ page.id == 'index' ? '' : page.id }}">{{ page.title }}</a>
                     <ul>
-                        {% for child in page.children().get() %}
+                        {% for child in page.children() %}
                             <li>
                                 <a href="/{{ child.id }}">{{ child.title }}</a>
                             </li>

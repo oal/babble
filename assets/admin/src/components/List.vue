@@ -11,10 +11,10 @@
                     New {{ model.name }}
                 </router-link>
             </h1>
-            <table class="ui table">
+            <table class="ui compact striped table">
                 <thead>
                 <tr>
-                    <th v-for="column in listDisplay">
+                    <th v-for="column in listDisplay" :class="{collapsing: column.name === 'ID'}">
                         {{ column.name }}
                     </th>
                     <th>&nbsp;</th>

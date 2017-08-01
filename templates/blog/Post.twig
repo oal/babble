@@ -14,7 +14,7 @@
 
         <h5>Want more? Check out these posts:</h5>
         <ul>
-            {% for post in Post().where('is_draft', '=', false).where('title', '!=', this.title).get() %}
+            {% for post in Post().where('is_draft', '=', false).where('title', '!=', this.title) %}
                 <li><a href="/blog/{{ post.id }}">{{ post.title }}</a></li>
             {% endfor %}
         </ul>

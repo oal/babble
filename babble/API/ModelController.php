@@ -58,8 +58,8 @@ class ModelController extends Controller
     private function readMany(ContentLoader $loader)
     {
         try {
-            $records = $loader->get();
-            return new JsonResponse($records);
+            $records = $loader->withChildren();
+            return new JsonResponse(iterator_to_array($records));
         } catch (Exception $e) {
         }
 
