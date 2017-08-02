@@ -12,8 +12,28 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
 use Twig_Environment;
-use Twig_Function;
 use Twig_Loader_Filesystem;
+
+// Decorate ContentLoader so querying models looks better (Post.where(...) vs Post().where(...)).
+class ContentLoaderDecorator
+{
+    private $modelType;
+
+    public function __construct(string $modelType)
+    {
+        $this->modelType = $modelType;
+    }
+
+    public function __call($method_name, $args)
+    {
+        $loader = new ContentLoader($this->modelType);
+        // If all records are requested, just return the loader (an iterator)
+        if ($method_name === 'all') return $loader;
+
+        // Otherwise, call the correct method and return the result (for "where" etc, that will be the loader instance).
+        return call_user_func_array(array($loader, $method_name), $args);
+    }
+}
 
 class TemplateRenderer
 {
@@ -31,9 +51,8 @@ class TemplateRenderer
 
         $modelNames = ContentLoader::getModelNames();
         foreach ($modelNames as $modelName) {
-            $twig->addFunction(new Twig_Function($modelName, function () use ($modelName) {
-                return new ContentLoader($modelName);
-            }));
+            $loader = new ContentLoaderDecorator($modelName);
+            $twig->addGlobal($modelName, $loader);
         }
 
         $this->twig = $twig;

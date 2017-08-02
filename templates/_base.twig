@@ -11,7 +11,7 @@
     </h2>
     <nav>
         <ul>
-            {% for page in Page() %}
+            {% for page in Page.all() %}
                 <li>
                     <a href="/{{ page.id == 'index' ? '' : page.id }}">{{ page.title }}</a>
                     <ul>
