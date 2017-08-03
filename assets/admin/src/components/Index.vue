@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1 class="ui header">Manage website content</h1>
+        <h1 class="ui header">{{ $t('manageContent') }}</h1>
         <div class="ui cards">
             <div class="ui card" v-for="model in $parent.models">
                 <router-link :to="{name: 'List', params: {modelType: model.type}}" class="center aligned content"

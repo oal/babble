@@ -3,8 +3,8 @@
         <div class="ui loading basic segment" v-if="loading"></div>
         <div v-else>
             <h1>
-                <span v-if="isNew">Edit</span>
-                <span v-else>New</span>
+                <span v-if="isNew">{{ $t('edit') }}</span>
+                <span v-else>{{ $t('new') }}</span>
                 {{ model.name }}
             </h1>
 
@@ -32,7 +32,7 @@
 
                 <div class="ui green left labeled icon button" v-on:click="save">
                     <i class="save icon"></i>
-                    Save
+                    {{ $t('save') }}
                 </div>
             </div>
         </div>

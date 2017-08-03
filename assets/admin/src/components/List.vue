@@ -8,7 +8,7 @@
                 <router-link v-bind:to="{name: 'Create', params: {modelType: model.type}}"
                              class="ui right floated primary left labeled icon button">
                     <i class="add icon"></i>
-                    New {{ model.name }}
+                    {{ $t('addRecord') }} {{ model.name }}
                 </router-link>
             </h1>
             <table class="ui compact striped table">
@@ -33,11 +33,11 @@
                         <router-link v-bind:to="{name: 'Edit', params: {modelType: model.type, id: record.id}}"
                                      class="ui green left labeled icon button">
                             <i class="edit icon"></i>
-                            Edit
+                            {{ $t('edit') }}
                         </router-link>
                         <a href="#" class="ui red left labeled icon button">
                             <i class="remove icon"></i>
-                            Delete
+                            {{ $t('delete') }}
                         </a>
                     </td>
                 </tr>
