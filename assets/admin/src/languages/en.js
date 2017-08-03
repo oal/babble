@@ -9,7 +9,7 @@ export default {
     'manageContent': 'Manage website content',
 
     'allRecords': 'All',
-    'addNew': 'Add new',
+    'addRecord': 'Add new',
 
     'fileManager': 'File manager',
     'allFiles': 'All files',
