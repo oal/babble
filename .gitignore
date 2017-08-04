@@ -2,3 +2,4 @@
 vendor/
 public/admin/
 public/uploads/_*
+cache/

@@ -3,9 +3,11 @@
 namespace Babble\API;
 
 use Babble\Content\ContentLoader;
+use Babble\Events\RecordChangeEvent;
 use Babble\Models\Model;
 use Babble\Models\Record;
 use Exception;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,10 +15,12 @@ use Symfony\Component\HttpFoundation\Response;
 class ModelController extends Controller
 {
     private $model;
+    private $dispatcher;
 
-    public function __construct(string $modelType)
+    public function __construct(EventDispatcher $dispatcher, string $modelType)
     {
         $this->model = new Model($modelType);
+        $this->dispatcher = $dispatcher;
     }
 
     public function create(Request $request, $id)
@@ -88,6 +92,13 @@ class ModelController extends Controller
             $deleteInstance = Record::fromDisk($this->model, $oldId);
             $deleteInstance->delete();
         }
+
+        $this->dispatcher->dispatch(
+            RecordChangeEvent::NAME,
+            new RecordChangeEvent($this->model->getType(), $id)
+        );
+
+        // TODO: RecordDeleteEvent when ID is changed?
 
         return new JsonResponse($record);
     }

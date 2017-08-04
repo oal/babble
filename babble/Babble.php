@@ -4,17 +4,22 @@ namespace Babble;
 
 use Babble\API;
 use Symfony\Component\Debug\Debug;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class Babble
 {
     private $debug = false;
+    private $dispatcher;
     private $renderer;
+    private $cache;
 
     public function __construct()
     {
-        $this->renderer = new TemplateRenderer();
+        $this->dispatcher = new EventDispatcher();
+        $this->renderer = new TemplateRenderer($this->dispatcher);
+        $this->cache = new Cache($this->dispatcher);
     }
 
     /**
@@ -48,13 +53,24 @@ class Babble
 
     private function handleAPIRequest(Request $request): Response
     {
-        $router = new API\Router();
+        $router = new API\Router($this->dispatcher);
         return $router->handleRequest($request);
     }
 
     private function handlePageRequest(Request $request): Response
     {
         $path = $request->getPathInfo();
-        return $this->renderer->render($path);
+
+        // Attempt to load from cache.
+        $cachedPage = $this->cache->load($path);
+        if ($cachedPage) {
+            return new Response($cachedPage);
+        }
+
+        // Render and store in cache.
+        $response = $this->renderer->render($path);
+        $this->cache->store($path, $response->getContent());
+
+        return $response;
     }
 }

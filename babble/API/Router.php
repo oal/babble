@@ -5,6 +5,7 @@ namespace Babble\API;
 use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\Model;
 use Babble\Models\Record;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,9 +18,11 @@ use Symfony\Component\Routing\RouteCollection;
 class Router
 {
     private $router;
+    private $dispatcher;
 
-    public function __construct()
+    public function __construct(EventDispatcher $dispatcher)
     {
+        $this->dispatcher = $dispatcher;
         $this->router = new RouteCollection();
         $this->addRoutes();
     }
@@ -83,7 +86,7 @@ class Router
 
     private function handleModelRoute(Request $request, array $parameters)
     {
-        $controller = new ModelController($parameters['model']);
+        $controller = new ModelController($this->dispatcher, $parameters['model']);
         $method = $request->getMethod();
 
         $id = $parameters['id'];

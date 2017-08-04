@@ -3,11 +3,13 @@
 namespace Babble;
 
 use Babble\Content\ContentLoader;
+use Babble\Events\RenderDependencyEvent;
 use Babble\Exceptions\InvalidModelException;
 use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\TemplateRecord;
 use Babble\Models\Model;
 use Babble\Models\Record;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +20,7 @@ use Twig_Loader_Filesystem;
 class ContentLoaderDecorator
 {
     private $modelType;
+    private $wasAccessed = false;
 
     public function __construct(string $modelType)
     {
@@ -26,6 +29,7 @@ class ContentLoaderDecorator
 
     public function __call($method_name, $args)
     {
+        $this->wasAccessed = true;
         $loader = new ContentLoader($this->modelType);
         // If all records are requested, just return the loader (an iterator)
         if ($method_name === 'all') return $loader;
@@ -33,14 +37,26 @@ class ContentLoaderDecorator
         // Otherwise, call the correct method and return the result (for "where" etc, that will be the loader instance).
         return call_user_func_array(array($loader, $method_name), $args);
     }
+
+    /**
+     * @return bool
+     */
+    public function wasAccessed(): bool
+    {
+        return $this->wasAccessed;
+    }
 }
 
 class TemplateRenderer
 {
+    private $dispatcher;
     private $twig;
+    private $loaders;
 
-    public function __construct()
+    public function __construct(EventDispatcher $dispatcher)
     {
+        $this->dispatcher = $dispatcher;
+        $this->initContentLoaders();
         $this->initTwig();
     }
 
@@ -49,9 +65,7 @@ class TemplateRenderer
         $loader = new Twig_Loader_Filesystem('../templates');
         $twig = new Twig_Environment($loader, ['debug' => true]);
 
-        $modelNames = ContentLoader::getModelNames();
-        foreach ($modelNames as $modelName) {
-            $loader = new ContentLoaderDecorator($modelName);
+        foreach ($this->loaders as $modelName => $loader) {
             $twig->addGlobal($modelName, $loader);
         }
 
@@ -69,6 +83,14 @@ class TemplateRenderer
         $html = $this->renderRecord($path);
         if ($html === null) $html = $this->renderTemplate($path);
         if ($html === null) return new Response('404', 404); // TODO: Render custom 404 page.
+
+        // What ContentLoaders / Models were accessed during render?
+        foreach ($this->loaders as $modelName => $loader) {
+            if($loader->wasAccessed()) {
+                $this->dispatcher->dispatch(RenderDependencyEvent::NAME, new RenderDependencyEvent($modelName, $path));
+            }
+        }
+
         return new Response($html);
     }
 
@@ -174,5 +196,17 @@ class TemplateRenderer
             }
         }
         return $basePath;
+    }
+
+    private function initContentLoaders()
+    {
+        $modelNames = ContentLoader::getModelNames();
+        $loaders = [];
+        foreach ($modelNames as $modelName) {
+            $loader = new ContentLoaderDecorator($modelName);
+            $loaders[$modelName] = $loader;
+        }
+
+        $this->loaders = $loaders;
     }
 }
