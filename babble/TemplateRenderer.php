@@ -4,6 +4,7 @@ namespace Babble;
 
 use Babble\Content\ContentLoader;
 use Babble\Events\RenderDependencyEvent;
+use Babble\Events\RenderEvent;
 use Babble\Exceptions\InvalidModelException;
 use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\TemplateRecord;
@@ -80,16 +81,22 @@ class TemplateRenderer
      */
     public function render(string $path)
     {
-        $html = $this->renderRecord($path);
-        if ($html === null) $html = $this->renderTemplate($path);
-        if ($html === null) return new Response('404', 404); // TODO: Render custom 404 page.
+        $html = $this->renderRecordFor($path);
+        if ($html === null) $html = $this->renderTemplateFor($path);
+        if ($html === null) {
+            return new Response($this->renderTemplate('_404.twig'), 404);
+        }
 
         // What ContentLoaders / Models were accessed during render?
         foreach ($this->loaders as $modelName => $loader) {
-            if($loader->wasAccessed()) {
-                $this->dispatcher->dispatch(RenderDependencyEvent::NAME, new RenderDependencyEvent($modelName, $path));
+            if ($loader->wasAccessed()) {
+                $this->dispatcher
+                    ->dispatch(RenderDependencyEvent::NAME, new RenderDependencyEvent($modelName, $path));
             }
         }
+
+        $this->dispatcher
+            ->dispatch(RenderEvent::NAME, new RenderEvent($path, $html));
 
         return new Response($html);
     }
@@ -101,7 +108,7 @@ class TemplateRenderer
      * @param string $path
      * @return string|null
      */
-    function renderRecord(string $path)
+    function renderRecordFor(string $path)
     {
         $record = $this->pathToRecord($path);
         if ($record === null) return null;
@@ -123,7 +130,7 @@ class TemplateRenderer
      * @param string $path
      * @return string|null
      */
-    function renderTemplate(string $path)
+    function renderTemplateFor(string $path)
     {
         $isHidden = array_filter(explode('/', $path), function ($dir) {
             return strlen($dir) > 0 && $dir[0] === '_';
@@ -131,14 +138,19 @@ class TemplateRenderer
 
         if (!$isHidden) {
             $templateFile = $path . '.twig';
-
-            $fs = new Filesystem();
-            if ($fs->exists('../templates' . $templateFile)) {
-                $html = $this->twig->render($templateFile, []);
-                return $html;
-            }
+            return $this->renderTemplate($templateFile);
         }
 
+        return null;
+    }
+
+    private function renderTemplate(string $templateFile)
+    {
+        $fs = new Filesystem();
+        if ($fs->exists('../templates/' . $templateFile)) {
+            $html = $this->twig->render($templateFile, []);
+            return $html;
+        }
         return null;
     }
 

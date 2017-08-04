@@ -67,10 +67,7 @@ class Babble
             return new Response($cachedPage);
         }
 
-        // Render and store in cache.
         $response = $this->renderer->render($path);
-        $this->cache->store($path, $response->getContent());
-
         return $response;
     }
 }

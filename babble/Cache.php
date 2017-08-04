@@ -4,6 +4,7 @@ namespace Babble;
 
 use Babble\Events\RecordChangeEvent;
 use Babble\Events\RenderDependencyEvent;
+use Babble\Events\RenderEvent;
 use Exception;
 use SplFileObject;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -17,6 +18,7 @@ class Cache
     {
         $this->dispatcher = $dispatcher;
 
+        $dispatcher->addListener(RenderEvent::NAME, [$this, 'onRender']);
         $dispatcher->addListener(RenderDependencyEvent::NAME, [$this, 'onRenderDependency']);
         $dispatcher->addListener(RecordChangeEvent::NAME, [$this, 'onRecordChange']);
     }
@@ -49,6 +51,11 @@ class Cache
     private function pathToCachePath(string $path): string
     {
         return '../cache' . self::pathToFilename($path);
+    }
+
+    public function onRender(RenderEvent $event)
+    {
+        $this->store($event->getPath(), $event->getContent());
     }
 
     public function onRenderDependency(RenderDependencyEvent $event)
@@ -95,7 +102,7 @@ class Cache
             $removeFilenames[] = $cachedFilename;
         }
 
-        var_export( $removeFilenames);
+        var_export($removeFilenames);
 
         // Remove all files which depend on the changed record's model type.
         $fs->remove($removeFilenames);
