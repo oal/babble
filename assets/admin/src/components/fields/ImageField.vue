@@ -38,6 +38,8 @@
     import ImageCropper from '@/components/fields/helpers/ImageCropper';
 
     export default {
+        name: 'image-field',
+
         props: [
             'value',
             'name',

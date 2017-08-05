@@ -10,6 +10,8 @@
 <script>
     import {get} from 'lodash';
     export default {
+        name: 'boolean-field',
+
         props: [
             'value',
             'name',

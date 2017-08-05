@@ -9,6 +9,8 @@
 <script>
     import {get} from 'lodash';
     export default {
+        name: 'text-field',
+
         props: [
             'options',
             'value',

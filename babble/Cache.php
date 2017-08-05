@@ -18,7 +18,7 @@ class Cache
     {
         $this->dispatcher = $dispatcher;
 
-        $dispatcher->addListener(RenderEvent::NAME, [$this, 'onRender']);
+//        $dispatcher->addListener(RenderEvent::NAME, [$this, 'onRender']);
         $dispatcher->addListener(RenderDependencyEvent::NAME, [$this, 'onRenderDependency']);
         $dispatcher->addListener(RecordChangeEvent::NAME, [$this, 'onRecordChange']);
     }

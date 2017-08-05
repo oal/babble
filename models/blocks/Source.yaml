@@ -1,0 +1,10 @@
+name: Source
+
+fields:
+    title:
+        name: Title
+        type: text
+
+    url:
+        name: URL
+        type: text

@@ -14,19 +14,17 @@
                     <input v-model="changedId" pattern="[A-Za-z0-9-]+" required>
                 </div>
 
-                <div class="field" v-for="field in model.fields" v-bind:key="field.key">
-                    <component v-bind:is="field.type + '-field'" v-bind:value="data[field.key]"
-                               v-on:input="onFieldInput(field.key, $event)"
-                               v-bind:name="field.key"
-                               v-bind:label="field.name"
-                               v-bind:options="field.options" v-if="hasFieldComponent(field)"></component>
-                    <div class="field" v-else>
-                        <label>{{ field.name }}</label>
-                        <div class="ui visible error message">
-                            No component registered for field type "{{ field.type }}".
-                        </div>
-                    </div>
-                </div>
+                <field :type="field.type"
+                       :label="field.name"
+                       :name="field.key"
+                       :options="field.options"
+
+                       :value="data[field.key]"
+                       @input="onFieldInput(field.key, $event)"
+
+                       v-for="field in model.fields"
+                       :key="field.key">
+                </field>
 
                 <div class="ui divider"></div>
 
@@ -36,26 +34,19 @@
                 </div>
             </div>
         </div>
+        {{ data }}
     </div>
 </template>
 
 <script>
     import {upperFirst, camelCase} from 'lodash';
-    import TextField from '@/components/fields/TextField';
-    import BooleanField from '@/components/fields/BooleanField';
-    import DatetimeField from '@/components/fields/DatetimeField';
-    import ImageField from '@/components/fields/ImageField';
-    import PasswordField from '@/components/fields/PasswordField';
+    import Field from '@/components/fields/Field';
 
     export default {
         name: 'panel',
 
         components: {
-            BooleanField,
-            DatetimeField,
-            TextField,
-            ImageField,
-            PasswordField
+            Field
         },
 
         props: [
@@ -151,13 +142,6 @@
             },
             onFieldInput(key, value) {
                 this.data[key] = value;
-            },
-            getFieldName(key) {
-                return this.model.fields.filter(field => field.key === key)[0].name;
-            },
-            hasFieldComponent(field) {
-                let componentName = upperFirst(`${camelCase(field.type)}Field`);
-                return !!this.$options.components[componentName];
             }
         }
     }

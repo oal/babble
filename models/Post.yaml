@@ -25,3 +25,10 @@ fields:
         type: text
         options:
             multiline: true
+
+    sources:
+        name: Sources
+        type: list
+        options:
+            blocks:
+            - Source

@@ -19,6 +19,8 @@
     const timeFormat = 'hh:mm';
 
     export default {
+        name: 'datetime-field',
+
         props: [
             'value',
             'label'

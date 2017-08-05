@@ -15,6 +15,8 @@
 
 <script>
     export default {
+        name: 'password-field',
+
         props: [
             'label'
         ],

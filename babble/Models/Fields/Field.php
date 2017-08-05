@@ -2,6 +2,7 @@
 
 namespace Babble\Models\Fields;
 
+use Babble\Models\Block;
 use Babble\Models\Model;
 use Babble\Models\Record;
 use JsonSerializable;
@@ -14,9 +15,9 @@ class Field implements JsonSerializable
     private $type;
     private $options = [];
 
-    public function __construct(Model $model, string $key, array $data)
+    public function __construct(Block $blockOrModel, string $key, array $data)
     {
-        $this->model = $model;
+        $this->model = $blockOrModel;
         $this->key = $key;
         $this->name = $data['name'];
         $this->type = $data['type'];
