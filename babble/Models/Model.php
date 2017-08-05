@@ -3,19 +3,11 @@
 namespace Babble\Models;
 
 use Babble\Exceptions\InvalidModelException;
-use Babble\Models\Fields\BooleanField;
-use Babble\Models\Fields\DatetimeField;
-use Babble\Models\Fields\Field;
-use Babble\Models\Fields\ImageField;
-use Babble\Models\Fields\PasswordField;
-use Babble\Models\Fields\TextField;
-use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
-use Symfony\Component\Yaml\Exception\ParseException;
 
-class Model extends Block
+class Model extends BaseModel
 {
     private $hierarchical;
     private $options = [];
@@ -77,10 +69,15 @@ class Model extends Block
         return $data;
     }
 
-
     public function isHierarchical()
     {
         return $this->hierarchical;
+    }
+
+    public function getCacheLocation(string $recordId)
+    {
+        $baseLocation = parent::getCacheLocation($recordId);
+        return $baseLocation . $this->getType() . '/' . $recordId . '/';
     }
 }
 

@@ -19,21 +19,24 @@ class ImageField extends Field
     public function process(Record $record, $data)
     {
         // Directory part of the URL.
-        $targetDir = '/uploads/_cache/' . $this->getModelOrBlock()->getType() . '/' . $record->getValue('id');
+        $targetDir = $this->getModel()->getCacheLocation($record->getValue('id'));
 
         $fs = new Filesystem();
         $relativeTargetDir = '.' . $targetDir; // Make relative for file system access.
         if (!$fs->exists($relativeTargetDir)) $fs->mkdir($relativeTargetDir);
 
         // Filename = ID + file extension.
-        $ext = pathinfo($data['filename'], PATHINFO_EXTENSION);
-        $targetFilename = $this->getKey() . '.' . $ext;
+        $targetFilename = $this->getTargetFilename(
+            $data['filename'],
+            $this->getOption('width'),
+            $this->getOption('height')
+        );
 
-        $targetFile = $relativeTargetDir . '/' . $targetFilename;
+        $targetFile = $relativeTargetDir . $targetFilename;
         $this->cropAndSave($data['filename'], $data['crop'], $targetFile);
 
         // Return data array with URL to cropped version.
-        $url = $targetDir . '/' . $targetFilename;
+        $url = $targetDir . $targetFilename;
         $data['url'] = $url;
         return $data;
     }
@@ -54,5 +57,13 @@ class ImageField extends Field
     {
         if (!$data || !array_key_exists('url', $data)) return '';
         return $data['url'];
+    }
+
+    private function getTargetFilename($filename, $width, $height): string
+    {
+        $baseName = pathinfo($filename, PATHINFO_FILENAME);
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $targetFilename = $baseName . '-' . $width . 'x' . $height . '.' . $ext;
+        return $targetFilename;
     }
 }

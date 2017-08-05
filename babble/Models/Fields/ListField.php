@@ -4,6 +4,7 @@ namespace Babble\Models\Fields;
 
 
 use ArrayAccess;
+use Babble\Models\BaseModel;
 use Babble\Models\Block;
 use Babble\Models\Record;
 
@@ -11,12 +12,12 @@ class ListField extends Field
 {
     private $blocks;
 
-    public function __construct(Block $blockOrModel, $key, array $data)
+    public function __construct(BaseModel $model, $key, array $data)
     {
+        parent::__construct($model, $key, $data);
+
         $this->readBlocks($data['options']['blocks']);
         $data['options']['blocks'] = array_values($this->blocks);
-
-        parent::__construct($blockOrModel, $key, $data);
     }
 
     private function readBlocks(array $blockNames)
@@ -24,7 +25,7 @@ class ListField extends Field
         $blocks = [];
 
         foreach ($blockNames as $blockName) {
-            $blocks[$blockName] = new Block($blockName);
+            $blocks[$blockName] = new Block($this->getModel(), $blockName);
         }
 
         $this->blocks = $blocks;
