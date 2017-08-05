@@ -28,7 +28,7 @@ a {
 #header {
     display: flex;
     flex-direction: row;
-    background-color: #222;
+    background-color: #fff;
 
     justify-content: space-between;
     align-content: center;
@@ -36,7 +36,7 @@ a {
 }
 
 #header a {
-    color: #fff;
+    color: #222;
     text-decoration: none;
 }
 
@@ -44,6 +44,11 @@ a {
     margin: 0;
     display: flex;
     align-self: center;
+}
+
+#header img {
+    height: 4rem;
+    margin-top: -0.55rem;
 }
 
 #header nav ul {
@@ -86,7 +91,7 @@ a {
 
 #header nav a {
     display: block;
-    padding: 2rem;
+    padding: 3rem 2rem;
 }
 
 #header nav > ul > li {
@@ -94,7 +99,7 @@ a {
 }
 
 #header nav > ul > li:hover {
-    background-color: #333;
+    background-color: #fafafa;
 }
 
 #header-image {
