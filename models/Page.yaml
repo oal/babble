@@ -25,9 +25,9 @@ fields:
         options:
             multiline: true
 
-    archive_image:
-        name: Archive image
-        type: image
+    gallery:
+        name: Gallery
+        type: list
         options:
-            width: 125
-            height: 125
+            blocks:
+            - Image

@@ -12,9 +12,6 @@
                 <i class="remove icon"></i>
             </div>
 
-            <!--<div v-for="field in block.fields"-->
-                 <!--:key="field.key">{{ field }}</div>-->
-
             <field :type="field.type"
                    :label="field.name"
                    :name="field.key"
@@ -50,7 +47,7 @@
 
         data() {
             return {
-                blocks: []
+                blocks: [...this.value]
             }
         },
 

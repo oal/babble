@@ -12,6 +12,13 @@
             {{ this.body }}
         </div>
 
+        <h5>Sources:</h5>
+        <ul>
+            {% for block in this.sources %}
+                <li><a href="{{ block.url }}" target="_blank">{{ block.title }}</a></li>
+            {% endfor %}
+        </ul>
+
         <h5>Want more? Check out these posts:</h5>
         <ul>
             {% for post in Post.where('is_draft', '=', false).where('title', '!=', this.title) %}

@@ -55,6 +55,8 @@
 
 <script>
     export default {
+        name: 'file-manager',
+
         data() {
             return {
                 'path': [],

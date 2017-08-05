@@ -58,9 +58,9 @@
                 uncachedURL = this.value.url + '?' + ((Math.random() * 99999).toString(16));
             }
             return {
-                'openFileManager': false,
-                'selection': this.value.filename || null,
-                'croppedImage': uncachedURL,
+                openFileManager: false,
+                selection: this.value.filename || null,
+                croppedImage: uncachedURL,
             }
         },
 

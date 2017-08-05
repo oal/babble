@@ -102,8 +102,6 @@ class Cache
             $removeFilenames[] = $cachedFilename;
         }
 
-        var_export($removeFilenames);
-
         // Remove all files which depend on the changed record's model type.
         $fs->remove($removeFilenames);
 
