@@ -19,7 +19,7 @@ class ImageField extends Field
     public function process(Record $record, $data)
     {
         // Directory part of the URL.
-        $targetDir = '/uploads/_cache/' . $this->getModel()->getType() . '/' . $record->getValue('id');
+        $targetDir = '/uploads/_cache/' . $this->getModelOrBlock()->getType() . '/' . $record->getValue('id');
 
         $fs = new Filesystem();
         $relativeTargetDir = '.' . $targetDir; // Make relative for file system access.

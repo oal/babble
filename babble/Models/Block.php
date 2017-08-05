@@ -67,6 +67,11 @@ class Block implements JsonSerializable
         return array_values($this->fields);
     }
 
+    public function getField(string $key)
+    {
+        return $this->fields[$key];
+    }
+
     protected function initName(array $modelFormat)
     {
         $this->name = $modelFormat['name'];

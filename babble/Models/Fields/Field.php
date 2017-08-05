@@ -54,7 +54,7 @@ class Field implements JsonSerializable
         return $this->options[$key];
     }
 
-    public function getModel(): Model
+    public function getModelOrBlock(): Block
     {
         return $this->model;
     }

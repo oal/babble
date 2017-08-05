@@ -12,5 +12,16 @@
         <div>
             {{ this.body }}
         </div>
+
+
+        <h3>Gallery</h3>
+        <ul>
+            {% for block in this.gallery %}
+                <li>
+                    <img src="{{ block.image }}">
+                    <p>{{ block.description }}</p>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 {% endblock %}

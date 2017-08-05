@@ -5,12 +5,17 @@ namespace Babble\Models\Fields;
 
 use ArrayAccess;
 use Babble\Models\Block;
+use Babble\Models\Record;
 
 class ListField extends Field
 {
+    private $blocks;
+
     public function __construct(Block $blockOrModel, $key, array $data)
     {
-        $data['options']['blocks'] = $this->readBlocks($data['options']['blocks']);
+        $this->readBlocks($data['options']['blocks']);
+        $data['options']['blocks'] = array_values($this->blocks);
+
         parent::__construct($blockOrModel, $key, $data);
     }
 
@@ -19,19 +24,42 @@ class ListField extends Field
         $blocks = [];
 
         foreach ($blockNames as $blockName) {
-            $blocks[] = new Block($blockName);
+            $blocks[$blockName] = new Block($blockName);
         }
 
-        return $blocks;
+        $this->blocks = $blocks;
     }
 
-    public function getView($blocks)
+    public function process(Record $record, $data)
     {
-        if (!is_array($blocks)) return [];
+        $processedData = [];
+        foreach ($data as $blockInstanceData) {
+            $type = $blockInstanceData['type'];
+            $block = $this->blocks[$type];
+            $values = $blockInstanceData['value'];
 
-        return array_map(function ($blockData) {
-            return new BlockView($blockData);
-        }, $blocks);
+            $processedValues = [];
+            foreach ($values as $fieldKey => $value) {
+                $processedValues[$fieldKey] = $block->getField($fieldKey)->process($record, $value);
+            }
+            $processedData[] = [
+                'type' => $type,
+                'value' => $processedValues
+            ];
+        }
+
+        return $processedData;
+    }
+
+
+    public function getView($blockDatas)
+    {
+        if (!is_array($blockDatas)) return [];
+
+        $blocks = $this->blocks;
+        return array_map(function ($blockData) use (&$blocks) {
+            return new BlockView($blocks[$blockData['type']], $blockData);
+        }, $blockDatas);
     }
 }
 
@@ -39,14 +67,16 @@ class BlockView implements ArrayAccess
 {
     private $type;
     private $data;
+    private $block;
 
-    public function __construct(array $blockData)
+    public function __construct(Block $block, array $blockData)
     {
+        $this->block = $block;
         $this->type = $blockData['type'];
         $this->data = $blockData['value'];
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getType();
     }
@@ -64,7 +94,7 @@ class BlockView implements ArrayAccess
 
     public function offsetGet($offset)
     {
-        return $this->data[$offset];
+        return $this->block->getField($offset)->getView($this->data[$offset]);
     }
 
     public function offsetSet($offset, $value)

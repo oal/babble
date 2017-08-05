@@ -1,2 +1,8 @@
-title: "About us"
-body: "Hello, world! Lorem ipsum sit amet..."
+title: 'About us'
+image:
+    filename: canada-goose-2317430_640.jpg
+    crop: { x: 64, 'y': 216.16666666667, width: 512, height: 170.66666666667 }
+    url: /uploads/_cache/Page/about/image.jpg
+body: 'Hello, world! Lorem ipsum sit amet...'
+gallery:
+    - { type: Image, value: { image: { filename: transport/railway-2439189_640.jpg, crop: { x: 0, 'y': 0, width: 450.13333333333, height: 337.6 }, url: /uploads/_cache/Image/about/image.jpg }, description: asdasd } }
