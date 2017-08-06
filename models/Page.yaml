@@ -31,3 +31,5 @@ fields:
         options:
             blocks:
             - Image
+            admin:
+                cards: true

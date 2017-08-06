@@ -1,29 +1,36 @@
 <template>
     <div class="field">
         <label>{{ label }}</label>
-        <div class="ui top attached menu">
-            <div class="item" v-for="block in options.blocks" @click="addBlock(block.type)">
+        <div :class="{'top attached': !displayAsCards}" class="ui menu">
+            <a class="item" v-for="block in options.blocks" @click="addBlock(block.type)">
                 <i class="add icon"></i> {{ block.name }}
-            </div>
+            </a>
         </div>
-        <div class="ui attached segment" v-for="(block, $index) in blocksWithFields" :key="getKey(block)">
-            <div v-if="block">
-                <strong>{{ getBlockName(block.type) }}</strong>
-                <div class="ui tiny right floated red icon button" @click="removeBlockAt($index)">
-                    <i class="remove icon"></i>
+
+        <div :class="{'ui cards': displayAsCards, 'ui attached segment': !displayAsCards}">
+            <div :class="{'card': displayAsCards, 'ui vertical segment': !displayAsCards}"
+                 v-for="(block, $index) in blocksWithFields" :key="getKey(block)" v-if="block">
+                <div class="content">
+                    <div class="header">
+                        <strong>{{ getBlockName(block.type) }}</strong>
+                        <div class="ui tiny right floated red icon button" @click="removeBlockAt($index)">
+                            <i class="remove icon"></i>
+                        </div>
+                    </div>
                 </div>
+                <div class="content">
+                    <field :type="field.type"
+                           :label="field.name"
+                           :name="field.key"
+                           :options="field.options"
 
-                <field :type="field.type"
-                       :label="field.name"
-                       :name="field.key"
-                       :options="field.options"
+                           :value="blocks[$index].value[field.key]"
+                           @input="onFieldInput($index, field.key, $event)"
 
-                       :value="blocks[$index].value[field.key]"
-                       @input="onFieldInput($index, field.key, $event)"
-
-                       v-for="field in block.fields"
-                       :key="field.key">
-                </field>
+                           v-for="field in block.fields"
+                           :key="field.key">
+                    </field>
+                </div>
             </div>
             <div class="ui visible error message" v-else>
                 Could not find block type.
@@ -83,7 +90,7 @@
                 this.$emit('input', [...this.blocks]);
             },
             getKey(block) {
-                if(!block) return null;
+                if (!block) return null;
 
                 // TODO: Use a less expensive key.
                 return JSON.stringify(block);
@@ -98,7 +105,21 @@
 
                     return {...blockData, fields: block.fields};
                 })
+            },
+
+            displayAsCards() {
+                return this.options.admin && this.options.admin.cards === true;
             }
         }
     }
 </script>
+
+<style scoped>
+    .card {
+        flex-grow: 1;
+    }
+
+    .vertical.segment:first-child {
+        padding-top: 0;
+    }
+</style>

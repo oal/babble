@@ -122,6 +122,7 @@
     .card .image {
         background: #333 url('/static/checkerboard.png');
         width: auto !important;
+        display: flex;
 
         img {
             margin: auto;

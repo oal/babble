@@ -11,10 +11,16 @@ fields:
     title:
         name: Title
         type: text
+        options:
+            admin:
+                columns: 8
 
     published:
         name: Published at
         type: datetime
+        options:
+            admin:
+                columns: 8
 
     is_draft:
         name: Draft

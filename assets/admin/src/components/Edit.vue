@@ -9,28 +9,33 @@
             </h1>
 
             <div class="ui form">
-                <div class="field">
-                    <label>ID</label>
-                    <input v-model="changedId" pattern="[A-Za-z0-9-]+" required>
-                </div>
+                <div class="ui grid">
+                    <div class="sixteen wide field">
+                        <label>ID</label>
+                        <input v-model="changedId" pattern="[A-Za-z0-9-]+" required>
+                    </div>
 
-                <field :type="field.type"
-                       :label="field.name"
-                       :name="field.key"
-                       :options="field.options"
+                    <field :type="field.type"
+                           :label="field.name"
+                           :name="field.key"
+                           :options="field.options"
+                           :class="field.classes"
 
-                       :value="data[field.key]"
-                       @input="onFieldInput(field.key, $event)"
+                           :value="data[field.key]"
+                           @input="onFieldInput(field.key, $event)"
 
-                       v-for="field in model.fields"
-                       :key="field.key">
-                </field>
+                           v-for="field in processedFields"
+                           :key="field.key">
+                    </field>
 
-                <div class="ui divider"></div>
+                    <div class="sixteen wide column">
+                        <div class="ui divider"></div>
 
-                <div class="ui green left labeled icon button" v-on:click="save">
-                    <i class="save icon"></i>
-                    {{ $t('save') }}
+                        <div class="ui green left labeled icon button" v-on:click="save">
+                            <i class="save icon"></i>
+                            {{ $t('save') }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -40,6 +45,12 @@
 <script>
     import {upperFirst, camelCase} from 'lodash';
     import Field from '@/components/fields/Field';
+
+    const numberToString = (num) => {
+        return [
+            'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+            'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen'][num];
+    };
 
     export default {
         name: 'panel',
@@ -141,6 +152,20 @@
             },
             onFieldInput(key, value) {
                 this.data[key] = value;
+            }
+        },
+
+        computed: {
+            processedFields() {
+                return this.model.fields.map(field => {
+                    let adminOptions = field.options['admin'];
+                    if (adminOptions && adminOptions['columns']) {
+                        field.classes = numberToString(adminOptions['columns']) + ' wide';
+                    } else {
+                        field.classes = 'sixteen wide';
+                    }
+                    return field;
+                });
             }
         }
     }
