@@ -18,52 +18,121 @@ class ImageField extends Field
 
     public function process(Record $record, $data)
     {
-        // Directory part of the URL.
-        $targetDir = $this->getModel()->getCacheLocation($record->getValue('id'));
+        $image = new Image($this, $data);
 
-        $fs = new Filesystem();
-        $relativeTargetDir = '.' . $targetDir; // Make relative for file system access.
-        if (!$fs->exists($relativeTargetDir)) $fs->mkdir($relativeTargetDir);
-
-        // Filename = ID + file extension.
-        $targetFilename = $this->getTargetFilename(
-            $data['filename'],
+        $croppedURL = $image->crop(
             $this->getOption('width'),
             $this->getOption('height')
         );
 
-        $targetFile = $relativeTargetDir . $targetFilename;
-        $this->cropAndSave($data['filename'], $data['crop'], $targetFile);
-
-        // Return data array with URL to cropped version.
-        $url = $targetDir . $targetFilename;
-        $data['url'] = $url;
+        $data['url'] = $croppedURL;
         return $data;
-    }
-
-    private function cropAndSave(string $filename, array $crop, string $targetFile)
-    {
-        $imagine = new Imagine();
-        $image = $imagine->open('./uploads/' . $filename);
-
-        // TODO: Support rotation and zooming from the Cropper JS component.
-        $image
-            ->crop(new Point($crop['x'], $crop['y']), new Box($crop['width'], $crop['height']))
-            ->resize(new Box($this->getOption('width'), $this->getOption('height')))
-            ->save($targetFile);
     }
 
     public function getView($data)
     {
-        if (!$data || !array_key_exists('url', $data)) return '';
-        return $data['url'];
+        return new Image($this, $data);
+    }
+}
+
+class Image
+{
+    private $field;
+    private $filename;
+    private $crop;
+    private $url;
+
+    public function __construct(ImageField $field, array $data)
+    {
+        $this->field = $field;
+        $this->filename = $data['filename'];
+        $this->crop = $data['crop'];
+        $this->url = $data['url'] ?? '';
     }
 
-    private function getTargetFilename($filename, $width, $height): string
+    public function __toString()
     {
-        $baseName = pathinfo($filename, PATHINFO_FILENAME);
-        $ext = pathinfo($filename, PATHINFO_EXTENSION);
-        $targetFilename = $baseName . '-' . $width . 'x' . $height . '.' . $ext;
-        return $targetFilename;
+        return $this->url;
+    }
+
+    public function crop(int $width, int $height)
+    {
+        list($cropWidth, $cropHeight, $width, $height) = $this->getCropDimensions($width, $height);
+        $url = $this->getCroppedURL($width, $height);
+
+        // Return URL if cropped and cached file already exists.
+        $relativePath = '.' . $url;
+        $fs = new Filesystem();
+//        if ($fs->exists($relativePath)) return $url;
+
+        // Create cache dir location if it doesn't exist.
+        $relativeDir = pathinfo($relativePath, PATHINFO_DIRNAME);
+        if (!$fs->exists($relativeDir)) $fs->mkdir($relativeDir);
+
+        // Crop and save
+        $imagine = new Imagine();
+        $image = $imagine->open('./uploads/' . $this->filename);
+
+        // TODO: Support rotation and zooming from the Cropper JS component.
+        $image
+            ->crop(new Point($this->crop['x'], $this->crop['y']), new Box($cropWidth, $cropHeight))
+            ->resize(new Box($width, $height))
+            ->save($relativePath);
+
+        return $url;
+    }
+
+    private function getCroppedFilename($cropWidth, $cropHeight)
+    {
+        $baseName = pathinfo($this->filename, PATHINFO_FILENAME);
+        $ext = pathinfo($this->filename, PATHINFO_EXTENSION);
+
+        $cropFrom = intval($this->crop['x']) . '-' . intval($this->crop['y']);
+        $size = intval($cropWidth) . 'x' . intval($cropHeight);
+
+        $targetFilename = $baseName . '-' . $cropFrom . '-' . $size . '.' . $ext;
+        $dirName = pathinfo($this->filename, PATHINFO_DIRNAME);
+
+        if ($dirName === '.') return $targetFilename;
+        return $dirName . '/' . $targetFilename;
+    }
+
+    private function getCroppedURL($cropWidth, $cropHeight)
+    {
+        return '/uploads/_cache/' . $this->getCroppedFilename($cropWidth, $cropHeight);
+    }
+
+    /**
+     * @param int $width
+     * @param int $height
+     * @return array
+     */
+    private function getCropDimensions(int $width, int $height): array
+    {
+        $cropWidth = $this->crop['width'];
+        $cropHeight = $this->crop['height'];
+
+        // Recalculate crop dimensions and aspect ratio when exact size is set.
+        if ($width && $height) {
+            $ratio = $width / $height;
+            if ($width > $height) {
+                $cropHeight = $cropWidth / $ratio;
+            } else {
+                $cropWidth = $cropHeight * $ratio;
+            }
+        } else {
+            $ratio = $cropWidth / $cropHeight;
+        }
+
+        // If only one side is set, keep ratio but calculate the missing side.
+        if (!$width) {
+            $width = $height * $ratio;
+            $cropWidth = $cropHeight * $ratio;
+        } else if (!$height) {
+            $height = $width / $ratio;
+            $cropHeight = $cropWidth / $ratio;
+        }
+
+        return array($cropWidth, $cropHeight, $width, $height);
     }
 }

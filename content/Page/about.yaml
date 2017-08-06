@@ -1,9 +1,9 @@
 title: 'About us'
 image:
     filename: canada-goose-2317430_640.jpg
-    crop: { x: 128, 'y': 0, width: 512, height: 170.66666666667 }
-    url: /uploads/_cache/Page/about/canada-goose-2317430_640-900x300.jpg
+    crop: { x: 46.308659217877, 'y': 15.728119180633, width: 593.69134078212, height: 197.89711359404 }
+    url: /uploads/_cache/canada-goose-2317430_640-46-15-900x300.jpg
 body: 'Hello, world! Lorem ipsum sit amet...'
 gallery:
-    - { type: Image, value: { image: { filename: transport/railway-2439189_640.jpg, crop: { x: 95.722118380062, 'y': 0, width: 450.13333333333, height: 337.6 }, url: /uploads/_cache/Page/about/Image/railway-2439189_640-640x480.jpg }, description: asdasd } }
-    - { type: Image, value: { image: { filename: canada-goose-2317430_640.jpg, crop: { x: 157.48184357542, 'y': 0, width: 407.56983240223, height: 305.67737430168 }, url: /uploads/_cache/Page/about/Image/canada-goose-2317430_640-640x480.jpg }, description: Duck! } }
+    - { type: Image, value: { image: { filename: transport/railway-2439189_640.jpg, crop: { x: 95.722118380062, 'y': 0, width: 450.13333333333, height: 337.6 }, url: /uploads/_cache/transport/railway-2439189_640-95-0-640x480.jpg }, description: asdasd } }
+    - { type: Image, value: { image: { filename: canada-goose-2317430_640.jpg, crop: { x: 157.48184357542, 'y': 0, width: 407.56983240223, height: 305.67737430168 }, url: /uploads/_cache/canada-goose-2317430_640-157-0-640x480.jpg }, description: Duck! } }

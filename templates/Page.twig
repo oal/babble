@@ -20,6 +20,11 @@
                 <li>
                     <img src="{{ block.image }}">
                     <p>{{ block.description }}</p>
+                    <img src="{{ block.image.crop(200, 50) }}" alt="">
+                    <img src="{{ block.image.crop(50, 200) }}" alt="">
+
+                    <img src="{{ block.image.crop(200, 0) }}" alt="">
+                    <img src="{{ block.image.crop(0, 200) }}" alt="">
                 </li>
             {% endfor %}
         </ul>
