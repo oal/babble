@@ -72,7 +72,9 @@ class Image
 
         // Crop and save
         $imagine = new Imagine();
-        $image = $imagine->open('./uploads/' . $this->filename);
+        $sourceFilename = './uploads/' . $this->filename;
+        if (!$fs->exists($sourceFilename)) return '';
+        $image = $imagine->open($sourceFilename);
 
         // TODO: Support rotation and zooming from the Cropper JS component.
         $image
