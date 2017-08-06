@@ -6,23 +6,28 @@
                 <i class="add icon"></i> {{ block.name }}
             </div>
         </div>
-        <div class="ui attached segment" v-for="(block, $index) in blocksWithFields">
-            <strong>{{ getBlockName(block.type) }}</strong>
-            <div class="ui tiny right floated red icon button">
-                <i class="remove icon"></i>
+        <div class="ui attached segment" v-for="(block, $index) in blocksWithFields" :key="getKey(block)">
+            <div v-if="block">
+                <strong>{{ getBlockName(block.type) }}</strong>
+                <div class="ui tiny right floated red icon button" @click="removeBlockAt($index)">
+                    <i class="remove icon"></i>
+                </div>
+
+                <field :type="field.type"
+                       :label="field.name"
+                       :name="field.key"
+                       :options="field.options"
+
+                       :value="blocks[$index].value[field.key]"
+                       @input="onFieldInput($index, field.key, $event)"
+
+                       v-for="field in block.fields"
+                       :key="field.key">
+                </field>
             </div>
-
-            <field :type="field.type"
-                   :label="field.name"
-                   :name="field.key"
-                   :options="field.options"
-
-                   :value="blocks[$index].value[field.key]"
-                   @input="onFieldInput($index, field.key, $event)"
-
-                   v-for="field in block.fields"
-                   :key="field.key">
-            </field>
+            <div class="ui visible error message" v-else>
+                Could not find block type.
+            </div>
         </div>
     </div>
 </template>
@@ -62,11 +67,26 @@
                 this.blocks.push({
                     type: type,
                     value: {},
-                })
+                });
+                this.emitInput();
             },
+            removeBlockAt(index) {
+                this.blocks.splice(index, 1);
+                this.emitInput();
+            },
+
             onFieldInput(blockIndex, key, value) {
                 this.blocks[blockIndex].value[key] = value;
+                this.emitInput();
+            },
+            emitInput() {
                 this.$emit('input', [...this.blocks]);
+            },
+            getKey(block) {
+                if(!block) return null;
+
+                // TODO: Use a less expensive key.
+                return JSON.stringify(block);
             }
         },
 
@@ -74,6 +94,8 @@
             blocksWithFields() {
                 return this.blocks.map(blockData => {
                     let block = this.getBlock(blockData.type);
+                    if (!block) return null;
+
                     return {...blockData, fields: block.fields};
                 })
             }

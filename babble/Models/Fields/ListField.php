@@ -12,13 +12,14 @@ class ListField extends Field
 {
     private $blocks;
 
-    public function __construct(BaseModel $model, $key, array $data)
+    protected function initOptions(array $data)
     {
-        parent::__construct($model, $key, $data);
-
         $this->readBlocks($data['options']['blocks']);
         $data['options']['blocks'] = array_values($this->blocks);
+
+        parent::initOptions($data);
     }
+
 
     private function readBlocks(array $blockNames)
     {

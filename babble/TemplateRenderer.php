@@ -71,8 +71,11 @@ class TemplateRenderer
             $twig->addGlobal($modelName, $loader);
         }
 
-        $siteData = Yaml::parse(file_get_contents('../content/site.yaml'));
-        $twig->addGlobal('site', $siteData);
+        $content = @file_get_contents('../content/site.yaml');
+        if ($content !== false) {
+            $siteData = Yaml::parse(file_get_contents('../content/site.yaml'));
+            $twig->addGlobal('site', $siteData);
+        }
 
         $this->twig = $twig;
     }

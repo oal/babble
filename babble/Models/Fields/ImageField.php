@@ -40,19 +40,20 @@ class Image
     private $field;
     private $filename;
     private $crop;
-    private $url;
 
     public function __construct(ImageField $field, array $data)
     {
         $this->field = $field;
         $this->filename = $data['filename'];
         $this->crop = $data['crop'];
-        $this->url = $data['url'] ?? '';
     }
 
     public function __toString()
     {
-        return $this->url;
+        return $this->crop(
+            $this->field->getOption('width'),
+            $this->field->getOption('height')
+        );
     }
 
     public function crop(int $width, int $height)

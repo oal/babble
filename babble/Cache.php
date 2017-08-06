@@ -35,13 +35,9 @@ class Cache
     {
         $filename = $this->pathToCachePath($path);
 
-        try {
-            $content = file_get_contents($filename);
-
-            return $content;
-        } catch (Exception $e) {
-            return null;
-        }
+        $content = @file_get_contents($filename);
+        if ($content === false) return null;
+        return $content;
     }
 
     /**

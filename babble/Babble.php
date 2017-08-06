@@ -18,18 +18,12 @@ class Babble
 
     public function __construct()
     {
-        $request = Request::createFromGlobals();
-        $this->config = new Config($request->getHost());
-
-        if ($this->config->get('debug')) $this->enableDebug();
-
         $this->dispatcher = new EventDispatcher();
-        $this->renderer = new TemplateRenderer($this->dispatcher);
-        if ($this->config->get('cache')) $this->cache = new Cache($this->dispatcher);
+        $this->loadConfig();
     }
 
     /**
-     * Debug enables Babble's debug mode, and also enables Symfony's Debug component for prettier stack traces etc.
+     * Enables Babble's debug mode, and also enables Symfony's Debug component for prettier stack traces etc.
      */
     private function enableDebug()
     {
@@ -74,13 +68,22 @@ class Babble
             }
         }
 
-        $response = $this->renderer->render($path);
+        // Generate page and serve.
+        $renderer = new TemplateRenderer($this->dispatcher);
+        $response = $renderer->render($path);
         return $response;
     }
 
     private function loadConfig()
     {
-        $config = Yaml::parse(file_get_contents('../content/config.yaml'));
-        $this->config = $config;
+        $request = Request::createFromGlobals();
+        $this->config = new Config($request->getHost());
+
+        // Set up cache.
+        if ($this->config->get('cache')) {
+            $this->cache = new Cache($this->dispatcher);
+        }
+
+        if ($this->config->get('debug')) $this->enableDebug();
     }
 }

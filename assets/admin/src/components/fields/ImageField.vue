@@ -55,7 +55,7 @@
         data() {
             let uncachedURL = null;
             if (this.value && this.value.url) {
-                uncachedURL = this.value.url + '?' + ((Math.random() * 99999).toString(16));
+                uncachedURL = this.value.url;
             }
 
             let filename = (this.value ? this.value.filename : null) || null;
@@ -65,10 +65,6 @@
                 selection: filename,
                 croppedImage: uncachedURL,
             }
-        },
-
-        mounted() {
-            console.log(this.$data)
         },
 
         methods: {

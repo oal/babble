@@ -20,7 +20,7 @@ class Field implements JsonSerializable
         $this->key = $key;
         $this->name = $data['name'];
         $this->type = $data['type'];
-        if (array_key_exists('options', $data)) $this->options = $data['options'];
+        $this->initOptions($data);
     }
 
     public function getKey() : string
@@ -65,5 +65,10 @@ class Field implements JsonSerializable
 
     public function toJSON($value) {
         return $value;
+    }
+
+    protected function initOptions(array $data)
+    {
+        $this->options = $data['options'] ?? [];
     }
 }

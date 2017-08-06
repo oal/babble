@@ -115,13 +115,11 @@ class Record implements JsonSerializable
         if (!$id) throw new RecordNotFoundException();
 
         $path = '../content/' . $model->getType() . '/' . $id . '.yaml';
-        try {
-            $data = file_get_contents($path);
-        } catch (Exception $e) {
-            throw new RecordNotFoundException();
-        }
 
-        $dataArray = Yaml::parse($data);
+        $content = @file_get_contents($path);
+        if ($content === false) throw new RecordNotFoundException();
+
+        $dataArray = Yaml::parse($content);
         $record = new Record($model, $id, $dataArray);
 
         return $record;
