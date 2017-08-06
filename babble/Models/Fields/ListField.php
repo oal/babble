@@ -33,6 +33,8 @@ class ListField extends Field
 
     public function process(Record $record, $data)
     {
+        if (!$data) return [];
+
         $processedData = [];
         foreach ($data as $blockInstanceData) {
             $type = $blockInstanceData['type'];

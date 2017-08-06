@@ -7,27 +7,32 @@ use Symfony\Component\Debug\Debug;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Yaml\Yaml;
 
 class Babble
 {
-    private $debug = false;
+    private $config;
     private $dispatcher;
     private $renderer;
     private $cache;
 
     public function __construct()
     {
+        $request = Request::createFromGlobals();
+        $this->config = new Config($request->getHost());
+
+        if ($this->config->get('debug')) $this->enableDebug();
+
         $this->dispatcher = new EventDispatcher();
         $this->renderer = new TemplateRenderer($this->dispatcher);
-        $this->cache = new Cache($this->dispatcher);
+        if ($this->config->get('cache')) $this->cache = new Cache($this->dispatcher);
     }
 
     /**
      * Debug enables Babble's debug mode, and also enables Symfony's Debug component for prettier stack traces etc.
      */
-    public function debug()
+    private function enableDebug()
     {
-        $this->debug = true;
         Debug::enable();
     }
 
@@ -62,12 +67,20 @@ class Babble
         $path = $request->getPathInfo();
 
         // Attempt to load from cache.
-        $cachedPage = $this->cache->load($path);
-        if ($cachedPage) {
-            return new Response($cachedPage);
+        if ($this->cache) {
+            $cachedPage = $this->cache->load($path);
+            if ($cachedPage) {
+                return new Response($cachedPage);
+            }
         }
 
         $response = $this->renderer->render($path);
         return $response;
+    }
+
+    private function loadConfig()
+    {
+        $config = Yaml::parse(file_get_contents('../content/config.yaml'));
+        $this->config = $config;
     }
 }

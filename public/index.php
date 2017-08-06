@@ -9,5 +9,4 @@ if (preg_match('/^(\/(static|admin|uploads)(\/|$))/', $_SERVER['REQUEST_URI'])) 
 }
 
 $babble = new Babble();
-$babble->debug();
 $babble->serve();

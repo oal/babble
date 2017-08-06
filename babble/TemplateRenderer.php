@@ -14,6 +14,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Yaml\Yaml;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
@@ -69,6 +70,9 @@ class TemplateRenderer
         foreach ($this->loaders as $modelName => $loader) {
             $twig->addGlobal($modelName, $loader);
         }
+
+        $siteData = Yaml::parse(file_get_contents('../content/site.yaml'));
+        $twig->addGlobal('site', $siteData);
 
         $this->twig = $twig;
     }
