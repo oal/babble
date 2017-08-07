@@ -1,0 +1,24 @@
+{% extends '_base.twig' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+    {% set this = Page.find('index') %}
+
+    <div id="jumbo">
+        <h1>A perfect fit for 80% of websites</h1>
+        <ul>
+            <li>Flat files</li>
+            <li>Flexible data models</li>
+            <li>Simple templating</li>
+            <li>Built-in admin</li>
+        </ul>
+    </div>
+
+    <div id="content">
+        <h1>{{ this.title }}</h1>
+        <div>
+            {{ this.body }}
+        </div>
+    </div>
+{% endblock %}

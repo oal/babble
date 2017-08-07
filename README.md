@@ -1,5 +1,3 @@
-![Babble](https://rawgit.com/oal/babble/master/public/static/logo.svg)
-
 # Babble CMS
 Babble is a simple content management system. Its main goal is ease of use, 
 both for developers and non-technical end users.

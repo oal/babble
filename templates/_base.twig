@@ -16,16 +16,8 @@
             {% for page in Page.all() %}
                 <li>
                     <a href="/{{ page.id == 'index' ? '' : page.id }}">{{ page.title }}</a>
-                    <ul>
-                        {% for child in page.children() %}
-                            <li>
-                                <a href="/{{ child.id }}">{{ child.title }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
                 </li>
             {% endfor %}
-            <li><a href="/blog">Blog</a></li>
         </ul>
     </nav>
 </header>

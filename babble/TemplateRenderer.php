@@ -88,8 +88,10 @@ class TemplateRenderer
      */
     public function render(string $path)
     {
-        $html = $this->renderRecordFor($path);
-        if ($html === null) $html = $this->renderTemplateFor($path);
+        if ($path === '/') $path = '/index';
+
+        $html = $this->renderTemplateFor($path);
+        if ($html === null) $html = $this->renderRecordFor($path);
         if ($html === null) {
             return new Response($this->renderTemplate('_404.twig'), 404);
         }
@@ -178,7 +180,6 @@ class TemplateRenderer
             ->in('../templates/' . $basePath);
 
         $id = substr($path, strlen($basePath) + 1);
-        if (empty($id)) $id = 'index';
 
         foreach ($templateFinder as $file) {
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);

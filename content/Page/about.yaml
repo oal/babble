@@ -1,9 +1,5 @@
-title: 'About us'
-image:
-    filename: canada-goose-2317430_640.jpg
-    crop: { x: 46.308659217877, 'y': 15.728119180633, width: 593.69134078212, height: 197.89711359404 }
-    url: /uploads/_cache/canada-goose-2317430_640-46-15-900x300.jpg
-body: 'Hello, world! Lorem ipsum sit amet...'
-gallery:
-    - { type: Image, value: { image: { filename: transport/railway-2439189_640.jpg, crop: { x: 95.722118380062, 'y': 0, width: 450.13333333333, height: 337.6 }, url: /uploads/_cache/transport/railway-2439189_640-95-0-640x480.jpg }, description: asdasd } }
-    - { type: Image, value: { image: { filename: canada-goose-2317430_640.jpg, crop: { x: 157.48184357542, 'y': 0, width: 407.56983240223, height: 305.67737430168 }, url: /uploads/_cache/canada-goose-2317430_640-157-0-640x480.jpg }, description: Duck! } }
+title: 'About Babble'
+body: |
+    Babble is a simple content management system. Its main goal is ease of use, both for developers and non-technical end users.
+    
+    Babble CMS was heavily inspired by Lektor and Kirby in how stores content structure (models) and website content in text files on disk, rather than in an SQL database. This means that the whole website can be kept in a version control system like Git. It uses the Twig templating engine (similar to Lektor's Jinja2), and comes with a user friendly admin interface, including a file manager and image cropping functionality.
