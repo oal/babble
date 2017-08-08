@@ -24,8 +24,10 @@ class StaticSiteGenerator
         $fs = new Filesystem();
 
         // Remove all previous build files.
-        $finder = new Finder();
-        $fs->remove($finder->in(absPath('build')));
+        if ($fs->exists(absPath('build'))) {
+            $finder = new Finder();
+            $fs->remove($finder->in(absPath('build')));
+        }
 
         // Find all pages to be built.
         $finder = new Finder();
