@@ -5,6 +5,7 @@ namespace Babble\Models;
 use Babble\Exceptions\InvalidModelException;
 use Babble\Models\Fields\BooleanField;
 use Babble\Models\Fields\DatetimeField;
+use Babble\Models\Fields\FileField;
 use Babble\Models\Fields\ImageField;
 use Babble\Models\Fields\ListField;
 use Babble\Models\Fields\PasswordField;
@@ -95,6 +96,9 @@ class BaseModel implements JsonSerializable
                     break;
                 case 'datetime':
                     $this->fields[$key] = new DatetimeField($this, $key, $data);
+                    break;
+                case 'file':
+                    $this->fields[$key] = new FileField($this, $key, $data);
                     break;
                 case 'image':
                     $this->fields[$key] = new ImageField($this, $key, $data);

@@ -20,6 +20,7 @@
     import TextField from '@/components/fields/TextField';
     import BooleanField from '@/components/fields/BooleanField';
     import DatetimeField from '@/components/fields/DatetimeField';
+    import FileField from '@/components/fields/FileField';
     import ImageField from '@/components/fields/ImageField';
     import PasswordField from '@/components/fields/PasswordField';
     import ListField from '@/components/fields/ListField';
@@ -39,6 +40,7 @@
             BooleanField,
             DatetimeField,
             TextField,
+            FileField,
             ImageField,
             PasswordField,
             ListField

@@ -8,7 +8,7 @@ use Imagine\Image\Box;
 use Imagine\Image\Point;
 use Symfony\Component\Filesystem\Filesystem;
 
-class ImageField extends Field
+class ImageField extends FileField
 {
     public function validate(Record $record, $data)
     {
