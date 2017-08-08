@@ -16,10 +16,10 @@
   },
   "autoload": {
     "psr-4": {
-      "Babble\\": "babble"
+      "Babble\\": "src"
     },
     "files": [
-      "babble/helpers.php"
+      "src/helpers.php"
     ]
   }
 }
