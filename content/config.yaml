@@ -1,7 +1,0 @@
-debug: false
-cache: true
-
-host:
-    localhost:
-        debug: true
-        cache: false

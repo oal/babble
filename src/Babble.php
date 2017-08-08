@@ -13,7 +13,6 @@ class Babble
 {
     private $config;
     private $dispatcher;
-    private $renderer;
     private $cache;
 
     public function __construct()
