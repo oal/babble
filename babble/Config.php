@@ -11,7 +11,7 @@ class Config
 
     public function __construct(string $currentHost)
     {
-        $config = Yaml::parse(file_get_contents('../content/config.yaml'));
+        $config = Yaml::parse(file_get_contents(absPath('content/config.yaml')));
         $this->initForHost($currentHost, $config);
     }
 

@@ -114,7 +114,7 @@ class Record implements JsonSerializable
     {
         if (!$id) throw new RecordNotFoundException();
 
-        $path = '../content/' . $model->getType() . '/' . $id . '.yaml';
+        $path = absPath('content/' . $model->getType() . '/' . $id . '.yaml');
 
         $content = @file_get_contents($path);
         if ($content === false) throw new RecordNotFoundException();
@@ -127,7 +127,7 @@ class Record implements JsonSerializable
 
     private function getContentFilePath(): string
     {
-        return '../content/' . $this->getType() . '/' . $this->id . '.yaml';
+        return absPath('content/' . $this->getType() . '/' . $this->id . '.yaml');
     }
 
     private function getData()

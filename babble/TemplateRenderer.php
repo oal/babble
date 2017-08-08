@@ -64,16 +64,16 @@ class TemplateRenderer
 
     private function initTwig()
     {
-        $loader = new Twig_Loader_Filesystem('../templates');
+        $loader = new Twig_Loader_Filesystem(absPath('templates'));
         $twig = new Twig_Environment($loader, ['debug' => true]);
 
         foreach ($this->loaders as $modelName => $loader) {
             $twig->addGlobal($modelName, $loader);
         }
 
-        $content = @file_get_contents('../content/site.yaml');
+        $content = @file_get_contents(absPath('content/site.yaml'));
         if ($content !== false) {
-            $siteData = Yaml::parse(file_get_contents('../content/site.yaml'));
+            $siteData = Yaml::parse(file_get_contents(absPath('content/site.yaml')));
             $twig->addGlobal('site', $siteData);
         }
 
@@ -90,6 +90,11 @@ class TemplateRenderer
     {
         if ($path === '/') $path = '/index';
 
+        // Allow trailing slash.
+        if (substr($path, strlen($path) - 1) === '/') {
+            $path = substr($path, 0, strlen($path) - 1);
+        }
+
         $html = $this->renderTemplateFor($path);
         if ($html === null) $html = $this->renderRecordFor($path);
         if ($html === null) {
@@ -99,8 +104,9 @@ class TemplateRenderer
         // What ContentLoaders / Models were accessed during render?
         foreach ($this->loaders as $modelName => $loader) {
             if ($loader->wasAccessed()) {
-                $this->dispatcher
-                    ->dispatch(RenderDependencyEvent::NAME, new RenderDependencyEvent($modelName, $path));
+                $this->dispatcher->dispatch(
+                    RenderDependencyEvent::NAME, new RenderDependencyEvent($modelName, $path)
+                );
             }
         }
 
@@ -156,7 +162,7 @@ class TemplateRenderer
     private function renderTemplate(string $templateFile)
     {
         $fs = new Filesystem();
-        if ($fs->exists('../templates/' . $templateFile)) {
+        if ($fs->exists(absPath('templates/' . $templateFile))) {
             $html = $this->twig->render($templateFile, []);
             return $html;
         }
@@ -177,7 +183,7 @@ class TemplateRenderer
             ->files()
             ->depth(0)
             ->name('/^[A-Z].+\.twig/')
-            ->in('../templates/' . $basePath);
+            ->in(absPath('templates/' . $basePath));
 
         $id = substr($path, strlen($basePath) + 1);
 
@@ -207,7 +213,7 @@ class TemplateRenderer
         if ($basePath) {
             $fs = new Filesystem();
             while (strlen($basePath) > 0) {
-                if ($fs->exists('../templates/' . $basePath)) {
+                if ($fs->exists(absPath('templates/' . $basePath))) {
                     break;
                 }
                 $pathParts = explode('/', $basePath);

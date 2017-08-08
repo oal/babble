@@ -11,11 +11,15 @@
     "symfony/yaml": "^3.3",
     "imagine/imagine": "^0.7.1",
     "symfony/debug": "^3.3",
-    "symfony/event-dispatcher": "^3.3"
+    "symfony/event-dispatcher": "^3.3",
+    "symfony/console": "^3.3"
   },
   "autoload": {
     "psr-4": {
       "Babble\\": "babble"
-    }
+    },
+    "files": [
+      "babble/helpers.php"
+    ]
   }
 }

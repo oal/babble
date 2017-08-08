@@ -35,7 +35,7 @@ class BaseModel implements JsonSerializable
 
     protected function getDefinitionFile()
     {
-        return '../models/blocks/' . $this->type . '.yaml';
+        return absPath('models/blocks/' . $this->type . '.yaml');
     }
 
     protected function init($type)

@@ -15,7 +15,7 @@ class Block extends BaseModel
 
     protected function getDefinitionFile()
     {
-        return '../models/blocks/' . $this->type . '.yaml';
+        return absPath('models/blocks/' . $this->type . '.yaml');
     }
 
     public function getField(string $key)

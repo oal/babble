@@ -14,7 +14,7 @@ class Model extends BaseModel
 
     protected function getDefinitionFile()
     {
-        return '../models/' . $this->type . '.yaml';
+        return absPath('models/' . $this->type . '.yaml');
     }
 
     protected function init($type)
@@ -37,13 +37,13 @@ class Model extends BaseModel
     public function exists(string $id)
     {
         $fs = new Filesystem();
-        return $fs->exists('../content/' . $this->getType() . '/' . $id . '.yaml');
+        return $fs->exists(absPath('content/' . $this->getType() . '/' . $id . '.yaml'));
     }
 
     static function all()
     {
         $finder = new Finder();
-        $files = $finder->files()->depth(0)->in('../models');
+        $files = $finder->files()->depth(0)->in(absPath('models'));
 
         $models = [];
         foreach ($files as $file) {

@@ -91,7 +91,7 @@ class ContentLoader implements Iterator
     private function getModelDirectory(): string
     {
         $type = $this->model->getType();
-        $path = '../content/' . $type . '/';
+        $path = absPath('content/' . $type . '/');
 
         // Add parent ID to loader path.
         if ($this->parentId) {
@@ -122,7 +122,7 @@ class ContentLoader implements Iterator
             ->files()
             ->depth(0)
             ->name('/^[A-Z].+\.yaml$/')
-            ->in('../models/');
+            ->in(absPath('models'));
 
         foreach ($files as $filename) {
             $modelName = pathinfo($filename, PATHINFO_FILENAME);

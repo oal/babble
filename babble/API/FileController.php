@@ -73,7 +73,7 @@ class FileController extends Controller
         if (!$path) $path = '';
         $files = $finder
             ->notName('_*')
-            ->in('../public/uploads/' . $path)
+            ->in(absPath('public/uploads/' . $path))
             ->sortByType()
             ->depth(0);
 

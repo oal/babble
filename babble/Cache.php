@@ -46,7 +46,7 @@ class Cache
      */
     private function pathToCachePath(string $path): string
     {
-        return '../cache' . self::pathToFilename($path);
+        return absPath('cache' . self::pathToFilename($path));
     }
 
     public function onRender(RenderEvent $event)
@@ -111,7 +111,7 @@ class Cache
      */
     private function getModelDependencyFile($modelName): string
     {
-        $dependencyFilename = '../cache/_dependencies/' . $modelName . '.txt';
+        $dependencyFilename = absPath('cache/_dependencies/' . $modelName . '.txt');
         return $dependencyFilename;
     }
 }
