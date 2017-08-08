@@ -2,5 +2,5 @@
 
 function absPath($path)
 {
-    return getcwd() . '/../' . $path;
+    return getcwd() . '/' . $path;
 }
