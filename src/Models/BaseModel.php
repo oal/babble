@@ -107,6 +107,12 @@ class BaseModel implements JsonSerializable
                     $this->fields[$key] = new PasswordField($this, $key, $data);
                     break;
                 case 'list':
+                    // TODO: Max depth 2, hard coded. Need to make this dynamic.
+                    if (get_class($this) === Block::class &&
+                        get_class($this->getModel()) === Block::class &&
+                        get_class($this->getModel()->getModel()) === Model::class) {
+                        break;
+                    }
                     $this->fields[$key] = new ListField($this, $key, $data);
                     break;
             }

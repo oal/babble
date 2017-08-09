@@ -12,6 +12,10 @@ class Block extends BaseModel
         parent::__construct($type);
     }
 
+    public function getModel(): BaseModel
+    {
+        return $this->model;
+    }
 
     protected function getDefinitionFile()
     {

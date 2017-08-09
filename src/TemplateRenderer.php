@@ -77,7 +77,26 @@ class TemplateRenderer
             $twig->addGlobal('site', $siteData);
         }
 
+        if (class_exists('Aptoma\Twig\Extension\MarkdownExtension')) {
+            $engineClass = 'Aptoma\Twig\Extension\MarkdownEngine\MichelfMarkdownEngine';
+            $engine = new $engineClass;
+
+            $extensionClass = 'Aptoma\Twig\Extension\MarkdownExtension';
+            $twig->addExtension(new $extensionClass($engine));
+        }
+
         $this->twig = $twig;
+    }
+
+    public function renderNotFound()
+    {
+        return $this->renderTemplate('_404.twig');
+    }
+
+    private function renderIndex(string $path)
+    {
+        if (substr($path, strlen($path) - 1) === '/') $path .= '/index';
+        $this->render($path);
     }
 
     /**
@@ -88,8 +107,6 @@ class TemplateRenderer
      */
     public function render(string $path)
     {
-        if ($path === '/') $path = '/index';
-
         // Allow trailing slash.
         if (substr($path, strlen($path) - 1) === '/') {
             $path = substr($path, 0, strlen($path) - 1);
@@ -97,9 +114,8 @@ class TemplateRenderer
 
         $html = $this->renderTemplateFor($path);
         if ($html === null) $html = $this->renderRecordFor($path);
-        if ($html === null) {
-            return new Response($this->renderTemplate('_404.twig'), 404);
-        }
+        if ($html === null) $html = $this->render($path . '/index');
+        if ($html === null) return null;
 
         // What ContentLoaders / Models were accessed during render?
         foreach ($this->loaders as $modelName => $loader) {
@@ -113,7 +129,7 @@ class TemplateRenderer
         $this->dispatcher
             ->dispatch(RenderEvent::NAME, new RenderEvent($path, $html));
 
-        return new Response($html);
+        return $html;
     }
 
     /**

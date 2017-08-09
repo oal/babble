@@ -6,6 +6,7 @@ namespace Babble\Models\Fields;
 use ArrayAccess;
 use Babble\Models\BaseModel;
 use Babble\Models\Block;
+use Babble\Models\Model;
 use Babble\Models\Record;
 
 class ListField extends Field
@@ -14,15 +15,19 @@ class ListField extends Field
 
     protected function initOptions(array $data)
     {
-        $this->readBlocks($data['options']['blocks']);
-        $data['options']['blocks'] = array_values($this->blocks);
-
+//        if (get_class($this->getModel()) === Block::class) {
+//            $this->blocks = [];
+//        } else {
+            $this->readBlocks($data['options']['blocks']);
+            $data['options']['blocks'] = array_values($this->blocks);
+//        }
         parent::initOptions($data);
     }
 
 
     private function readBlocks(array $blockNames)
     {
+
         $blocks = [];
 
         foreach ($blockNames as $blockName) {
