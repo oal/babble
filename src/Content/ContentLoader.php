@@ -16,11 +16,11 @@ class ContentLoader implements Iterator
 {
     private $model;
     private $filters;
+    private $orderBy = ['id', 'asc'];
     private $withChildren = false;
     private $parentId;
 
-    private $fileIterator;
-    private $currentRecord = null;
+    private $arrayIterator;
 
     public function __construct(string $modelType)
     {
@@ -52,6 +52,12 @@ class ContentLoader implements Iterator
         return $this;
     }
 
+    public function orderBy($key, $direction = 'desc')
+    {
+        $this->orderBy = [$key, $direction];
+        return $this;
+    }
+
     public function withChildren()
     {
         // TODO: Warn if not hierarchical?
@@ -79,9 +85,32 @@ class ContentLoader implements Iterator
                 $finder->depth(0);
             }
 
-            $this->fileIterator = $finder->getIterator();
+            // TODO: Split up.
+            $records = [];
+            foreach ($finder as $file) {
+                $id = $this->filenameToId($file->getRelativePathname());
+                $record = Record::fromDisk($this->model, $id);
+                if ($this->filters->isMatch($record)) {
+                    // Matching record was found.
+                    $records[] = new TemplateRecord($record);
+                    continue;
+                }
+            }
+
+            $orderBy = $this->orderBy;
+            usort($records, function($a, $b) use ($orderBy) {
+                $key = $orderBy[0];
+                $val = 0;
+                if($a[$key] < $b[$key]) $val = -1;
+                else if ($a[$key] > $b[$key]) $val = 1;
+
+                if($orderBy[1] === 'desc') $val *= -1;
+                return $val;
+            });
+
+            $this->arrayIterator = new ArrayIterator($records);
         } catch (InvalidArgumentException $e) {
-            $this->fileIterator = new ArrayIterator([]);
+            $this->arrayIterator = new ArrayIterator([]);
         }
     }
 
@@ -140,7 +169,7 @@ class ContentLoader implements Iterator
      */
     public function current()
     {
-        return $this->currentRecord;
+        return $this->arrayIterator->current();
     }
 
     /**
@@ -151,36 +180,8 @@ class ContentLoader implements Iterator
      */
     public function next()
     {
-        if (!$this->fileIterator) $this->initIterator();
-
-        // Stop if no more files are available.
-        if (!$this->fileIterator->valid()) {
-            $this->currentRecord = null;
-            return;
-        };
-
-        // Get start file and move iterator along,
-        $file = $this->fileIterator->current();
-        $this->fileIterator->next();
-
-        // Load record files until a matching record is found.
-        $tmplRecord = null;
-        while (!$tmplRecord) {
-            $id = $this->filenameToId($file->getRelativePathname());
-            $record = Record::fromDisk($this->model, $id);
-            if ($this->filters->isMatch($record)) {
-                // Matching record was found.
-                $this->currentRecord = new TemplateRecord($record);
-                return;
-            } else if (!$this->fileIterator->valid()) {
-                // End of iterator. No more matches possible.
-                $this->currentRecord = null;
-                return;
-            } else {
-                // File didn't match, but there may be more to check. Move iterator along.
-                $this->fileIterator->next();
-            }
-        }
+        if (!$this->arrayIterator) $this->initIterator();
+        $this->arrayIterator->next();
     }
 
     /**
@@ -191,7 +192,7 @@ class ContentLoader implements Iterator
      */
     public function key()
     {
-        return $this->currentRecord['id'];
+        return $this->arrayIterator->current()['id'];
     }
 
     /**
@@ -203,7 +204,7 @@ class ContentLoader implements Iterator
      */
     public function valid()
     {
-        return $this->currentRecord !== null;
+        return $this->arrayIterator->valid();
     }
 
     /**
@@ -216,10 +217,10 @@ class ContentLoader implements Iterator
     {
         // If file iterator is already initialized, rewind it.
         // Otherwise it'll be initialized first time next() is called.
-        if ($this->fileIterator) {
-            $this->fileIterator->rewind();
+        if ($this->arrayIterator) {
+            $this->arrayIterator->rewind();
+        } else {
+            $this->initIterator();
         }
-
-        $this->next();
     }
 }

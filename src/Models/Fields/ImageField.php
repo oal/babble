@@ -13,17 +13,17 @@ class ImageField extends FileField
     public function validate(Record $record, $data)
     {
         $fs = new Filesystem();
-        return $fs->exists('./uploads/' . $data['filename']);
+        return $fs->exists(absPath('public/uploads/' . $data['filename']));
     }
 
     public function process(Record $record, $data)
     {
         $image = new Image($this, $data);
 
-        $croppedURL = $image->crop(
-            $this->getOption('width'),
-            $this->getOption('height')
-        );
+        $cropWidth = $this->getOption('width') ?? 0;
+        $cropHeight = $this->getOption('height') ?? 0;
+
+        $croppedURL = $image->crop($cropWidth, $cropHeight);
 
         $data['url'] = $croppedURL;
         return $data;
@@ -45,42 +45,52 @@ class Image
     {
         $this->field = $field;
         $this->filename = $data['filename'];
-        $this->crop = $data['crop'];
+        $this->crop = $data['crop'] ?? null;
     }
 
     public function __toString()
     {
-        return $this->crop(
-            $this->field->getOption('width'),
-            $this->field->getOption('height')
-        );
+        $cropWidth = $this->field->getOption('width') ?? 0;
+        $cropHeight = $this->field->getOption('height') ?? 0;
+        return $this->crop($cropWidth, $cropHeight);
     }
+
 
     public function crop(int $width, int $height)
     {
+        // Return original image if no cropping is specified.
+        if ($width == 0 && $height == 0) {
+            return '/uploads/' . $this->filename;
+        }
+
         list($cropWidth, $cropHeight, $width, $height) = $this->getCropDimensions($width, $height);
         $url = $this->getCroppedURL($width, $height);
 
         // Return URL if cropped and cached file already exists.
-        $relativePath = '.' . $url;
+        $absolutePath = absPath('public' . $url);
         $fs = new Filesystem();
-        if ($fs->exists($relativePath)) return $url;
+        if ($fs->exists($absolutePath)) return $url;
 
         // Create cache dir location if it doesn't exist.
-        $relativeDir = pathinfo($relativePath, PATHINFO_DIRNAME);
+        $relativeDir = pathinfo($absolutePath, PATHINFO_DIRNAME);
         if (!$fs->exists($relativeDir)) $fs->mkdir($relativeDir);
 
         // Crop and save
         $imagine = new Imagine();
-        $sourceFilename = './uploads/' . $this->filename;
+        $sourceFilename = absPath('public/uploads/' . $this->filename);
         if (!$fs->exists($sourceFilename)) return '';
         $image = $imagine->open($sourceFilename);
+
+        // TODO: This may squash the image. Use correct aspect ratio.
+        $size = $image->getSize();
+        if($cropWidth === 0) $cropWidth = $size->getWidth();
+        if($cropHeight === 0) $cropHeight = $size->getHeight();
 
         // TODO: Support rotation and zooming from the Cropper JS component.
         $image
             ->crop(new Point($this->crop['x'], $this->crop['y']), new Box($cropWidth, $cropHeight))
             ->resize(new Box($width, $height))
-            ->save($relativePath);
+            ->save($absolutePath);
 
         return $url;
     }
@@ -112,8 +122,8 @@ class Image
      */
     private function getCropDimensions(int $width, int $height): array
     {
-        $cropWidth = $this->crop['width'];
-        $cropHeight = $this->crop['height'];
+        $cropWidth = $this->crop['width'] ?? 0;
+        $cropHeight = $this->crop['height'] ?? 0;
 
         // Recalculate crop dimensions and aspect ratio when exact size is set.
         if ($width && $height) {

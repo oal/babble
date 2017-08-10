@@ -114,7 +114,7 @@ class TemplateRenderer
 
         $html = $this->renderTemplateFor($path);
         if ($html === null) $html = $this->renderRecordFor($path);
-        if ($html === null) $html = $this->render($path . '/index');
+        if ($html === null && substr($path, -6) !== '/index') $html = $this->render($path . '/index');
         if ($html === null) return null;
 
         // What ContentLoaders / Models were accessed during render?

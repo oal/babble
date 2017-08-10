@@ -34,11 +34,9 @@ class FileController extends Controller
 {
     public function create(Request $request, $path)
     {
-        var_dump($path);
         $files = $request->files->all();
-        var_export($files);
         if (count($files) > 0) {
-            $targetDir = './uploads/' . $path;
+            $targetDir = absPath('public/uploads/' . $path);
             foreach ($files as $file) {
                 // Check if name already exists and rename.
                 $file->move($targetDir, $file->getClientOriginalName());
@@ -54,7 +52,7 @@ class FileController extends Controller
             };
 
             $fs = new Filesystem();
-            $fs->mkdir('./uploads/' . $path . '/' . $dirName);
+            $fs->mkdir(absPath('public/uploads/' . $path . '/' . $dirName));
         }
 
         return new JsonResponse([]);
@@ -67,6 +65,7 @@ class FileController extends Controller
                 'error' => 'Invalid location provided.'
             ], 400);
         };
+
 
         $finder = new Finder();
 
@@ -101,7 +100,7 @@ class FileController extends Controller
         $newPath = implode('/', $newPath) . '/' . $dirName;
 
         $fs = new Filesystem();
-        $fs->rename('./uploads/' . $path, './uploads/' . $newPath);
+        $fs->rename(absPath('uploads/' . $path), absPath('uploads/' . $newPath));
 
         return new JsonResponse([]);
     }

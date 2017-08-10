@@ -11,7 +11,7 @@ class FileField extends Field
     public function validate(Record $record, $data)
     {
         $fs = new Filesystem();
-        return $fs->exists('./uploads/' . $data);
+        return $fs->exists(absPath('public/uploads/' . $data));
     }
 
     public function getView($data)

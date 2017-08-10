@@ -23,7 +23,7 @@ class Field implements JsonSerializable
         $this->initOptions($data);
     }
 
-    public function getKey() : string
+    public function getKey(): string
     {
         return $this->key;
     }
@@ -50,7 +50,7 @@ class Field implements JsonSerializable
 
     public function getOption($key)
     {
-        return $this->options[$key];
+        return $this->options[$key] ?? null;
     }
 
     public function getModel(): BaseModel
@@ -63,7 +63,8 @@ class Field implements JsonSerializable
         return $data;
     }
 
-    public function toJSON($value) {
+    public function toJSON($value)
+    {
         return $value;
     }
 
