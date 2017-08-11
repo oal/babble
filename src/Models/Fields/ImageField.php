@@ -18,6 +18,8 @@ class ImageField extends FileField
 
     public function process(Record $record, $data)
     {
+        if(!$data) return null;
+
         $image = new Image($this, $data);
 
         $cropWidth = $this->getOption('width') ?? 0;
@@ -31,6 +33,7 @@ class ImageField extends FileField
 
     public function getView($data)
     {
+        if(!$data) return '';
         return new Image($this, $data);
     }
 }

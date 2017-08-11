@@ -58,6 +58,12 @@ class ContentLoader implements Iterator
         return $this;
     }
 
+    public function count()
+    {
+        if(!$this->arrayIterator) $this->initIterator();
+        return iterator_count($this->arrayIterator);
+    }
+
     public function withChildren()
     {
         // TODO: Warn if not hierarchical?

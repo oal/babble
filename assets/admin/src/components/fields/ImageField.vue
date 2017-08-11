@@ -7,7 +7,7 @@
                 <div class="ui fluid card">
                     <div class="image">
                         <img :src="croppedImage" v-if="croppedImage" class="ui image">
-                        <image-cropper v-else :src="'/uploads/' + selection" :width="width"
+                        <image-cropper v-else-if="hasCropper" :src="'/uploads/' + selection" :width="width"
                                        :height="height" @crop="onCrop"></image-cropper>
                     </div>
                     <div class="extra content" v-if="selection">
@@ -15,7 +15,7 @@
                             <i class="folder icon"></i>
                             Choose another file
                         </a>
-                        <a @click="onReCrop" v-if="croppedImage">
+                        <a @click="onReCrop" v-if="croppedImage" v-if="hasCropper">
                             <i class="crop icon"></i>
                             Re-crop
                         </a>
@@ -102,6 +102,9 @@
         },
 
         computed: {
+            hasCropper() {
+                return !!(this.options && this.options.admin && this.options.admin.crop);
+            },
             width() {
                 if (this.options && this.options.width) return this.options.width;
                 return 100;

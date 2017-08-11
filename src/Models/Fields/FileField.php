@@ -16,6 +16,6 @@ class FileField extends Field
 
     public function getView($data)
     {
-        return '/uploads/' . $data['filename'];
+        return '/uploads/' . $data;
     }
 }

@@ -1,13 +1,13 @@
 <?php
-require 'vendor/autoload.php';
+
+namespace Babble\Commands;
 
 use Babble\Content\StaticSiteGenerator;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GenerateCommand extends Command
+class BuildCommand extends Command
 {
     protected function configure()
     {
@@ -22,10 +22,3 @@ class GenerateCommand extends Command
         $walker->build();
     }
 }
-
-$application = new Application();
-
-
-$application->add(new GenerateCommand());
-
-$application->run();
