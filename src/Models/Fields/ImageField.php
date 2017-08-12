@@ -3,6 +3,7 @@
 namespace Babble\Models\Fields;
 
 use Babble\Models\Record;
+use Imagine\Image\BoxInterface;
 use Imagine\Imagick\Imagine;
 use Imagine\Image\Box;
 use Imagine\Image\Point;
@@ -18,14 +19,11 @@ class ImageField extends FileField
 
     public function process(Record $record, $data)
     {
-        if(!$data) return null;
+        if (!$data) return null;
 
         $image = new Image($this, $data);
 
-        $cropWidth = $this->getOption('width') ?? 0;
-        $cropHeight = $this->getOption('height') ?? 0;
-
-        $croppedURL = $image->crop($cropWidth, $cropHeight);
+        $croppedURL = $image->crop();
 
         $data['url'] = $croppedURL;
         return $data;
@@ -33,7 +31,7 @@ class ImageField extends FileField
 
     public function getView($data)
     {
-        if(!$data) return '';
+        if (!$data) return '';
         return new Image($this, $data);
     }
 }
@@ -53,20 +51,16 @@ class Image
 
     public function __toString()
     {
-        $cropWidth = $this->field->getOption('width') ?? 0;
-        $cropHeight = $this->field->getOption('height') ?? 0;
-        return $this->crop($cropWidth, $cropHeight);
+        return $this->crop();
     }
 
-
-    public function crop(int $width, int $height)
+    public function crop($width = null, $height = null)
     {
-        // Return original image if no cropping is specified.
-        if ($width == 0 && $height == 0) {
-            return '/uploads/' . $this->filename;
-        }
+        if (!$width) $width = $this->field->getOption('width') ?? $this->crop['width'] ?? null;
+        if (!$height) $height = $this->field->getOption('height') ?? $this->crop['height'] ?? null;
 
-        list($cropWidth, $cropHeight, $width, $height) = $this->getCropDimensions($width, $height);
+        if (!$width && !$height) return '/uploads/' . $this->filename;
+
         $url = $this->getCroppedURL($width, $height);
 
         // Return URL if cropped and cached file already exists.
@@ -84,14 +78,13 @@ class Image
         if (!$fs->exists($sourceFilename)) return '';
         $image = $imagine->open($sourceFilename);
 
-        // TODO: This may squash the image. Use correct aspect ratio.
+        // Where to crop from, and what portion of the image to crop.
         $size = $image->getSize();
-        if($cropWidth === 0) $cropWidth = $size->getWidth();
-        if($cropHeight === 0) $cropHeight = $size->getHeight();
+        list($cropWidth, $cropHeight, $cropX, $cropY) = $this->getCropData($width, $height, $size);
 
         // TODO: Support rotation and zooming from the Cropper JS component.
         $image
-            ->crop(new Point($this->crop['x'], $this->crop['y']), new Box($cropWidth, $cropHeight))
+            ->crop(new Point($cropX, $cropY), new Box($cropWidth, $cropHeight))
             ->resize(new Box($width, $height))
             ->save($absolutePath);
 
@@ -103,7 +96,12 @@ class Image
         $baseName = pathinfo($this->filename, PATHINFO_FILENAME);
         $ext = pathinfo($this->filename, PATHINFO_EXTENSION);
 
-        $cropFrom = intval($this->crop['x']) . '-' . intval($this->crop['y']);
+        if ($this->crop) {
+            $cropFrom = intval($this->crop['x']) . '-' . intval($this->crop['y']);
+        } else {
+            $cropFrom = 'auto';
+        }
+
         $size = intval($cropWidth) . 'x' . intval($cropHeight);
 
         $targetFilename = $baseName . '-' . $cropFrom . '-' . $size . '.' . $ext;
@@ -119,36 +117,36 @@ class Image
     }
 
     /**
-     * @param int $width
-     * @param int $height
+     * @param $width
+     * @param $height
+     * @param BoxInterface $size
      * @return array
      */
-    private function getCropDimensions(int $width, int $height): array
+    private function getCropData($width, $height, BoxInterface $size): array
     {
-        $cropWidth = $this->crop['width'] ?? 0;
-        $cropHeight = $this->crop['height'] ?? 0;
-
-        // Recalculate crop dimensions and aspect ratio when exact size is set.
-        if ($width && $height) {
-            $ratio = $width / $height;
-            if ($width > $height) {
-                $cropHeight = $cropWidth / $ratio;
-            } else {
-                $cropWidth = $cropHeight * $ratio;
-            }
+        if ($this->crop) {
+            // Use stored crop data.
+            $cropWidth = $this->crop['width'];
+            $cropHeight = $this->crop['height'];
+            $cropX = $this->crop['x'];
+            $cropY = $this->crop['y'];
         } else {
-            $ratio = $cropWidth / $cropHeight;
+            // Calculate crop data.
+            $ratio = $width / $height;
+            $side = min($size->getWidth(), $size->getHeight());
+
+            if ($ratio > 1) {
+                $cropWidth = $side;
+                $cropHeight = $side / $ratio;
+            } else {
+                $cropWidth = $side * $ratio;
+                $cropHeight = $side;
+            }
+
+            $cropX = $size->getWidth() / 2 - $cropWidth / 2;
+            $cropY = $size->getHeight() / 2 - $cropHeight / 2;
         }
 
-        // If only one side is set, keep ratio but calculate the missing side.
-        if (!$width) {
-            $width = $height * $ratio;
-            $cropWidth = $cropHeight * $ratio;
-        } else if (!$height) {
-            $height = $width / $ratio;
-            $cropHeight = $cropWidth / $ratio;
-        }
-
-        return array($cropWidth, $cropHeight, $width, $height);
+        return array($cropWidth, $cropHeight, $cropX, $cropY);
     }
 }
