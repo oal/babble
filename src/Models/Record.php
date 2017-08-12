@@ -15,7 +15,7 @@ class Record implements JsonSerializable
     private $id;
     private $data = [];
 
-    public function __construct(Model $model, $id, array $data = [])
+    public function __construct(Model $model, $id = null, array $data = [])
     {
         $this->model = $model;
         $this->id = $id;
@@ -38,8 +38,10 @@ class Record implements JsonSerializable
      */
     public function save(array $data)
     {
-        $id = $data['id'] ?? $this->id;
-        $this->id = $id;
+        if (!$this->getModel()->isSingle()) {
+            $id = $data['id'] ?? $this->id;
+            $this->id = $id;
+        }
 
         $columns = $this->data;
         foreach ($columns as $key => $column) {
@@ -110,12 +112,11 @@ class Record implements JsonSerializable
         return $this->model->getType();
     }
 
-    static function fromDisk(Model $model, string $id)
+    static function fromDisk(Model $model, $id = null)
     {
-        if (!$id) throw new RecordNotFoundException();
+        if (!$model->isSingle() && !$id) throw new RecordNotFoundException();
 
-        $path = absPath('content/' . $model->getType() . '/' . $id . '.yaml');
-
+        $path = getContentDir($model, $id);
         $content = @file_get_contents($path);
         if ($content === false) throw new RecordNotFoundException();
 
@@ -127,7 +128,7 @@ class Record implements JsonSerializable
 
     private function getContentFilePath(): string
     {
-        return absPath('content/' . $this->getType() . '/' . $this->id . '.yaml');
+        return getContentDir($this->getModel(), $this->id);
     }
 
     private function getData()
@@ -148,4 +149,11 @@ class Record implements JsonSerializable
     {
         return $this->model;
     }
+}
+
+function getContentDir(Model $model, $id)
+{
+    $typeDir = 'content/' . $model->getType();
+    if ($model->isSingle()) return absPath($typeDir . '.yaml');
+    return absPath($typeDir . '/' . $id . '.yaml');
 }

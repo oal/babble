@@ -36,10 +36,15 @@ class Model extends BaseModel
         $this->initFields($modelFormat['fields']);
     }
 
-    public function exists(string $id)
+    public function exists(string $id = null)
     {
         $fs = new Filesystem();
-        return $fs->exists(absPath('content/' . $this->getType() . '/' . $id . '.yaml'));
+        if ($this->isSingle()) {
+            return $fs->exists(absPath('content/' . $this->getType() . '.yaml'));
+        } else {
+            if (!$id) return false;
+            return $fs->exists(absPath('content/' . $this->getType() . '/' . $id . '.yaml'));
+        }
     }
 
     static function all()

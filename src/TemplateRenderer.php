@@ -48,19 +48,19 @@ class SingleRecordDecorator extends DependencyTrackedResource
     public function __call($methodName, $args)
     {
         $this->wasAccessed = true;
-        $loader = new ContentLoader($this->getModel());
 
         try {
-            $record = $loader->find('index');
+            $record = Record::fromDisk($this->getModel());
         } catch (RecordNotFoundException $e) {
             return null;
         }
 
-        if ($record[$methodName]) {
-            return $record[$methodName];
+        $templateRecord = new TemplateRecord($record);
+        if ($templateRecord[$methodName]) {
+            return $templateRecord[$methodName];
         }
 
-        return call_user_func_array(array($record, $methodName), $args);
+        return call_user_func_array(array($templateRecord, $methodName), $args);
     }
 
     /**

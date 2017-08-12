@@ -4,6 +4,7 @@ namespace Babble\API;
 
 use Babble\Content\ContentLoader;
 use Babble\Events\RecordChangeEvent;
+use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\Model;
 use Babble\Models\Record;
 use Exception;
@@ -25,8 +26,8 @@ class ModelController extends Controller
 
     public function create(Request $request, $id)
     {
-        // If ID is already taken.
-        if ($this->model->exists($id)) {
+        // If ID is already taken (assuming not a single instance model).
+        if (!$this->model->isSingle() && $this->model->exists($id)) {
             return new JsonResponse([
                 'error' => 'Provided ID is already taken.'
             ], 400);
@@ -42,8 +43,19 @@ class ModelController extends Controller
 
     public function read(Request $request, $id)
     {
-        $loader = new ContentLoader($this->model);
+        // Single instance models do not have IDs.
+        if($this->model->isSingle()) {
+            if($id) return new Response(null, 404);
+            try {
+                $record = Record::fromDisk($this->model);
+            } catch (RecordNotFoundException $e) {
+                $record = new Record($this->model);
+            }
+            return new JsonResponse($record);
+        }
 
+        // Multi instance models.
+        $loader = new ContentLoader($this->model);
         if (!empty($id)) return $this->readOne($loader, $id);
         return $this->readMany($loader);
     }
