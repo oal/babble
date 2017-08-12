@@ -42,7 +42,7 @@ class ModelController extends Controller
 
     public function read(Request $request, $id)
     {
-        $loader = new ContentLoader($this->model->getType());
+        $loader = new ContentLoader($this->model);
 
         if (!empty($id)) return $this->readOne($loader, $id);
         return $this->readMany($loader);

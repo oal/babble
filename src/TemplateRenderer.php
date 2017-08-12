@@ -18,26 +18,49 @@ use Symfony\Component\Yaml\Yaml;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
-// Decorate ContentLoader so querying models looks better (Post.where(...) vs Post().where(...)).
-class ContentLoaderDecorator
+class DependencyTrackedResource
 {
-    private $modelType;
-    private $wasAccessed = false;
+    private $model;
+    protected $wasAccessed = false;
 
-    public function __construct(string $modelType)
+    public function __construct(Model $model)
     {
-        $this->modelType = $modelType;
+        $this->model = $model;
     }
 
-    public function __call($method_name, $args)
+    /**
+     * @return bool
+     */
+    public function wasAccessed(): bool
+    {
+        return $this->wasAccessed;
+    }
+
+    public function getModel(): Model
+    {
+        return $this->model;
+    }
+}
+
+// Used if Model's isSingle() === true.
+class SingleRecordDecorator extends DependencyTrackedResource
+{
+    public function __call($methodName, $args)
     {
         $this->wasAccessed = true;
-        $loader = new ContentLoader($this->modelType);
-        // If all records are requested, just return the loader (an iterator)
-        if ($method_name === 'all') return $loader;
+        $loader = new ContentLoader($this->getModel());
 
-        // Otherwise, call the correct method and return the result (for "where" etc, that will be the loader instance).
-        return call_user_func_array(array($loader, $method_name), $args);
+        try {
+            $record = $loader->find('index');
+        } catch (RecordNotFoundException $e) {
+            return null;
+        }
+
+        if ($record[$methodName]) {
+            return $record[$methodName];
+        }
+
+        return call_user_func_array(array($record, $methodName), $args);
     }
 
     /**
@@ -49,16 +72,32 @@ class ContentLoaderDecorator
     }
 }
 
+// Decorate ContentLoader so querying models looks better (Post.where(...) vs Post().where(...)).
+class ContentLoaderDecorator extends DependencyTrackedResource
+{
+    public function __call($methodName, $args)
+    {
+        $this->wasAccessed = true;
+        $loader = new ContentLoader($this->getModel());
+        // If all records are requested, just return the loader (an iterator)
+        if ($methodName === 'all') return $loader;
+
+        // Otherwise, call the correct method and return the result (for "where" etc, that will be the loader instance).
+        return call_user_func_array(array($loader, $methodName), $args);
+    }
+
+}
+
 class TemplateRenderer
 {
     private $dispatcher;
     private $twig;
-    private $loaders;
+    private $resources;
 
     public function __construct(EventDispatcher $dispatcher)
     {
         $this->dispatcher = $dispatcher;
-        $this->initContentLoaders();
+        $this->initResources();
         $this->initTwig();
     }
 
@@ -67,8 +106,8 @@ class TemplateRenderer
         $loader = new Twig_Loader_Filesystem(absPath('templates'));
         $twig = new Twig_Environment($loader, ['debug' => true]);
 
-        foreach ($this->loaders as $modelName => $loader) {
-            $twig->addGlobal($modelName, $loader);
+        foreach ($this->resources as $modelName => $resource) {
+            $twig->addGlobal($modelName, $resource);
         }
 
         $content = @file_get_contents(absPath('content/site.yaml'));
@@ -93,12 +132,6 @@ class TemplateRenderer
         return $this->renderTemplate('_404.twig');
     }
 
-    private function renderIndex(string $path)
-    {
-        if (substr($path, strlen($path) - 1) === '/') $path .= '/index';
-        $this->render($path);
-    }
-
     /**
      * Finds the appropriate way to render the requested page, and returns a Response object.
      *
@@ -118,8 +151,8 @@ class TemplateRenderer
         if ($html === null) return null;
 
         // What ContentLoaders / Models were accessed during render?
-        foreach ($this->loaders as $modelName => $loader) {
-            if ($loader->wasAccessed()) {
+        foreach ($this->resources as $modelName => $resource) {
+            if ($resource->wasAccessed()) {
                 $this->dispatcher->dispatch(
                     RenderDependencyEvent::NAME, new RenderDependencyEvent($modelName, $path)
                 );
@@ -240,15 +273,21 @@ class TemplateRenderer
         return $basePath;
     }
 
-    private function initContentLoaders()
+    private function initResources()
     {
         $modelNames = ContentLoader::getModelNames();
-        $loaders = [];
+        $resources = [];
         foreach ($modelNames as $modelName) {
-            $loader = new ContentLoaderDecorator($modelName);
-            $loaders[$modelName] = $loader;
+            $model = new Model($modelName);
+            if ($model->isSingle()) {
+                $record = new SingleRecordDecorator($model);
+                $resources[$modelName] = $record;
+            } else {
+                $loader = new ContentLoaderDecorator($model);
+                $resources[$modelName] = $loader;
+            }
         }
 
-        $this->loaders = $loaders;
+        $this->resources = $resources;
     }
 }

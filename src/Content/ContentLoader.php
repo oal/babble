@@ -22,9 +22,9 @@ class ContentLoader implements Iterator
 
     private $arrayIterator;
 
-    public function __construct(string $modelType)
+    public function __construct(Model $model)
     {
-        $this->model = new Model($modelType);
+        $this->model = $model;
         $this->filters = new FilterContainer();
     }
 

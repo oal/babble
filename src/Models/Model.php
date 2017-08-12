@@ -9,7 +9,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class Model extends BaseModel
 {
-    private $hierarchical;
+    private $hierarchical = false;
+    private $single = false;
     private $options = [];
 
     protected function getDefinitionFile()
@@ -30,6 +31,7 @@ class Model extends BaseModel
 
         $this->initName($modelFormat);
         $this->hierarchical = ($modelFormat['hierarchical'] ?? false) === true;
+        $this->single = ($modelFormat['single'] ?? false) === true;
         $this->initOptions($modelFormat);
         $this->initFields($modelFormat['fields']);
     }
@@ -66,12 +68,19 @@ class Model extends BaseModel
     {
         $data = parent::jsonSerialize();
         $data['options'] = $this->options;
+        $data['hierarchical'] = $this->isHierarchical();
+        $data['single'] = $this->isSingle();
         return $data;
     }
 
-    public function isHierarchical()
+    public function isHierarchical(): bool
     {
         return $this->hierarchical;
+    }
+
+    public function isSingle(): bool
+    {
+        return $this->single;
     }
 
     public function getCacheLocation(string $recordId)

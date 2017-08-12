@@ -143,4 +143,9 @@ class Record implements JsonSerializable
     {
         return array_merge(['id' => $this->id], $this->data);
     }
+
+    public function getModel(): Model
+    {
+        return $this->model;
+    }
 }

@@ -28,7 +28,10 @@ class TemplateRecord implements ArrayAccess, JsonSerializable
 
     public function children()
     {
-        $loader = new ContentLoader($this->record->getType());
+        $model = $this->record->getModel();
+        if (!$model->isHierarchical()) return [];
+
+        $loader = new ContentLoader($model);
         return $loader->childrenOf($this->record->getValue('id'));
     }
 

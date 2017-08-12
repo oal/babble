@@ -2,6 +2,7 @@
 
 namespace Babble\Content;
 
+use Babble\Models\Model;
 use Babble\TemplateRenderer;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
@@ -67,7 +68,8 @@ class StaticSiteGenerator
         else $directory = '/' . $directory;
 
         $modelName = pathinfo($relativePath, PATHINFO_FILENAME);
-        $loader = new ContentLoader($modelName);
+        $model = new Model($modelName);
+        $loader = new ContentLoader($model);
         foreach ($loader as $record) {
             $path = $directory . '/' . $record['id'];
             $this->save($path, $this->renderer->renderRecordFor($path));
