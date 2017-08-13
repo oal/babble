@@ -110,12 +110,6 @@ class TemplateRenderer
             $twig->addGlobal($modelName, $resource);
         }
 
-        $content = @file_get_contents(absPath('content/site.yaml'));
-        if ($content !== false) {
-            $siteData = Yaml::parse(file_get_contents(absPath('content/site.yaml')));
-            $twig->addGlobal('site', $siteData);
-        }
-
         if (class_exists('Aptoma\Twig\Extension\MarkdownExtension')) {
             $engineClass = 'Aptoma\Twig\Extension\MarkdownEngine\MichelfMarkdownEngine';
             $engine = new $engineClass;
