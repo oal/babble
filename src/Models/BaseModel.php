@@ -10,6 +10,7 @@ use Babble\Models\Fields\ImageField;
 use Babble\Models\Fields\ListField;
 use Babble\Models\Fields\PasswordField;
 use Babble\Models\Fields\TextField;
+use Babble\Models\Fields\HtmlField;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
@@ -114,6 +115,9 @@ class BaseModel implements JsonSerializable
                         break;
                     }
                     $this->fields[$key] = new ListField($this, $key, $data);
+                    break;
+                case 'html':
+                    $this->fields[$key] = new HtmlField($this, $key, $data);
                     break;
             }
         }
