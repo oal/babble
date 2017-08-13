@@ -44,8 +44,8 @@ class ModelController extends Controller
     public function read(Request $request, $id)
     {
         // Single instance models do not have IDs.
-        if($this->model->isSingle()) {
-            if($id) return new Response(null, 404);
+        if ($this->model->isSingle()) {
+            if ($id) return new Response(null, 404);
             try {
                 $record = Record::fromDisk($this->model);
             } catch (RecordNotFoundException $e) {
@@ -117,9 +117,17 @@ class ModelController extends Controller
 
     public function delete(Request $request, $id)
     {
-        return new JsonResponse([
-            'error' => 'Not implemented'
-        ], 400);
+        try {
+            $deleteInstance = Record::fromDisk($this->model, $id);
+            $deleteInstance->delete();
+            return new JsonResponse([
+                'message' => 'Delete successful.'
+            ]);
+        } catch (RecordNotFoundException $e) {
+            return new JsonResponse([
+                'error' => 'Not found.'
+            ], 403);
+        }
     }
 
     public function describe(Request $request)
