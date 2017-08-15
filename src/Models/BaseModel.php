@@ -54,12 +54,14 @@ class BaseModel implements JsonSerializable
         $this->initFields($modelFormat['fields']);
     }
 
-    /**
-     * @return mixed
-     */
     public function getType()
     {
         return $this->type;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     public function getFields()

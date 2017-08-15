@@ -58,6 +58,12 @@ class Model extends BaseModel
             $models[] = new Model($modelName);
         }
 
+        usort($models, function ($a, $b) {
+            if ($a->getName() < $b->getName()) return -1;
+            if ($a->getName() > $b->getName()) return 1;
+            return 0;
+        });
+
         return $models;
     }
 
