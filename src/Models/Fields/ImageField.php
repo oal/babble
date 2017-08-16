@@ -2,12 +2,21 @@
 
 namespace Babble\Models\Fields;
 
+use Exception;
 use Babble\Models\Record;
 use Imagine\Image\BoxInterface;
-use Imagine\Imagick\Imagine;
 use Imagine\Image\Box;
 use Imagine\Image\Point;
 use Symfony\Component\Filesystem\Filesystem;
+
+function detectImageLibrary() {
+    if(extension_loaded('imagick')) {
+        return \Imagine\Imagick\Imagine::class;
+    } else if(extension_loaded('gd')) {
+        return \Imagine\Gd\Imagine::class;
+    }
+    return null;
+}
 
 class ImageField extends FileField
 {
@@ -73,7 +82,11 @@ class Image
         if (!$fs->exists($relativeDir)) $fs->mkdir($relativeDir);
 
         // Crop and save
-        $imagine = new Imagine();
+        $imagineImplementation = detectImageLibrary();
+        if(!$imagineImplementation) {
+            throw new Exception('No image manipulation library found.');
+        }
+        $imagine = new $imagineImplementation();
         $sourceFilename = absPath('public/uploads/' . $this->filename);
         if (!$fs->exists($sourceFilename)) return '';
         $image = $imagine->open($sourceFilename);
