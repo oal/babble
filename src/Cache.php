@@ -46,7 +46,7 @@ class Cache
      */
     private function pathToCachePath(string $path): string
     {
-        return absPath('cache' . self::pathToFilename($path));
+        return absPath('cache/' . self::pathToFilename($path));
     }
 
     public function onRender(RenderEvent $event)

@@ -18,7 +18,7 @@ class ServeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $command = 'php -t public/ -S localhost:8000 public/index.php';
+        $command = 'php -S localhost:8000 index.php';
         $handle = popen($command, 'r');
         while (1) {
             $read = fread($handle, 1024);

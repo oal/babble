@@ -18,13 +18,15 @@ class Config
     private function initForHost(string $host, array $config)
     {
         // Overwrite global configs if host config is set for current host.
-        $configHostData = $config['host'][$host] ?? [];
-        if ($configHostData) {
-            foreach ($configHostData as $key => $value) {
-                $config[$key] = $value;
+        if (array_key_exists('host', $config) && is_array($config['host']) && array_key_exists($host, $config['host'])) {
+            $configHostData = $config['host'][$host];
+            if ($configHostData) {
+                foreach ($configHostData as $key => $value) {
+                    $config[$key] = $value;
+                }
             }
+            unset($config['host']);
         }
-        unset($config['host']);
 
         // Set config.
         $this->config = $config;
