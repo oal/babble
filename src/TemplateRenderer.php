@@ -129,19 +129,23 @@ class TemplateRenderer
     /**
      * Finds the appropriate way to render the requested page, and returns a Response object.
      *
-     * @param string $path
+     * @param Path $path
      * @return Response
      */
-    public function render(string $path)
+    public function render(Path $path)
     {
         // Allow trailing slash.
-        if (substr($path, strlen($path) - 1) === '/') {
-            $path = substr($path, 0, strlen($path) - 1);
-        }
+//        if (substr($path, strlen($path) - 1) === '/') {
+//            $path = substr($path, 0, strlen($path) - 1);
+//        }
+
+        $this->twig->addGlobal('path', $path);
 
         $html = $this->renderTemplateFor($path);
         if ($html === null) $html = $this->renderRecordFor($path);
-        if ($html === null && substr($path, -6) !== '/index') $html = $this->render($path . '/index');
+        if ($html === null && $path->getFilename() !== 'index') {
+            $html = $this->renderRecordFor(new Path($path . '/index'));
+        }
         if ($html === null) return null;
 
         // What ContentLoaders / Models were accessed during render?
@@ -163,19 +167,21 @@ class TemplateRenderer
      * Looks for a matching record and capitalized template name and sets "this" to the matching Record
      * inside template context.
      *
-     * @param string $path
-     * @return string|null
+     * @param Path $path
+     * @return null|string
      */
-    function renderRecordFor(string $path)
+    function renderRecordFor(Path $path)
     {
         $record = $this->pathToRecord($path);
         if ($record === null) return null;
 
         $basePath = self::pathToDir($path);
         $modelType = $record->getType();
-        $templateFile = $basePath . '/' . $modelType . '.twig';
+        $templateFile = $basePath . '/' . $modelType;
 
-        $html = $this->twig->render($templateFile, [
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        if ($extension) $templateFile .= '.' . $extension;
+        $html = $this->twig->render($templateFile . '.twig', [
             'this' => new TemplateRecord($record)
         ]);
 
@@ -185,21 +191,25 @@ class TemplateRenderer
     /**
      * Renders a non-capitalized template matching the given path directly.
      *
-     * @param string $path
-     * @return string|null
+     * @param Path $path
+     * @return null|string
      */
-    function renderTemplateFor(string $path)
+    function renderTemplateFor(Path $path)
     {
         $isHidden = array_filter(explode('/', $path), function ($dir) {
             return strlen($dir) > 0 && $dir[0] === '_';
         });
+        if ($isHidden) return null;
 
-        if (!$isHidden) {
-            $templateFile = $path . '.twig';
-            return $this->renderTemplate($templateFile);
+        $templateFile = $path . '.twig';
+        $html = $this->renderTemplate($templateFile);
+
+        // Try index file inside a directory with the name of this path's filename unless filename is index.
+        if (!$html && !$path->getExtension() && $path->getFilename() !== 'index') {
+            $templateFile = $path . '/index.twig';
+            $html = $this->renderTemplate($templateFile);
         }
-
-        return null;
+        return $html;
     }
 
     private function renderTemplate(string $templateFile)
@@ -214,10 +224,10 @@ class TemplateRenderer
 
 
     /**
-     * @param $path
+     * @param Path $path
      * @return null|Record
      */
-    private function pathToRecord(string $path)
+    private function pathToRecord(Path $path)
     {
         $basePath = self::pathToDir($path);
 
@@ -228,10 +238,11 @@ class TemplateRenderer
             ->name('/^[A-Z].+\.twig/')
             ->in(absPath('templates/' . $basePath));
 
-        $id = substr($path, strlen($basePath) + 1);
+        $id = ltrim(substr($path->getWithoutExtension(), strlen($basePath)), '/');
 
         foreach ($templateFinder as $file) {
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+
             try {
                 $model = new Model($modelNameMaybe);
                 $record = Record::fromDisk($model, $id);

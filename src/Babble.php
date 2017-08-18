@@ -5,6 +5,7 @@ namespace Babble;
 use Babble\API;
 use Symfony\Component\Debug\Debug;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -56,7 +57,13 @@ class Babble
 
     private function handlePageRequest(Request $request): Response
     {
-        $path = $request->getPathInfo();
+        $path = new Path($request->getPathInfo());
+        if(substr($path, -1) !== '/') {
+            return new RedirectResponse($path . '/');
+        }
+        if($path->getFilename() === 'index') {
+            return new RedirectResponse($path->getDirectory() . '/');
+        }
 
         // Attempt to load from cache.
         if ($this->cache) {
