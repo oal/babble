@@ -58,4 +58,9 @@ class TemplateRecord implements ArrayAccess, JsonSerializable
     {
         return $this->record;
     }
+
+    public function getAbsoluteURL()
+    {
+        return $this->record->getAbsoluteURL();
+    }
 }

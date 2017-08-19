@@ -99,5 +99,26 @@ class Model extends BaseModel
         $baseLocation = parent::getCacheLocation($recordId);
         return $baseLocation . $this->getType() . '/' . $recordId . '/';
     }
+
+    public function getBaseURL()
+    {
+        $finder = new Finder();
+
+        $type = $this->getType();
+        $finder->in(absPath('templates'))->name("/^$type\..*twig/");
+
+        $minLength = 9999999;
+        $shortestFile = null;
+        foreach ($finder as $file) {
+            $length = strlen($file->getRelativePathname());
+            if ($length < $minLength) {
+                $minLength = $length;
+                $shortestFile = $file;
+            }
+        }
+
+        if (!$shortestFile) return '/';
+        return '/' . $shortestFile->getRelativePath();
+    }
 }
 

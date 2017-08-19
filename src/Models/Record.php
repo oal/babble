@@ -149,6 +149,14 @@ class Record implements JsonSerializable
     {
         return $this->model;
     }
+
+    public function getAbsoluteURL()
+    {
+        $baseURL = $this->getModel()->getBaseURL();
+        if ($baseURL === '/') $baseURL = '';
+        if ($this->id === 'index') return $baseURL . '/';
+        return $baseURL . '/' . $this->id . '/';
+    }
 }
 
 function getContentDir(Model $model, $id)
