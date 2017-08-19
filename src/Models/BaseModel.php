@@ -8,6 +8,7 @@ use Babble\Models\Fields\DatetimeField;
 use Babble\Models\Fields\FileField;
 use Babble\Models\Fields\ImageField;
 use Babble\Models\Fields\ListField;
+use Babble\Models\Fields\MarkdownField;
 use Babble\Models\Fields\PasswordField;
 use Babble\Models\Fields\TextField;
 use Babble\Models\Fields\HtmlField;
@@ -120,6 +121,9 @@ class BaseModel implements JsonSerializable
                     break;
                 case 'html':
                     $this->fields[$key] = new HtmlField($this, $key, $data);
+                    break;
+                case 'markdown':
+                    $this->fields[$key] = new MarkdownField($this, $key, $data);
                     break;
             }
         }

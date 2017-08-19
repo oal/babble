@@ -14,7 +14,6 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Yaml\Yaml;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
@@ -104,7 +103,10 @@ class TemplateRenderer
     private function initTwig()
     {
         $loader = new Twig_Loader_Filesystem(absPath('templates'));
-        $twig = new Twig_Environment($loader, ['debug' => true]);
+        $twig = new Twig_Environment($loader, [
+            'debug' => true,
+            'autoescape' => false
+        ]);
 
         foreach ($this->resources as $modelName => $resource) {
             $twig->addGlobal($modelName, $resource);
@@ -130,15 +132,10 @@ class TemplateRenderer
      * Finds the appropriate way to render the requested page, and returns a Response object.
      *
      * @param Path $path
-     * @return Response
+     * @return string
      */
     public function render(Path $path)
     {
-        // Allow trailing slash.
-//        if (substr($path, strlen($path) - 1) === '/') {
-//            $path = substr($path, 0, strlen($path) - 1);
-//        }
-
         $this->twig->addGlobal('path', $path);
 
         $html = $this->renderTemplateFor($path);
@@ -201,7 +198,7 @@ class TemplateRenderer
         });
         if ($isHidden) return null;
 
-        $templateFile = $path . '.twig';
+        $templateFile = rtrim($path, '/') . '.twig';
         $html = $this->renderTemplate($templateFile);
 
         // Try index file inside a directory with the name of this path's filename unless filename is index.

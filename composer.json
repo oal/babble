@@ -14,7 +14,8 @@
     "symfony/debug": "^3.3",
     "symfony/event-dispatcher": "^3.3",
     "symfony/console": "^3.3",
-    "nesbot/carbon": "~1.21"
+    "nesbot/carbon": "~1.21",
+    "michelf/php-markdown": "^1.7"
   },
   "autoload": {
     "psr-4": {
