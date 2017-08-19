@@ -58,11 +58,15 @@ class Babble
     private function handlePageRequest(Request $request): Response
     {
         $path = new Path($request->getPathInfo());
-        if(substr($path, -1) !== '/') {
-            return new RedirectResponse($path . '/');
-        }
-        if($path->getFilename() === 'index') {
-            return new RedirectResponse($path->getDirectory() . '/');
+
+        // Redirect if needed.
+        if(!$path->getExtension()) {
+            if(substr($path, -1) !== '/') {
+                return new RedirectResponse($path . '/');
+            }
+            if($path->getFilename() === 'index') {
+                return new RedirectResponse($path->getDirectory() . '/');
+            }
         }
 
         // Attempt to load from cache.

@@ -9,10 +9,10 @@ class Path
 
     public function __construct(string $path)
     {
-        $this->path = $path;
+        $this->path = preg_replace('/\/+/', '/', $path);
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->path;
     }
@@ -38,6 +38,6 @@ class Path
 
     public function getDirectory()
     {
-        return pathinfo($this->path, PATHINFO_DIRNAME);
+        return rtrim(pathinfo($this->path, PATHINFO_DIRNAME), '/');
     }
 }

@@ -13,7 +13,6 @@ use Babble\Models\Record;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpFoundation\Response;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
@@ -112,14 +111,6 @@ class TemplateRenderer
             $twig->addGlobal($modelName, $resource);
         }
 
-        if (class_exists('Aptoma\Twig\Extension\MarkdownExtension')) {
-            $engineClass = 'Aptoma\Twig\Extension\MarkdownEngine\MichelfMarkdownEngine';
-            $engine = new $engineClass;
-
-            $extensionClass = 'Aptoma\Twig\Extension\MarkdownExtension';
-            $twig->addExtension(new $extensionClass($engine));
-        }
-
         $this->twig = $twig;
     }
 
@@ -136,12 +127,11 @@ class TemplateRenderer
      */
     public function render(Path $path)
     {
-        $this->twig->addGlobal('path', $path);
-
         $html = $this->renderTemplateFor($path);
         if ($html === null) $html = $this->renderRecordFor($path);
         if ($html === null && $path->getFilename() !== 'index') {
-            $html = $this->renderRecordFor(new Path($path . '/index'));
+            $path = new Path($path . '/index');
+            $html = $this->renderRecordFor($path);
         }
         if ($html === null) return null;
 
@@ -167,7 +157,7 @@ class TemplateRenderer
      * @param Path $path
      * @return null|string
      */
-    function renderRecordFor(Path $path)
+    private function renderRecordFor(Path $path)
     {
         $record = $this->pathToRecord($path);
         if ($record === null) return null;
@@ -179,7 +169,8 @@ class TemplateRenderer
         $extension = pathinfo($path, PATHINFO_EXTENSION);
         if ($extension) $templateFile .= '.' . $extension;
         $html = $this->twig->render($templateFile . '.twig', [
-            'this' => new TemplateRecord($record)
+            'this' => new TemplateRecord($record),
+            'path' => $path
         ]);
 
         return $html;
@@ -191,34 +182,35 @@ class TemplateRenderer
      * @param Path $path
      * @return null|string
      */
-    function renderTemplateFor(Path $path)
+    private function renderTemplateFor(Path $path)
     {
         $isHidden = array_filter(explode('/', $path), function ($dir) {
             return strlen($dir) > 0 && $dir[0] === '_';
         });
         if ($isHidden) return null;
 
+        $context = ['path' => $path];
+
         $templateFile = rtrim($path, '/') . '.twig';
-        $html = $this->renderTemplate($templateFile);
+        $html = $this->renderTemplate($templateFile, $context);
 
         // Try index file inside a directory with the name of this path's filename unless filename is index.
         if (!$html && !$path->getExtension() && $path->getFilename() !== 'index') {
             $templateFile = $path . '/index.twig';
-            $html = $this->renderTemplate($templateFile);
+            $html = $this->renderTemplate($templateFile, $context);
         }
         return $html;
     }
 
-    private function renderTemplate(string $templateFile)
+    private function renderTemplate(string $templateFile, array $context = [])
     {
         $fs = new Filesystem();
         if ($fs->exists(absPath('templates/' . $templateFile))) {
-            $html = $this->twig->render($templateFile, []);
+            $html = $this->twig->render($templateFile, $context);
             return $html;
         }
         return null;
     }
-
 
     /**
      * @param Path $path
