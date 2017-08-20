@@ -14,11 +14,13 @@ class Babble
     private $config;
     private $dispatcher;
     private $cache;
+    private $liveReload = false;
 
     public function __construct()
     {
         $this->dispatcher = new EventDispatcher();
         $this->loadConfig();
+        $this->liveReload = !!getenv('BABBLE_LIVE_RELOAD');
     }
 
     /**
@@ -36,6 +38,9 @@ class Babble
     {
         $request = Request::createFromGlobals();
         $response = $this->handleRequest($request);
+
+        if ($this->liveReload) $this->injectLiveReload($response);
+
         $response->send();
     }
 
@@ -60,11 +65,11 @@ class Babble
         $path = new Path($request->getPathInfo());
 
         // Redirect if needed.
-        if(!$path->getExtension()) {
-            if(substr($path, -1) !== '/') {
+        if (!$path->getExtension()) {
+            if (substr($path, -1) !== '/') {
                 return new RedirectResponse($path . '/');
             }
-            if($path->getFilename() === 'index') {
+            if ($path->getFilename() === 'index') {
                 return new RedirectResponse($path->getDirectory() . '/');
             }
         }
@@ -97,5 +102,20 @@ class Babble
         }
 
         if ($this->config->get('debug')) $this->enableDebug();
+    }
+
+    /**
+     * Injects script tag that loads livereload.js to the response.
+     *
+     * @param Response $response
+     */
+    private function injectLiveReload(Response $response)
+    {
+        $content = $response->getContent();
+        $content = str_replace('</body>', '
+            <script>
+                document.write(\'<script src="http://\' + (location.host || \'localhost\').split(\':\')[0] + \':35729/livereload.js?snipver=1"></\' + \'script>\')
+            </script></body>', $content);
+        $response->setContent($content);
     }
 }

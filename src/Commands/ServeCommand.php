@@ -12,12 +12,17 @@ class ServeCommand extends Command
     {
         $this
             ->setName('serve')
-            //->addArgument('live-reload', InputArgument::OPTIONAL)
+            ->addOption('live-reload', 'l')
             ->setDescription("Start Babble's development server.");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if($input->getOption('live-reload')) {
+            echo "Live reload enabled.\n";
+            putenv('BABBLE_LIVE_RELOAD=true');
+        }
+
         $command = 'php -S localhost:8000 index.php';
         $handle = popen($command, 'r');
         while (1) {
