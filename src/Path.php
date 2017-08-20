@@ -17,6 +17,12 @@ class Path
         return $this->path;
     }
 
+    private function clean()
+    {
+        if (substr($this->path, -6) === '/index') return substr($this->path, 0, -6);
+        return rtrim($this->path, '/');
+    }
+
 
     public function getExtension()
     {
@@ -39,5 +45,19 @@ class Path
     public function getDirectory()
     {
         return rtrim(pathinfo($this->path, PATHINFO_DIRNAME), '/');
+    }
+
+    public function is(string $url)
+    {
+        $url = rtrim($url, '/');
+        $clean = $this->clean();
+        return strpos($clean, $url) === 0;
+    }
+
+    public function isExactly(string $url)
+    {
+        $url = rtrim($url, '/');
+        $clean = $this->clean();
+        return $clean == $url;
     }
 }
