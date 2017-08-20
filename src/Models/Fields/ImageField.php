@@ -9,10 +9,11 @@ use Imagine\Image\Box;
 use Imagine\Image\Point;
 use Symfony\Component\Filesystem\Filesystem;
 
-function detectImageLibrary() {
-    if(extension_loaded('imagick')) {
+function detectImageLibrary()
+{
+    if (extension_loaded('imagick')) {
         return \Imagine\Imagick\Imagine::class;
-    } else if(extension_loaded('gd')) {
+    } else if (extension_loaded('gd')) {
         return \Imagine\Gd\Imagine::class;
     }
     return null;
@@ -83,7 +84,7 @@ class Image
 
         // Crop and save
         $imagineImplementation = detectImageLibrary();
-        if(!$imagineImplementation) {
+        if (!$imagineImplementation) {
             throw new Exception('No image manipulation library found.');
         }
         $imagine = new $imagineImplementation();
@@ -91,14 +92,26 @@ class Image
         if (!$fs->exists($sourceFilename)) return '';
         $image = $imagine->open($sourceFilename);
 
-        // Where to crop from, and what portion of the image to crop.
+        // If either side i 0 or missing, calculate it to maintain aspect ratio.
         $size = $image->getSize();
+        if (!$width) {
+            $scale = $height / $size->getHeight();
+            $width = $size->getWidth() * $scale;
+        } else if (!$height) {
+            $scale = $width / $size->getWidth();
+            $height = $size->getHeight() * $scale;
+        }
+
+        // Where to crop from, and what portion of the image to crop.
         list($cropWidth, $cropHeight, $cropX, $cropY) = $this->getCropData($width, $height, $size);
 
-        // TODO: Support rotation and zooming from the Cropper JS component.
-        $image
-            ->crop(new Point($cropX, $cropY), new Box($cropWidth, $cropHeight))
-            ->resize(new Box($width, $height))
+        // If crop dimensions are set, apply cropping operation
+        if ($cropHeight > 0 && $cropWidth > 0) {
+            // TODO: Support rotation and zooming from the Cropper JS component.
+            $image = $image->crop(new Point($cropX, $cropY), new Box($cropWidth, $cropHeight));
+        }
+
+        $image->resize(new Box($width, $height))
             ->save($absolutePath);
 
         return $url;
