@@ -52,7 +52,7 @@ class Record implements JsonSerializable
             }
         }
 
-        $yaml = Yaml::dump($this->getData(), 2, 4, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
+        $yaml = Yaml::dump($this->getData(), 5, 4);
 
         $fs = new Filesystem();
         $fs->dumpFile($this->getContentFilePath(), $yaml);
