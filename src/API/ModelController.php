@@ -38,6 +38,12 @@ class ModelController extends Controller
         // Save model instance.
         $record = new Record($this->model, $id);
         $record->save($data);
+
+        $this->dispatcher->dispatch(
+            RecordChangeEvent::NAME,
+            new RecordChangeEvent($this->model->getType(), $id)
+        );
+
         return new JsonResponse($record);
     }
 

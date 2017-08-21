@@ -173,6 +173,11 @@ class TemplateRenderer
             'path' => $path
         ]);
 
+        $this->dispatcher->dispatch(
+            RenderDependencyEvent::NAME,
+            new RenderDependencyEvent($record->getType(), $path)
+        );
+
         return $html;
     }
 

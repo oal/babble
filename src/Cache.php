@@ -13,6 +13,7 @@ use Symfony\Component\Filesystem\Filesystem;
 class Cache
 {
     private $dispatcher;
+    private $addedDependencies = [];
 
     public function __construct(EventDispatcher $dispatcher)
     {
@@ -61,10 +62,46 @@ class Cache
 
     private function addDependency($modelName, $path)
     {
-        $dependencyFilename = $this->getModelDependencyFile($modelName);
-        $content = $path . "\n";
+        // If it's already tracked this page load. This is needed because file system flushing, and
+        // a light performance increase.
+        $strPath = '' . $path;
+        if (array_key_exists($modelName, $this->addedDependencies) &&
+            array_key_exists($strPath, $this->addedDependencies[$modelName])) return;
+
+        // Store dependency for this page load.
+        if (!array_key_exists($modelName, $this->addedDependencies)) {
+            $this->addedDependencies[$modelName] = [
+                $strPath => true
+            ];
+        } else {
+            $this->addedDependencies[$modelName][$strPath] = true;
+        }
 
         $fs = new Filesystem();
+        $dependencyFilename = $this->getModelDependencyFile($modelName);
+
+        // Check if dependency is already tracked for this model and path.
+        if ($fs->exists($dependencyFilename)) {
+            $dependencyExists = false;
+            $handle = fopen($dependencyFilename, 'r');
+            if ($handle) {
+                while (($line = fgets($handle)) !== false) {
+                    if ($line === $path) {
+                        $dependencyExists = true;
+                        break;
+                    }
+                }
+                fclose($handle);
+            } else {
+                // Handle error.
+            }
+
+            // No need to add it again.
+            if ($dependencyExists) return;
+        }
+
+        // Add Model dependency for this path.
+        $content = $path . "\n";
         $fs->appendToFile($dependencyFilename, $content);
     }
 
@@ -100,6 +137,9 @@ class Cache
 
         // Remove all files which depend on the changed record's model type.
         $fs->remove($removeFilenames);
+
+        // Remove list of URLs cached for this model.
+        $fs->remove($dependencyFilename);
 
         // Unset the file to call __destruct(), closing the file handle.
         $file = null;

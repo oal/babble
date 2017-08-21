@@ -19,8 +19,13 @@ class Path
 
     private function clean()
     {
-        if (substr($this->path, -6) === '/index') return substr($this->path, 0, -6);
-        return rtrim($this->path, '/');
+        $cleanPath = $this->path;
+        if (substr($cleanPath, -6) === '/index') {
+            $cleanPath = substr($cleanPath, 0, -6);
+        }
+        $cleanPath = rtrim($cleanPath, '/');
+
+        if(!$cleanPath) return '/';
     }
 
 
