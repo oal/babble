@@ -4,6 +4,7 @@ namespace Babble\Models;
 
 use Babble\Exceptions\InvalidModelException;
 use Babble\Models\Fields\BooleanField;
+use Babble\Models\Fields\ChoiceField;
 use Babble\Models\Fields\DatetimeField;
 use Babble\Models\Fields\FileField;
 use Babble\Models\Fields\ImageField;
@@ -124,6 +125,9 @@ class BaseModel implements JsonSerializable
                     break;
                 case 'markdown':
                     $this->fields[$key] = new MarkdownField($this, $key, $data);
+                    break;
+                case 'choice':
+                    $this->fields[$key] = new ChoiceField($this, $key, $data);
                     break;
             }
         }
