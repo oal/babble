@@ -3,16 +3,6 @@
 namespace Babble\Models;
 
 use Babble\Exceptions\InvalidModelException;
-use Babble\Models\Fields\BooleanField;
-use Babble\Models\Fields\ChoiceField;
-use Babble\Models\Fields\DatetimeField;
-use Babble\Models\Fields\FileField;
-use Babble\Models\Fields\ImageField;
-use Babble\Models\Fields\ListField;
-use Babble\Models\Fields\MarkdownField;
-use Babble\Models\Fields\PasswordField;
-use Babble\Models\Fields\TextField;
-use Babble\Models\Fields\HtmlField;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
@@ -26,6 +16,7 @@ class BaseModel implements JsonSerializable
     protected $namePlural;
 
     protected $fields = [];
+    private static $fieldRegistry;
 
     public function __construct(string $type)
     {
@@ -54,6 +45,18 @@ class BaseModel implements JsonSerializable
 
         $this->initName($modelFormat);
         $this->initFields($modelFormat['fields']);
+    }
+
+    /**
+     * @return FieldRegistry
+     */
+    public static function getFieldRegistry()
+    {
+        if (!self::$fieldRegistry) {
+            self::$fieldRegistry = new FieldRegistry();
+        }
+
+        return self::$fieldRegistry;
     }
 
     public function getType()
@@ -90,46 +93,19 @@ class BaseModel implements JsonSerializable
 
     protected function initFields($fields)
     {
-        // TODO: Add a field registry and do this dynamically.
         foreach ($fields as $key => $data) {
-            switch ($data['type']) {
-                case 'text':
-                    $this->fields[$key] = new TextField($this, $key, $data);
-                    break;
-                case 'boolean':
-                    $this->fields[$key] = new BooleanField($this, $key, $data);
-                    break;
-                case 'datetime':
-                    $this->fields[$key] = new DatetimeField($this, $key, $data);
-                    break;
-                case 'file':
-                    $this->fields[$key] = new FileField($this, $key, $data);
-                    break;
-                case 'image':
-                    $this->fields[$key] = new ImageField($this, $key, $data);
-                    break;
-                case 'password':
-                    $this->fields[$key] = new PasswordField($this, $key, $data);
-                    break;
-                case 'list':
-                    // TODO: Max depth 2, hard coded. Need to make this dynamic.
-                    if (get_class($this) === Block::class &&
-                        get_class($this->getModel()) === Block::class &&
-                        get_class($this->getModel()->getModel()) === Model::class) {
-                        break;
-                    }
-                    $this->fields[$key] = new ListField($this, $key, $data);
-                    break;
-                case 'html':
-                    $this->fields[$key] = new HtmlField($this, $key, $data);
-                    break;
-                case 'markdown':
-                    $this->fields[$key] = new MarkdownField($this, $key, $data);
-                    break;
-                case 'choice':
-                    $this->fields[$key] = new ChoiceField($this, $key, $data);
-                    break;
+            $type = $data['type'];
+
+            // TODO: Hard coded only two levels deep.
+            if ($type === 'list' &&
+                get_class($this) === Block::class &&
+                get_class($this->getModel()) === Block::class &&
+                get_class($this->getModel()->getModel()) === Model::class) {
+                break;
             }
+
+            $fieldClass = self::getFieldRegistry()->get($type);
+            $this->fields[$key] = new $fieldClass($this, $key, $data);
         }
     }
 
