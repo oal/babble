@@ -63,6 +63,16 @@ class ModelController extends Controller
         // Multi instance models.
         $loader = new ContentLoader($this->model);
         if (!empty($id)) return $this->readOne($loader, $id);
+
+        $sort = $request->get('sort');
+        if($sort) {
+            $sortDirection = 'asc';
+            if(substr($sort, 0, 1) === '-') {
+                $sortDirection = 'desc';
+                $sort = substr($sort, 1);
+            }
+            $loader = $loader->orderBy($sort, $sortDirection);
+        }
         return $this->readMany($loader);
     }
 
@@ -81,7 +91,7 @@ class ModelController extends Controller
     {
         try {
             $records = $loader->withChildren();
-            return new JsonResponse(iterator_to_array($records));
+            return new JsonResponse(array_values(iterator_to_array($records)));
         } catch (Exception $e) {
         }
 

@@ -54,7 +54,7 @@ class ContentLoader implements Iterator
 
     public function orderBy($key, $direction = 'desc')
     {
-        $this->orderBy = [$key, $direction];
+        $this->orderBy = [$key, strtolower($direction)];
         return $this;
     }
 
