@@ -148,6 +148,9 @@ class ModelController extends Controller
 
     public function describe(Request $request)
     {
-        return new JsonResponse($this->model);
+        return new JsonResponse([
+            'model' => $this->model,
+            'blocks' => $this->model->getBlocks()
+        ]);
     }
 }

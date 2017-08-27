@@ -3,6 +3,7 @@
 namespace Babble\Models;
 
 use Babble\Exceptions\InvalidModelException;
+use Babble\Models\Fields\ListField;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
@@ -95,15 +96,6 @@ class BaseModel implements JsonSerializable
     {
         foreach ($fields as $key => $data) {
             $type = $data['type'];
-
-            // TODO: Hard coded only two levels deep.
-            if ($type === 'list' &&
-                get_class($this) === Block::class &&
-                get_class($this->getModel()) === Block::class &&
-                get_class($this->getModel()->getModel()) === Model::class) {
-                break;
-            }
-
             $fieldClass = self::getFieldRegistry()->get($type);
             $this->fields[$key] = new $fieldClass($this, $key, $data);
         }
@@ -117,6 +109,17 @@ class BaseModel implements JsonSerializable
             'name_plural' => $this->namePlural,
             'fields' => $this->getFields()
         ];
+    }
+
+    public function getBlocks()
+    {
+        $blocks = [];
+        foreach ($this->getFields() as $field) {
+            if(get_class($field) !== ListField::class) continue;
+            $blocks = array_merge($blocks, $field->getBlocks());
+        }
+        return $blocks;
+
     }
 
     public function getCacheLocation(string $recordId)

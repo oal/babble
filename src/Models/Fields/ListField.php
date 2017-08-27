@@ -15,26 +15,26 @@ class ListField extends Field
 
     protected function initOptions(array $data)
     {
-//        if (get_class($this->getModel()) === Block::class) {
-//            $this->blocks = [];
-//        } else {
-            $this->readBlocks($data['options']['blocks']);
-            $data['options']['blocks'] = array_values($this->blocks);
-//        }
         parent::initOptions($data);
     }
 
-
-    private function readBlocks(array $blockNames)
+    public function getBlocks()
     {
+        if($this->blocks) return $this->blocks;
 
         $blocks = [];
-
+        $blockNames = $this->getOption('blocks');
         foreach ($blockNames as $blockName) {
             $blocks[$blockName] = new Block($this->getModel(), $blockName);
         }
 
         $this->blocks = $blocks;
+        return $blocks;
+    }
+
+    public function getBlock($type)
+    {
+        return $this->getBlocks()[$type];
     }
 
     public function process(Record $record, $data)
@@ -44,12 +44,13 @@ class ListField extends Field
         $processedData = [];
         foreach ($data as $blockInstanceData) {
             $type = $blockInstanceData['type'];
-            $block = $this->blocks[$type];
+            $block = $this->getBlock($type);
             $values = $blockInstanceData['value'];
 
             $processedValues = [];
             foreach ($values as $fieldKey => $value) {
-                $processedValues[$fieldKey] = $block->getField($fieldKey)->process($record, $value);
+                $field = $block->getField($fieldKey);
+                $processedValues[$fieldKey] = $field->process($record, $value);
             }
             $processedData[] = [
                 'type' => $type,
