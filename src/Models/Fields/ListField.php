@@ -61,12 +61,11 @@ class ListField extends Field
         return $processedData;
     }
 
-
     public function getView($blockDatas)
     {
         if (!is_array($blockDatas)) return [];
 
-        $blocks = $this->blocks;
+        $blocks = $this->getBlocks();
         return array_map(function ($blockData) use (&$blocks) {
             return new BlockView($blocks[$blockData['type']], $blockData);
         }, $blockDatas);
