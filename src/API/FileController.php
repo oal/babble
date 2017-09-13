@@ -100,16 +100,25 @@ class FileController extends Controller
         $newPath = implode('/', $newPath) . '/' . $dirName;
 
         $fs = new Filesystem();
-        $fs->rename(absPath('uploads/' . $path), absPath('uploads/' . $newPath));
+        $fs->rename(absPath('public/uploads/' . $path), absPath('public/uploads/' . $newPath));
 
         return new JsonResponse([]);
     }
 
-    public function delete(Request $request, $id)
+    public function delete(Request $request, $path)
     {
+        if(strpos($path, '..') !==false) {
+            return new JsonResponse([
+                'error' => 'Invalid file path'
+            ], 400);
+        }
+
+        $fs = new Filesystem();
+        $fs->remove(absPath('public/uploads/' . $path));
+
         return new JsonResponse([
-            'error' => 'Not implemented'
-        ], 400);
+            'message' => 'The file has been removed.'
+        ]);
     }
 
     private function isValidDirectoryName(string $dirName): bool

@@ -177,8 +177,8 @@ class Router
                 return $controller->update($request, $path);
             case 'POST':
                 return $controller->create($request, $path);
-//            case 'DELETE':
-//                return $controller->delete($request, $id);
+            case 'DELETE':
+                return $controller->delete($request, $path);
 //            case 'OPTIONS':
 //                return $controller->describe($request);
         }
