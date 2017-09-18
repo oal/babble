@@ -76,7 +76,7 @@ class Image
         // Return URL if cropped and cached file already exists.
         $absolutePath = absPath('public' . $url);
         $fs = new Filesystem();
-        if ($fs->exists($absolutePath)) return $url;
+//        if ($fs->exists($absolutePath)) return $url;
 
         // Create cache dir location if it doesn't exist.
         $relativeDir = pathinfo($absolutePath, PATHINFO_DIRNAME);
@@ -108,6 +108,7 @@ class Image
         // If crop dimensions are set, apply cropping operation
         if ($cropHeight > 0 && $cropWidth > 0) {
             // TODO: Support rotation and zooming from the Cropper JS component.
+            error_log(json_encode([[$cropX, $cropY], [$cropWidth, $cropHeight], [$cropX+$cropWidth, $cropY+$cropHeight], [$image->getSize()->getWidth(), $image->getSize()->getHeight()]]));
             $image = $image->crop(new Point($cropX, $cropY), new Box($cropWidth, $cropHeight));
         }
 
@@ -152,27 +153,33 @@ class Image
     {
         if ($this->crop) {
             // Use stored crop data.
-            $cropWidth = $this->crop['width'];
-            $cropHeight = $this->crop['height'];
+            $width = $this->crop['width'];
+            $height = $this->crop['height'];
             $cropX = $this->crop['x'];
             $cropY = $this->crop['y'];
         } else {
             // Calculate crop data.
+            // Calculate desired ratio and make as big as possible to start with.
             $ratio = $width / $height;
-            $side = min($size->getWidth(), $size->getHeight());
+            $width = max($width, $size->getWidth());
+            $height = $width / $ratio;
 
-            if ($ratio > 1) {
-                $cropWidth = $side;
-                $cropHeight = $side / $ratio;
-            } else {
-                $cropWidth = $side * $ratio;
-                $cropHeight = $side;
+            // Shrink if needed.
+            if($width > $size->getWidth()) {
+                $widthRatio = $width / $size->getWidth();
+                $width = $size->getWidth();
+                $height /= $widthRatio;
+            }
+            if($height > $size->getHeight()) {
+                $heightRatio = $height / $size->getHeight();
+                $height = $size->getHeight();
+                $width /= $heightRatio;
             }
 
-            $cropX = $size->getWidth() / 2 - $cropWidth / 2;
-            $cropY = $size->getHeight() / 2 - $cropHeight / 2;
+            $cropX = $size->getWidth() / 2 - $width / 2;
+            $cropY = $size->getHeight() / 2 - $height / 2;
         }
 
-        return array($cropWidth, $cropHeight, $cropX, $cropY);
+        return array($width, $height, $cropX, $cropY);
     }
 }
