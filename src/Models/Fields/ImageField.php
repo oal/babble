@@ -79,8 +79,6 @@ class Image
         if ($width == 0) $width = null;
         if ($height == 0) $height = null;
 
-        error_log(json_encode([$width, $height]));
-
         $absolutePath = absPath('public' . $url);
         if ($this->cropData) {
             $img->crop(
@@ -91,7 +89,7 @@ class Image
 
         if ($width && $height) {
             $img->fit($width, $height);
-        } else if ($width || $height) {
+        } else if ($width) {
             $img->resize($width, 0);
         } else if ($height) {
             $img->resize(0, $height);
