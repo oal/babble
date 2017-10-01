@@ -118,8 +118,16 @@ class BaseModel implements JsonSerializable
             if(get_class($field) !== ListField::class) continue;
             $blocks = array_merge($blocks, $field->getBlocks());
         }
-        return $blocks;
 
+        // Avoid loading blocks for List fields twice (keep track of already processed).
+        $processedTypes = [$this->getType()];
+        foreach ($blocks as $block) {
+            if(!in_array($block->getType(), $processedTypes)) {
+                $blocks = array_merge($blocks, $block->getBlocks());
+            }
+        }
+
+        return $blocks;
     }
 
     public function getCacheLocation(string $recordId)
