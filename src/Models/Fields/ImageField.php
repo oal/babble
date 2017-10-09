@@ -54,6 +54,11 @@ class Image
 
     public function crop($width = null, $height = null)
     {
+        if (!$width && !$height) {
+            $width = $this->field->getOption('width') ?? null;
+            $height = $this->field->getOption('height') ?? null;
+        }
+
         $manager = new ImageManager(array('driver' => 'imagick'));
         $path = '/uploads/' . $this->filename;
         if (!$width && !$height && !$this->cropData) return $path;
