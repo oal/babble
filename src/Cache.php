@@ -37,7 +37,9 @@ class Cache
         $filename = $this->pathToCachePath($path);
 
         $content = @file_get_contents($filename);
-        if ($content === false) return null;
+        if ($content === false) {
+            return null;
+        }
         return $content;
     }
 
@@ -62,11 +64,13 @@ class Cache
 
     private function addDependency($modelName, $path)
     {
-        // If it's already tracked this page load. This is needed because file system flushing, and
-        // a light performance increase.
+        // If it's already tracked this page load. This is needed because file system
+        // flushing, and a slight performance increase.
         $strPath = '' . $path;
-        if (array_key_exists($modelName, $this->addedDependencies) &&
-            array_key_exists($strPath, $this->addedDependencies[$modelName])) return;
+        if (array_key_exists($modelName, $this->addedDependencies)
+            && array_key_exists($strPath, $this->addedDependencies[$modelName])) {
+            return;
+        }
 
         // Store dependency for this page load.
         if (!array_key_exists($modelName, $this->addedDependencies)) {
@@ -97,7 +101,9 @@ class Cache
             }
 
             // No need to add it again.
-            if ($dependencyExists) return;
+            if ($dependencyExists) {
+                return;
+            }
         }
 
         // Add Model dependency for this path.
@@ -121,16 +127,23 @@ class Cache
     private function invalidateCache($modelName)
     {
         $dependencyFilename = $this->getModelDependencyFile($modelName);
-        $file = new SplFileObject($dependencyFilename);
+        try {
+            $file = new SplFileObject($dependencyFilename);
+        } catch (\RuntimeException $e) {
+            return;
+        }
 
         $fs = new Filesystem();
 
         // Loop until we reach the end of the file.
         $removeFilenames = [];
         while (!$file->eof()) {
-            // Convert from path (/blog) to cached filename (/blog.html) and add to array.
+            // Convert from path (/blog) to cached filename (/blog.html) and
+            // add to array.
             $dependentPath = trim($file->fgets());
-            if (strlen($dependentPath) === 0) continue;
+            if (strlen($dependentPath) === 0) {
+                continue;
+            }
             $cachedFilename = $this->pathToCachePath($dependentPath);
             $removeFilenames[] = $cachedFilename;
         }
@@ -146,7 +159,10 @@ class Cache
     }
 
     /**
+     * Returns path to dependency file for the given model.
+     * 
      * @param $modelName
+     * 
      * @return string
      */
     private function getModelDependencyFile($modelName): string
