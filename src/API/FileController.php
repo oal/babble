@@ -6,6 +6,7 @@ use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -37,9 +38,15 @@ class FileController extends Controller
         $files = $request->files->all();
         if (count($files) > 0) {
             $targetDir = absPath('public/uploads/' . $path);
-            foreach ($files as $file) {
-                // Check if name already exists and rename.
-                $file->move($targetDir, $file->getClientOriginalName());
+            try {
+                foreach ($files as $file) {
+                    // Check if name already exists and rename.
+                    $file->move($targetDir, $file->getClientOriginalName());
+                }
+            } catch (FileException $e) {
+                return new JsonResponse([
+                    'error' => 'Error saving file: ' . $e->getMessage()
+                ], 400);
             }
         } else {
             $data = json_decode($request->getContent(), true);
@@ -55,7 +62,9 @@ class FileController extends Controller
             $fs->mkdir(absPath('public/uploads/' . $path . '/' . $dirName));
         }
 
-        return new JsonResponse([]);
+        return new JsonResponse([
+            'message' => 'Upload completed.'
+        ]);
     }
 
     public function read(Request $request, $path)
@@ -102,12 +111,14 @@ class FileController extends Controller
         $fs = new Filesystem();
         $fs->rename(absPath('public/uploads/' . $path), absPath('public/uploads/' . $newPath));
 
-        return new JsonResponse([]);
+        return new JsonResponse([
+            'message' => 'The directory has been successfully renamed.'
+        ]);
     }
 
     public function delete(Request $request, $path)
     {
-        if(strpos($path, '..') !==false) {
+        if (strpos($path, '..') !== false) {
             return new JsonResponse([
                 'error' => 'Invalid file path'
             ], 400);
@@ -127,5 +138,4 @@ class FileController extends Controller
         if (preg_match('/^[a-zA-Z0-9-_]+$/', $dirName) !== 1) return false;
         return true;
     }
-
 }
