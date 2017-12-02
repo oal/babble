@@ -88,6 +88,7 @@ class Babble
         if (!$html) {
             return new Response($renderer->renderNotFound(), 404);
         }
+
         return new Response($html);
     }
 

@@ -189,14 +189,15 @@ class TemplateRenderer
      */
     private function renderTemplateFor(Path $path)
     {
-        $isHidden = array_filter(explode('/', $path), function ($dir) {
-            return strlen($dir) > 0 && $dir[0] === '_';
-        });
-        if ($isHidden) return null;
+        if ($path->isHidden()) {
+            return null;
+        }
+
+        $templateDir = pathToTemplateDir($path);
+        $path->bindRoute($templateDir);
+        $templateFile = $templateDir . '/' . $path->getFilename() . '.twig';
 
         $context = ['path' => $path];
-
-        $templateFile = rtrim($path, '/') . '.twig';
         $html = $this->renderTemplate($templateFile, $context);
 
         // Try index file inside a directory with the name of this path's filename unless filename is index.
@@ -232,11 +233,11 @@ class TemplateRenderer
             ->name('/^[A-Z].+\.twig/')
             ->in(absPath('templates/' . $basePath));
 
-        $id = ltrim(substr($path->getWithoutExtension(), strlen($basePath)), '/');
+        $idParts = explode('/', $path->getWithoutExtension());
+        $id = end($idParts);
 
         foreach ($templateFinder as $file) {
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-
             try {
                 $model = new Model($modelNameMaybe);
                 $record = Record::fromDisk($model, $id);
@@ -252,24 +253,12 @@ class TemplateRenderer
     /**
      * Takes the path from a request and finds its template base directory.
      *
-     * @param string $path
+     * @param Path $path
      * @return string
      */
-    public static function pathToDir(string $path): string
+    public static function pathToDir(Path $path): string
     {
-        $basePath = substr($path, 0, strrpos($path, '/'));
-        if ($basePath) {
-            $fs = new Filesystem();
-            while (strlen($basePath) > 0) {
-                if ($fs->exists(absPath('templates/' . $basePath))) {
-                    break;
-                }
-                $pathParts = explode('/', $basePath);
-                array_pop($pathParts);
-                $basePath = implode('/', $pathParts);
-            }
-        }
-        return $basePath;
+        return pathToTemplateDir($path);
     }
 
     private function initResources()
@@ -289,4 +278,43 @@ class TemplateRenderer
 
         $this->resources = $resources;
     }
+}
+
+function pathToTemplateDir(string $path, string $discoveredPath = '')
+{
+    $currentPath = absPath('templates/' . $discoveredPath);
+
+    $pathSplit = explode('/', trim($path, '/'), 2);
+    if (count($pathSplit) === 1) {
+        return $discoveredPath;
+    }
+
+    $finder = new Finder();
+    $varDirs = $finder
+        ->in($currentPath)
+        ->name('/^[$].+/')
+        ->directories()
+        ->depth(0);
+
+    $path = $pathSplit[1];
+    foreach ($varDirs as $varDir) {
+        return pathToTemplateDir($path, $discoveredPath . '/' . $varDir->getBasename());
+    }
+
+    $possibleExactMatch = $discoveredPath . '/' . $pathSplit[0] . '.twig';
+    if (file_exists(absPath('templates/' . $possibleExactMatch))) {
+        return $discoveredPath;
+    }
+
+    $dirHasModelFiles = $finder
+            ->in(absPath('templates/' . $discoveredPath))
+            ->files()
+            ->name('/^[A-Z].+(.twig)$/')
+            ->depth(0)->count() > 0;
+
+    if ($dirHasModelFiles) {
+        return $discoveredPath;
+    }
+
+    return null;
 }
