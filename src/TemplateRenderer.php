@@ -13,6 +13,7 @@ use Babble\Models\Record;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Throwable;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
@@ -83,7 +84,10 @@ class ContentLoaderDecorator extends DependencyTrackedResource
         // Otherwise, call the correct method and return the result (for "where" etc, that will be the loader instance).
         return call_user_func_array(array($loader, $methodName), $args);
     }
+}
 
+class TemplateAbortException extends \Exception
+{
 }
 
 class TemplateRenderer
@@ -111,6 +115,10 @@ class TemplateRenderer
             $twig->addGlobal($modelName, $resource);
         }
 
+        $twig->addFunction(new \Twig_Function('abort', function ($a) {
+            throw new TemplateAbortException();
+        }, ['needs_environment' => true]));
+
         $this->twig = $twig;
     }
 
@@ -127,11 +135,20 @@ class TemplateRenderer
      */
     public function render(Path $path)
     {
-        $html = $this->renderTemplateFor($path);
-        if ($html === null) $html = $this->renderRecordFor($path);
-        if ($html === null && $path->getFilename() !== 'index') {
-            $path = new Path($path . '/index');
-            $html = $this->renderRecordFor($path);
+        try {
+            $html = $this->renderTemplateFor($path);
+            if ($html === null) $html = $this->renderRecordFor($path);
+            if ($html === null && $path->getFilename() !== 'index') {
+                $path = new Path($path . '/index');
+                $html = $this->renderRecordFor($path);
+            }
+        } catch (\Twig_Error_Runtime $e) {
+            // Re-throw if not TemplateAbortException (something else failed)
+            if(!($e->getPrevious() instanceof TemplateAbortException)) {
+                throw $e;
+            }
+            // Nullify $html if TemplateAbortException so we get a 404 instead.
+            $html = null;
         }
         if ($html === null) return null;
 
