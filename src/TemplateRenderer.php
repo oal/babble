@@ -145,7 +145,7 @@ class TemplateRenderer
             }
         } catch (\Twig_Error_Runtime $e) {
             // Re-throw if not TemplateAbortException (something else failed)
-            if(!($e->getPrevious() instanceof TemplateAbortException)) {
+            if (!($e->getPrevious() instanceof TemplateAbortException)) {
                 throw $e;
             }
             // Nullify $html if TemplateAbortException so we get a 404 instead.
@@ -251,8 +251,9 @@ class TemplateRenderer
             ->name('/^[A-Z].+\.twig/')
             ->in(absPath('templates/' . $basePath));
 
-        $idParts = explode('/', $path->getWithoutExtension());
-        $id = end($idParts);
+        // Cut off the base path and treat the rest as resource ID (works for hierarchical models).
+        $numSlashes = count( explode('/', $basePath));
+        $id = implode('/', array_slice(explode('/', $path->getWithoutExtension()), $numSlashes));
 
         foreach ($templateFinder as $file) {
             $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
@@ -308,15 +309,17 @@ function pathToTemplateDir(string $path, string $discoveredPath = '')
     }
 
     $finder = new Finder();
-    $varDirs = $finder
+    $directories = $finder
         ->in($currentPath)
-        ->name('/^[$].+/')
         ->directories()
         ->depth(0);
 
     $path = $pathSplit[1];
-    foreach ($varDirs as $varDir) {
-        return pathToTemplateDir($path, $discoveredPath . '/' . $varDir->getBasename());
+    foreach ($directories as $directory) {
+        $dirName = $directory->getBasename();
+        if ($dirName[0] === '$' || $dirName === $pathSplit[0]) {
+            return pathToTemplateDir($path, $discoveredPath . '/' . $dirName);
+        }
     }
 
     $possibleExactMatch = $discoveredPath . '/' . $pathSplit[0] . '.twig';
