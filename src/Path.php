@@ -82,6 +82,8 @@ class Path
      */
     public function bindRoute(string $templateDir)
     {
+        if(strlen($templateDir) === 0) return;
+
         // $dirsOrVars contains directories or variables like this: ['blog', '$year', '$month', '$day'].
         $dirsOrVars = explode('/', trim($templateDir, '/'));
 

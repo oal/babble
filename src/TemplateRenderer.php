@@ -132,6 +132,7 @@ class TemplateRenderer
      *
      * @param Path $path
      * @return string
+     * @throws \Twig_Error_Runtime
      */
     public function render(Path $path)
     {
