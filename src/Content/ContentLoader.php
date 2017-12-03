@@ -17,6 +17,8 @@ class ContentLoader implements Iterator
     private $model;
     private $filters;
     private $orderBy = ['id', 'asc'];
+    private $skip = 0;
+    private $take = null;
     private $withChildren = false;
     private $parentId;
 
@@ -58,9 +60,26 @@ class ContentLoader implements Iterator
         return $this;
     }
 
+    public function skip($skip)
+    {
+        $this->skip = $skip;
+        return $this;
+    }
+
+    public function take($take)
+    {
+        $this->take = $take;
+        return $this;
+    }
+
+    public function paginate($perPage, $currentPage)
+    {
+        return new Paginator($this, $perPage, $currentPage);
+    }
+
     public function count()
     {
-        if(!$this->arrayIterator) $this->initIterator();
+        if (!$this->arrayIterator) $this->initIterator();
         return iterator_count($this->arrayIterator);
     }
 
@@ -104,15 +123,19 @@ class ContentLoader implements Iterator
             }
 
             $orderBy = $this->orderBy;
-            usort($records, function($a, $b) use ($orderBy) {
+            usort($records, function ($a, $b) use ($orderBy) {
                 $key = $orderBy[0];
                 $val = 0;
-                if($a[$key] < $b[$key]) $val = -1;
+                if ($a[$key] < $b[$key]) $val = -1;
                 else if ($a[$key] > $b[$key]) $val = 1;
 
-                if($orderBy[1] === 'desc') $val *= -1;
+                if ($orderBy[1] === 'desc') $val *= -1;
                 return $val;
             });
+
+            if ($this->skip || $this->take) {
+                $records = array_slice($records, $this->skip, $this->take);
+            }
 
             $this->arrayIterator = new ArrayIterator($records);
         } catch (InvalidArgumentException $e) {
