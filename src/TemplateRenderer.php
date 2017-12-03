@@ -124,7 +124,7 @@ class TemplateRenderer
 
     public function renderNotFound()
     {
-        return $this->renderTemplate('_404.twig');
+        return $this->renderTemplate('/_404.twig');
     }
 
     /**
@@ -136,22 +136,30 @@ class TemplateRenderer
      */
     public function render(Path $path)
     {
-        try {
-            $html = $this->renderTemplateFor($path);
-            if ($html === null) $html = $this->renderRecordFor($path);
-            if ($html === null && $path->getFilename() !== 'index') {
-                $path = new Path($path . '/index');
-                $html = $this->renderRecordFor($path);
-            }
-        } catch (\Twig_Error_Runtime $e) {
-            // Re-throw if not TemplateAbortException (something else failed)
-            if (!($e->getPrevious() instanceof TemplateAbortException)) {
-                throw $e;
-            }
-            // Nullify $html if TemplateAbortException so we get a 404 instead.
-            $html = null;
+        $html = null;
+        $t = new TemplateLocator($path);
+        foreach ($t->next() as $template) {
+            $context = $this->buildContext($path, $template);
+
+            // Skip template if no valid context could be created.
+            if ($context === null) continue;
+
+            // If abort() wasn't called in template, and it returned some HTML, we'll break and return this.
+            $html = $this->renderOrAbort($template, $context);
+            if ($html !== null) break;
         }
-        if ($html === null) return null;
+        if ($html === null) {
+            // If no match is found, it might be that we're looking for an "index" model, so append "/index" adn try
+            // again.
+            $pathWithoutExt = explode('/', $path->getWithoutExtension());
+            $fileWithoutExt = end($pathWithoutExt);
+            if ($fileWithoutExt !== 'index') {
+                return $this->render(new Path($path . '/index'));
+            }
+
+            // Nope, this really is a 404.
+            return null;
+        }
 
         // What ContentLoaders / Models were accessed during render?
         foreach ($this->resources as $modelName => $resource) {
@@ -168,60 +176,17 @@ class TemplateRenderer
         return $html;
     }
 
-    /**
-     * Looks for a matching record and capitalized template name and sets "this" to the matching Record
-     * inside template context.
-     *
-     * @param Path $path
-     * @return null|string
-     */
-    private function renderRecordFor(Path $path)
+    private function renderOrAbort(Template $template, array $context)
     {
-        $record = $this->pathToRecord($path);
-        if ($record === null) return null;
-
-        $basePath = self::pathToDir($path);
-        $modelType = $record->getType();
-        $templateFile = $basePath . '/' . $modelType;
-
-        $extension = pathinfo($path, PATHINFO_EXTENSION);
-        if ($extension) $templateFile .= '.' . $extension;
-        $html = $this->twig->render($templateFile . '.twig', [
-            'this' => new TemplateRecord($record),
-            'path' => $path
-        ]);
-
-        $this->dispatcher->dispatch(
-            RenderDependencyEvent::NAME,
-            new RenderDependencyEvent($record->getType(), $path)
-        );
-
-        return $html;
-    }
-
-    /**
-     * Renders a non-capitalized template matching the given path directly.
-     *
-     * @param Path $path
-     * @return null|string
-     */
-    private function renderTemplateFor(Path $path)
-    {
-        if ($path->isHidden()) {
-            return null;
-        }
-
-        $templateDir = pathToTemplateDir($path);
-        $path->bindRoute($templateDir);
-        $templateFile = $templateDir . '/' . $path->getFilename() . '.twig';
-
-        $context = ['path' => $path];
-        $html = $this->renderTemplate($templateFile, $context);
-
-        // Try index file inside a directory with the name of this path's filename unless filename is index.
-        if (!$html && !$path->getExtension() && $path->getFilename() !== 'index') {
-            $templateFile = $path . '/index.twig';
-            $html = $this->renderTemplate($templateFile, $context);
+        try {
+            $html = $this->renderTemplate($template->getTemplatePath(), $context);
+        } catch (\Twig_Error_Runtime $e) {
+            // Re-throw if not TemplateAbortException (something else failed)
+            if (!($e->getPrevious() instanceof TemplateAbortException)) {
+                throw $e;
+            }
+            // Nullify $html if TemplateAbortException so we get a 404 instead.
+            $html = null;
         }
         return $html;
     }
@@ -229,55 +194,11 @@ class TemplateRenderer
     private function renderTemplate(string $templateFile, array $context = [])
     {
         $fs = new Filesystem();
-        if ($fs->exists(absPath('templates/' . $templateFile))) {
+        if ($fs->exists(absPath('templates' . $templateFile))) {
             $html = $this->twig->render($templateFile, $context);
             return $html;
         }
         return null;
-    }
-
-    /**
-     * @param Path $path
-     * @return null|Record
-     */
-    private function pathToRecord(Path $path)
-    {
-        $basePath = self::pathToDir($path);
-
-        $templateFinder = new Finder();
-        $templateFinder
-            ->files()
-            ->depth(0)
-            ->name('/^[A-Z].+\.twig/')
-            ->in(absPath('templates/' . $basePath));
-
-        // Cut off the base path and treat the rest as resource ID (works for hierarchical models).
-        $numSlashes = count( explode('/', $basePath));
-        $id = implode('/', array_slice(explode('/', $path->getWithoutExtension()), $numSlashes));
-
-        foreach ($templateFinder as $file) {
-            $modelNameMaybe = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-            try {
-                $model = new Model($modelNameMaybe);
-                $record = Record::fromDisk($model, $id);
-                if ($record) return $record;
-            } catch (InvalidModelException $e) {
-            } catch (RecordNotFoundException $e) {
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Takes the path from a request and finds its template base directory.
-     *
-     * @param Path $path
-     * @return string
-     */
-    public static function pathToDir(Path $path): string
-    {
-        return pathToTemplateDir($path);
     }
 
     private function initResources()
@@ -297,45 +218,26 @@ class TemplateRenderer
 
         $this->resources = $resources;
     }
-}
 
-function pathToTemplateDir(string $path, string $discoveredPath = '')
-{
-    $currentPath = absPath('templates/' . $discoveredPath);
+    private function buildContext(Path $path, Template $template)
+    {
+        $context = [
+            'path' => $template->getBoundPath()
+        ];
 
-    $pathSplit = explode('/', trim($path, '/'), 2);
-    if (count($pathSplit) === 1) {
-        return $discoveredPath;
-    }
-
-    $finder = new Finder();
-    $directories = $finder
-        ->in($currentPath)
-        ->directories()
-        ->depth(0);
-
-    $path = $pathSplit[1];
-    foreach ($directories as $directory) {
-        $dirName = $directory->getBasename();
-        if ($dirName[0] === '$' || $dirName === $pathSplit[0]) {
-            return pathToTemplateDir($path, $discoveredPath . '/' . $dirName);
+        if ($template->hasModel()) {
+            $record = $template->getRecord();
+            if ($record !== null) {
+                $context['this'] = new TemplateRecord($record);
+                $this->dispatcher->dispatch(
+                    RenderDependencyEvent::NAME,
+                    new RenderDependencyEvent($record->getType(), $path)
+                );
+            } else {
+                return null;
+            }
         }
+
+        return $context;
     }
-
-    $possibleExactMatch = $discoveredPath . '/' . $pathSplit[0] . '.twig';
-    if (file_exists(absPath('templates/' . $possibleExactMatch))) {
-        return $discoveredPath;
-    }
-
-    $dirHasModelFiles = $finder
-            ->in(absPath('templates/' . $discoveredPath))
-            ->files()
-            ->name('/^[A-Z].+(.twig)$/')
-            ->depth(0)->count() > 0;
-
-    if ($dirHasModelFiles) {
-        return $discoveredPath;
-    }
-
-    return null;
 }

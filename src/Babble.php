@@ -85,7 +85,7 @@ class Babble
         // Generate page and serve.
         $renderer = new TemplateRenderer($this->dispatcher);
         $html = $renderer->render($path);
-        if (!$html) {
+        if ($html === null) {
             return new Response($renderer->renderNotFound(), 404);
         }
 

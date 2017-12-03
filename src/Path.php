@@ -82,7 +82,8 @@ class Path
      */
     public function bindRoute(string $templateDir)
     {
-        if(strlen($templateDir) === 0) return;
+        $this->routeBindings = [];
+        if (strlen($templateDir) === 0) return;
 
         // $dirsOrVars contains directories or variables like this: ['blog', '$year', '$month', '$day'].
         $dirsOrVars = explode('/', trim($templateDir, '/'));
@@ -96,6 +97,13 @@ class Path
             if ($dirOrVar[0] !== '$') continue; // Only bind variables like "$year", and ignore literals like "blog".
 
             $boundVar = substr($dirOrVar, 1); // Drop the dollar sign.
+
+            // If this is matched with a file, it might look like "$page.twig", so we need to drop the extension.
+            $extStart = strpos($boundVar, '.');
+            if ($extStart !== false) {
+                $boundVar = substr($boundVar, 0, $extStart);
+            }
+
             $this->routeBindings[$boundVar] = $varValues[$i];
         }
     }
