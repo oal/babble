@@ -34,6 +34,7 @@ class Model extends BaseModel
         $this->single = ($modelFormat['single'] ?? false) === true;
         $this->initOptions($modelFormat);
         $this->initFields($modelFormat['fields']);
+        $this->initProperties($modelFormat['properties'] ?? []);
     }
 
     public function exists(string $id = null)

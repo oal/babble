@@ -35,15 +35,23 @@ class TemplateRecord implements ArrayAccess, JsonSerializable
         return $loader->childrenOf($this->record->getValue('id'));
     }
 
+    private function renderProperty(string $property)
+    {
+        return $this->record->getModel()->getProperty($property, ['this' => $this]);
+    }
+
 
     public function offsetExists($offset)
     {
-        return !!$this->record->getView($offset);
+        return !!$this->record->getView($offset) || $this->record->getModel()->hasProperty($offset);
     }
 
     public function offsetGet($offset)
     {
-        return $this->record->getView($offset);
+        $result = $this->record->getView($offset);
+        if(!$result) $result = $this->renderProperty($offset);
+
+        return $result;
     }
 
     public function offsetSet($offset, $value)

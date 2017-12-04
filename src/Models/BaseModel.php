@@ -8,6 +8,8 @@ use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
+use Twig_Environment;
+use Twig_Loader_Array;
 
 class BaseModel implements JsonSerializable
 {
@@ -18,6 +20,8 @@ class BaseModel implements JsonSerializable
 
     protected $fields = [];
     private static $fieldRegistry;
+
+    protected $properties;
 
     public function __construct(string $type)
     {
@@ -46,6 +50,7 @@ class BaseModel implements JsonSerializable
 
         $this->initName($modelFormat);
         $this->initFields($modelFormat['fields']);
+        $this->initProperties($modelFormat['properties'] ?? []);
     }
 
     /**
@@ -115,14 +120,14 @@ class BaseModel implements JsonSerializable
     {
         $blocks = [];
         foreach ($this->getFields() as $field) {
-            if(get_class($field) !== ListField::class) continue;
+            if (get_class($field) !== ListField::class) continue;
             $blocks = array_merge($blocks, $field->getBlocks());
         }
 
         // Avoid loading blocks for List fields twice (keep track of already processed).
         $processedTypes = [$this->getType()];
         foreach ($blocks as $block) {
-            if(!in_array($block->getType(), $processedTypes)) {
+            if (!in_array($block->getType(), $processedTypes)) {
                 $blocks = array_merge($blocks, $block->getBlocks());
             }
         }
@@ -133,6 +138,24 @@ class BaseModel implements JsonSerializable
     public function getCacheLocation(string $recordId)
     {
         return '/uploads/_cache/';
+    }
+
+    protected function initProperties(array $properties)
+    {
+        // TODO: Validation.
+        $loader = new Twig_Loader_Array($properties);
+        $twig = new Twig_Environment($loader);
+        $this->properties = $twig;
+    }
+
+    public function getProperty(string $property, $context)
+    {
+        return $this->properties->render($property, $context);
+    }
+
+    public function hasProperty(string $property)
+    {
+        return $this->properties->getLoader()->exists($property);
     }
 }
 
