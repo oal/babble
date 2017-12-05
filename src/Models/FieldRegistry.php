@@ -25,6 +25,7 @@ class FieldRegistry
         $this->register('list', Fields\ListField::class);
         $this->register('markdown', Fields\MarkdownField::class);
         $this->register('password', Fields\PasswordField::class);
+        $this->register('tags', Fields\TagsField::class);
         $this->register('text', Fields\TextField::class);
     }
 
