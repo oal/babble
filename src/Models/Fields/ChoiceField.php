@@ -3,7 +3,9 @@
 namespace Babble\Models\Fields;
 
 
+use Babble\Models\Model;
 use Babble\Models\Record;
+use Babble\Models\TemplateRecord;
 
 class ChoiceField extends Field
 {
@@ -14,7 +16,15 @@ class ChoiceField extends Field
 
     public function getView($data)
     {
-        return new ChoiceView($this, $data);
+        if (!isset($data)) return null;
+
+        $modelType = $this->getOption('model');
+        if ($modelType) {
+            $record = Record::fromDisk(new Model($modelType), $data);
+            return new TemplateRecord($record);
+        } else {
+            return new ChoiceView($this, $data);
+        }
     }
 }
 
@@ -23,7 +33,7 @@ class ChoiceView
     private $field;
     private $value;
 
-    public function __construct(ChoiceField $field, string $value)
+    public function __construct(ChoiceField $field, $value)
     {
         $this->field = $field;
         $this->value = $value;

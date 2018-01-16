@@ -68,7 +68,7 @@ class Image
         // Return URL if cropped and cached file already exists.
         $absolutePath = absPath('public' . $url);
         $fs = new Filesystem();
-        if ($fs->exists($absolutePath)) return $url;
+//        if ($fs->exists($absolutePath)) return $url;
 
         // Create cache dir location if it doesn't exist.
         $relativeDir = pathinfo($absolutePath, PATHINFO_DIRNAME);
@@ -86,6 +86,16 @@ class Image
 
         $absolutePath = absPath('public' . $url);
         if ($this->cropData) {
+            $flipX = ((int)$this->cropData['scaleX'] ?? 0) === -1;
+            if($flipX) $img->flip('h');
+
+            $flipY = ((int)$this->cropData['scaleY'] ?? 0) === -1;
+            if($flipY) $img->flip('v');
+
+            if(array_key_exists('rotate', $this->cropData)) {
+                $img->rotate(-(float)$this->cropData['rotate']);
+            }
+
             $img->crop(
                 (int)$this->cropData['width'], (int)$this->cropData['height'],
                 (int)$this->cropData['x'], (int)$this->cropData['y']
