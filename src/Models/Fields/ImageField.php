@@ -68,7 +68,7 @@ class Image
         // Return URL if cropped and cached file already exists.
         $absolutePath = absPath('public' . $url);
         $fs = new Filesystem();
-//        if ($fs->exists($absolutePath)) return $url;
+        if ($fs->exists($absolutePath)) return $url;
 
         // Create cache dir location if it doesn't exist.
         $relativeDir = pathinfo($absolutePath, PATHINFO_DIRNAME);
