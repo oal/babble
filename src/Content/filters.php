@@ -26,24 +26,44 @@ class WhereFilter implements ContentFilter
     public function isMatch(Record $record): bool
     {
         $key = $record->getValue($this->key);
-        $value = $this->value;
+        $field = $record->getModel()->getField($this->key);
 
         switch ($this->comparison) {
             case '=':
-                return $key == $value;
+                return $field->isEqual($key, $this->value);
             case '!=':
-                return $key != $value;
+                return $field->isNotEqual($key, $this->value);
             case '<':
-                return $key < $value;
+                return $field->isLess($key, $this->value);
             case '>':
-                return $key > $value;
+                return $field->isGreater($key, $this->value);
             case '<=':
-                return $key <= $value;
+                return $field->isLessOrEqual($key, $this->value);
             case '>=':
-                return $key >= $value;
+                return $field->isGreater($key, $this->value);
         }
 
         throw new Exception('Invalid comparison operator "' . $this->comparison . '".');
+    }
+}
+
+class WhereContainsFilter implements ContentFilter
+{
+    private $key;
+    private $value;
+
+    public function __construct($key, $value)
+    {
+        $this->key = $key;
+        $this->value = $value;
+    }
+
+    public function isMatch(Record $record): bool
+    {
+        $storedValue = $record->getValue($this->key);
+        $field = $record->getModel()->getField($this->key);
+
+        return $field->contains($storedValue, $this->value);
     }
 }
 

@@ -5,15 +5,14 @@ namespace Babble;
 use Babble\Content\ContentLoader;
 use Babble\Events\RenderDependencyEvent;
 use Babble\Events\RenderEvent;
-use Babble\Exceptions\InvalidModelException;
 use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\TemplateRecord;
 use Babble\Models\Model;
 use Babble\Models\Record;
+use Cocur\Slugify\Bridge\Twig\SlugifyExtension;
+use Cocur\Slugify\Slugify;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Throwable;
 use Twig_Environment;
 use Twig_Loader_Filesystem;
 
@@ -118,6 +117,8 @@ class TemplateRenderer
         $twig->addFunction(new \Twig_Function('abort', function ($a) {
             throw new TemplateAbortException();
         }, ['needs_environment' => true]));
+
+        $twig->addExtension(new SlugifyExtension(Slugify::create()));
 
         $this->twig = $twig;
     }

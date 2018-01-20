@@ -72,4 +72,45 @@ class Field implements JsonSerializable
     {
         $this->options = $data['options'] ?? [];
     }
+
+    // Generic comparisons
+    public function isEqual($a, $b)
+    {
+        return $a == $b;
+    }
+
+    public function isNotEqual($a, $b)
+    {
+        return $a != $b;
+    }
+
+    public function isLess($a, $b)
+    {
+        return $a < $b;
+    }
+
+    public function isGreater($a, $b)
+    {
+        return $a > $b;
+    }
+
+    public function isLessOrEqual($a, $b)
+    {
+        return $a <= $b;
+    }
+
+    public function isGreaterOrEqual($a, $b)
+    {
+        return $a >= $b;
+    }
+
+    /**
+     * @param $data
+     * @param $value
+     * @throws \Exception
+     */
+    public function contains($data, $value)
+    {
+        throw new \Exception('Contains is not implemented for this field type.');
+    }
 }

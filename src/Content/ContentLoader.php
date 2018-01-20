@@ -54,6 +54,18 @@ class ContentLoader implements Iterator
         return $this;
     }
 
+    public function whereContains($key, $value)
+    {
+        $this->filters->and(new WhereContainsFilter($key, $value));
+        return $this;
+    }
+
+    public function orWhereContains($key, $value)
+    {
+        $this->filters->or(new WhereContainsFilter($key, $value));
+        return $this;
+    }
+
     public function orderBy($key, $direction = 'desc')
     {
         $this->orderBy = [$key, strtolower($direction)];
@@ -198,6 +210,7 @@ class ContentLoader implements Iterator
      */
     public function current()
     {
+        if (!$this->arrayIterator) $this->initIterator();
         return $this->arrayIterator->current();
     }
 
