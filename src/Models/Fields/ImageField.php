@@ -86,10 +86,10 @@ class Image
 
         $absolutePath = absPath('public' . $url);
         if ($this->cropData) {
-            $flipX = ((int)$this->cropData['scaleX'] ?? 0) === -1;
+            $flipX = ((int)($this->cropData['scaleX'] ?? 0)) === -1;
             if($flipX) $img->flip('h');
 
-            $flipY = ((int)$this->cropData['scaleY'] ?? 0) === -1;
+            $flipY = ((int)($this->cropData['scaleY'] ?? 0)) === -1;
             if($flipY) $img->flip('v');
 
             if(array_key_exists('rotate', $this->cropData)) {
