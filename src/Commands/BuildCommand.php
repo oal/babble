@@ -18,7 +18,7 @@ class BuildCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $walker = new StaticSiteGenerator();
+        $walker = new StaticSiteGenerator($output);
         $walker->build();
     }
 }
