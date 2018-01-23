@@ -121,5 +121,34 @@ class Model extends BaseModel
         if (!$shortestFile) return '/';
         return '/' . $shortestFile->getRelativePath();
     }
+
+    public function jsonSchema()
+    {
+        $schema = parent::jsonSchema();
+
+        if (!$this->isSingle()) {
+            $validIdCharacters = $this->getValidIdCharacters();
+            $schema['required'][] = 'id';
+            $schema['properties']['id'] = [
+                'type' => 'string',
+                'minLength' => 1,
+                'pattern' => "^([$validIdCharacters]+)$"
+            ];
+        }
+
+        return $schema;
+    }
+
+    /**
+     * @return string
+     */
+    private function getValidIdCharacters(): string
+    {
+        $validIdCharacters = 'a-z0-9-_';
+        if ($this->isHierarchical()) {
+            $validIdCharacters .= '\/';
+        }
+        return $validIdCharacters;
+    }
 }
 

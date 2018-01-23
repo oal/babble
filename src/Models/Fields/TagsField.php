@@ -30,7 +30,15 @@ class TagsField extends Field
         return false;
     }
 
-
+    function jsonSchema(): array
+    {
+        return [
+            'type' => 'array',
+            'items' => [
+                'type' => 'string'
+            ]
+        ];
+    }
 }
 
 class TagsView implements \IteratorAggregate

@@ -10,4 +10,11 @@ class TextField extends Field
     {
         return strlen($value) > 2; // TODO: Add proper validation.
     }
+
+    function jsonSchema(): array
+    {
+        return [
+            'type' => 'string'
+        ];
+    }
 }

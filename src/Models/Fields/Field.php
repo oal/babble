@@ -38,6 +38,10 @@ class Field implements JsonSerializable
         return $data;
     }
 
+    function jsonSchema(): array {
+        return [];
+    }
+
     function jsonSerialize()
     {
         return [

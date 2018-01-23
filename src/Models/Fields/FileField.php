@@ -18,4 +18,11 @@ class FileField extends Field
     {
         return '/uploads/' . $data;
     }
+
+    function jsonSchema(): array
+    {
+        return [
+            'type' => 'string'
+        ];
+    }
 }

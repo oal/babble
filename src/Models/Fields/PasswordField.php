@@ -24,4 +24,11 @@ class PasswordField extends Field
         // Never expose hash through the API / in JSON.
         return null;
     }
+
+    function jsonSchema(): array
+    {
+        return [
+            'type' => 'string'
+        ];
+    }
 }

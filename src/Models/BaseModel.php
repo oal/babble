@@ -106,6 +106,28 @@ class BaseModel implements JsonSerializable
         }
     }
 
+    public function jsonSchema()
+    {
+        $fieldsSchema = [];
+        foreach ($this->fields as $key => $field) {
+            $schema = $field->jsonSchema();
+            if (!$schema) continue;
+            $fieldsSchema[$key] = $schema;
+        }
+
+        return [
+            '$schema' => 'http://json-schema.org/draft-04/schema',
+            'type' => 'object',
+            'required' => ['fields'],
+            'properties' => [
+                'fields' => [
+                    'type' => 'object',
+                    'properties' => $fieldsSchema
+                ]
+            ]
+        ];
+    }
+
     public function jsonSerialize()
     {
         return [

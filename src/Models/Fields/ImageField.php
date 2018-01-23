@@ -32,6 +32,46 @@ class ImageField extends FileField
         if (!$data) return '';
         return new Image($this, $data);
     }
+
+    function jsonSchema(): array
+    {
+        return [
+            'type' => 'object',
+            'required' => ['filename'],
+            'properties' => [
+                'filename' => [
+                    'type' => 'string'
+                ],
+                'crop' => [
+                    'type' => 'object',
+                    'required' => ['x', 'y', 'width', 'height'],
+                    'properties' => [
+                        'x' => [
+                            'type' => 'number'
+                        ],
+                        'y' => [
+                            'type' => 'number'
+                        ],
+                        'width' => [
+                            'type' => 'number'
+                        ],
+                        'height' => [
+                            'type' => 'number'
+                        ],
+                        'rotate' => [
+                            'type' => 'number'
+                        ],
+                        'scaleX' => [
+                            'type' => 'number'
+                        ],
+                        'scaleY' => [
+                            'type' => 'number'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
 }
 
 class Image
@@ -87,12 +127,12 @@ class Image
         $absolutePath = absPath('public' . $url);
         if ($this->cropData) {
             $flipX = ((int)($this->cropData['scaleX'] ?? 0)) === -1;
-            if($flipX) $img->flip('h');
+            if ($flipX) $img->flip('h');
 
             $flipY = ((int)($this->cropData['scaleY'] ?? 0)) === -1;
-            if($flipY) $img->flip('v');
+            if ($flipY) $img->flip('v');
 
-            if(array_key_exists('rotate', $this->cropData)) {
+            if (array_key_exists('rotate', $this->cropData)) {
                 $img->rotate(-(float)$this->cropData['rotate']);
             }
 

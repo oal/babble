@@ -12,4 +12,11 @@ class MarkdownField extends TextField
         $parser = new MarkdownExtra();
         return $parser->transform($data);
     }
+
+    function jsonSchema(): array
+    {
+        return [
+            'type' => 'string'
+        ];
+    }
 }

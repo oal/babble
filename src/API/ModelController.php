@@ -8,6 +8,8 @@ use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\Model;
 use Babble\Models\Record;
 use Exception;
+use JsonSchema\Constraints\Constraint;
+use JsonSchema\Validator;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,7 +35,14 @@ class ModelController extends Controller
             ], 400);
         }
 
-        $data = json_decode($request->getContent(), true);
+        $data = $this->getContentFromRequest($request);
+
+        $validator = $this->validate($id, $data);
+        if (!$validator->isValid()) {
+            return new JsonResponse([
+                'errors' => $validator->getErrors()
+            ], 419);
+        }
 
         // Save model instance.
         $record = new Record($this->model, $id);
@@ -65,9 +74,9 @@ class ModelController extends Controller
         if (!empty($id)) return $this->readOne($loader, $id);
 
         $sort = $request->get('sort');
-        if($sort) {
+        if ($sort) {
             $sortDirection = 'asc';
-            if(substr($sort, 0, 1) === '-') {
+            if (substr($sort, 0, 1) === '-') {
                 $sortDirection = 'desc';
                 $sort = substr($sort, 1);
             }
@@ -100,7 +109,14 @@ class ModelController extends Controller
 
     public function update(Request $request, $id)
     {
-        $data = json_decode($request->getContent(), true);
+        $data = $this->getContentFromRequest($request);
+
+        $validator = $this->validate($id, $data);
+        if (!$validator->isValid()) {
+            return new JsonResponse([
+                'errors' => $validator->getErrors()
+            ], 419);
+        }
 
         // If ID was changed and new ID is already taken.
         $oldId = $data['_old_id'] ?? null;
@@ -152,5 +168,38 @@ class ModelController extends Controller
             'model' => $this->model,
             'blocks' => $this->model->getBlocks()
         ]);
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    private function getContentFromRequest(Request $request): array
+    {
+        $data = json_decode($request->getContent(), true);
+        foreach ($data as $key => $value) {
+            if ($value === null || $value === '') {
+                unset($data[$key]);
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * @param $id
+     * @param $data
+     * @return Validator
+     */
+    private function validate($id, $data): \JsonSchema\Validator
+    {
+        $modelData = [
+            'id' => $id,
+            'fields' => $data
+        ];
+
+        $validator = new \JsonSchema\Validator();
+        $validator->validate($modelData, $this->model->jsonSchema(), Constraint::CHECK_MODE_TYPE_CAST);
+
+        return $validator;
     }
 }

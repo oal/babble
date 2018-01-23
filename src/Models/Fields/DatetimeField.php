@@ -16,4 +16,12 @@ class DatetimeField extends Field
     public function getView($data) {
         return Carbon::parse($data);
     }
+
+    function jsonSchema(): array
+    {
+        return [
+            'type' => 'string',
+            'format' => 'date-time'
+        ];
+    }
 }

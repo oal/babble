@@ -165,7 +165,6 @@ class Router
     private
     function handleFileRoute($request, array $parameters)
     {
-        error_log(json_encode($parameters));
         $controller = new FileController();
         $method = $request->getMethod();
 

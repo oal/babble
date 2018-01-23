@@ -15,4 +15,11 @@ class BooleanField extends Field
     {
         return $data === true;
     }
+
+    function jsonSchema(): array
+    {
+        return [
+            'type' => 'boolean'
+        ];
+    }
 }
