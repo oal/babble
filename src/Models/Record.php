@@ -45,14 +45,14 @@ class Record implements JsonSerializable
 
         $columns = $this->data;
         foreach ($columns as $key => $column) {
-//            $ok = $column->validate();
-//            if (!$ok) return;
             if (array_key_exists($key, $data)) {
                 $column->setValue($data[$key]);
+            } else {
+                $column->setValue(null);
             }
         }
 
-        $yaml = Yaml::dump($this->getData(), 5, 4, YAML::DUMP_MULTI_LINE_LITERAL_BLOCK|YAML::DUMP_OBJECT_AS_MAP);
+        $yaml = Yaml::dump($this->getData(), 5, 4, YAML::DUMP_MULTI_LINE_LITERAL_BLOCK | YAML::DUMP_OBJECT_AS_MAP);
 
         $fs = new Filesystem();
         $fs->dumpFile($this->getContentFilePath(), $yaml);

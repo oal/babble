@@ -13,8 +13,8 @@ class TextField extends Field
 
     function jsonSchema(): array
     {
-        return [
+        return array_merge([
             'type' => 'string'
-        ];
+        ], parent::jsonSchema());
     }
 }

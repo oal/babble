@@ -108,8 +108,12 @@ class BaseModel implements JsonSerializable
 
     public function jsonSchema()
     {
+        $requiredFields = [];
         $fieldsSchema = [];
         foreach ($this->fields as $key => $field) {
+            if ($field->isRequired()) {
+                $requiredFields[] = $key;
+            }
             $schema = $field->jsonSchema();
             if (!$schema) continue;
             $fieldsSchema[$key] = $schema;
@@ -122,6 +126,7 @@ class BaseModel implements JsonSerializable
             'properties' => [
                 'fields' => [
                     'type' => 'object',
+                    'required' => $requiredFields,
                     'properties' => $fieldsSchema
                 ]
             ]
