@@ -52,7 +52,7 @@ class Record implements JsonSerializable
             }
         }
 
-        $yaml = Yaml::dump($this->getData(), 5, 4);
+        $yaml = Yaml::dump($this->getData(), 5, 4, YAML::DUMP_MULTI_LINE_LITERAL_BLOCK|YAML::DUMP_OBJECT_AS_MAP);
 
         $fs = new Filesystem();
         $fs->dumpFile($this->getContentFilePath(), $yaml);
@@ -142,7 +142,11 @@ class Record implements JsonSerializable
 
     function jsonSerialize()
     {
-        return array_merge(['id' => $this->id], $this->data);
+        $computedFields = ['id' => $this->id];
+        if ($this->getModel()->hasProperty('permalink')) {
+            $computedFields['_permalink'] = $this->getModel()->getProperty('permalink', ['this' => new TemplateRecord($this)]);
+        }
+        return array_merge($computedFields, $this->data);
     }
 
     public function getModel(): Model

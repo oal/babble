@@ -75,7 +75,6 @@ class FileController extends Controller
             ], 400);
         };
 
-
         $finder = new Finder();
 
         if (!$path) $path = '';

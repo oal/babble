@@ -56,21 +56,41 @@ class Router
 
     private function checkAuth(Request $request): bool
     {
+        $user = $this->getUserFromSession();
+        if (!$user) {
+            $authHeader = $request->headers->get('Authorization');
+            $user = $this->getUserFromAuthHeaders($authHeader);
+        }
+
+        if (!$user) return false;
+
+        $this->session->set('username', $user->getValue('id'));
+        return true;
+    }
+
+    public function getUserFromSession()
+    {
         $model = new Model('User');
 
         // Check session auth.
         $sessionUsername = $this->session->get('username');
         if ($sessionUsername) {
             try {
-                Record::fromDisk($model, $sessionUsername);
-                return true;
+                $user = Record::fromDisk($model, $sessionUsername);
+                return $user;
             } catch (RecordNotFoundException $e) {
                 return false;
             }
         }
 
-        // Check basic auth;
-        $authHeader = $request->headers->get('Authorization');
+        return false;
+    }
+
+    private function getUserFromAuthHeaders($authHeader)
+    {
+        $model = new Model('User');
+
+        // Check basic auth.
         $authParts = explode(' ', $authHeader, 2);
         if ($authParts[0] !== 'Basic' || count($authParts) !== 2) return false;
 
@@ -83,17 +103,19 @@ class Router
         try {
             $user = Record::fromDisk($model, $username);
         } catch (RecordNotFoundException $e) {
-            return false;
+            return null;
         }
-        if (!$user->getValue('is_active')) return false;
+
+        if (!$user->getValue('is_active')) {
+            return null;
+        }
 
         $storedHash = $user->getValue('password');
         $ok = password_verify($password, $storedHash);
-        if ($ok) {
-            $this->session->set('username', $user->getValue('id'));
-        }
 
-        return $ok;
+        if (!$ok) return null;
+
+        return $user;
     }
 
     private function addRoutes()

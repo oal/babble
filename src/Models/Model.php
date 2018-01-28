@@ -135,7 +135,6 @@ class Model extends BaseModel
                 'pattern' => "^([$validIdCharacters]+)$"
             ];
         }
-
         return $schema;
     }
 
