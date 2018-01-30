@@ -79,11 +79,11 @@ class Router
                 $user = Record::fromDisk($model, $sessionUsername);
                 return $user;
             } catch (RecordNotFoundException $e) {
-                return false;
+                return null;
             }
         }
 
-        return false;
+        return null;
     }
 
     private function getUserFromAuthHeaders($authHeader)

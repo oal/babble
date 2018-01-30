@@ -56,14 +56,14 @@ class Path
     public function is(string $url)
     {
         $url = rtrim($url, '/');
-        $clean = $this->clean();
+        $clean = rtrim($this, '/');
         return strpos($clean, $url) === 0;
     }
 
     public function isExactly(string $url)
     {
         $url = rtrim($url, '/');
-        $clean = $this->clean();
+        $clean = rtrim($this, '/');
         return $clean == $url;
     }
 
