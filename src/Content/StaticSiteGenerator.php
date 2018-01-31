@@ -94,7 +94,6 @@ class StaticSiteGenerator
     private function render(Path $pathObject)
     {
         $path = '' . $pathObject;
-        if ($path === '/') $path = '/index'; // Avoid index rendering twice.
 
         // Skip already rendered pages.
         if (array_key_exists($path, $this->processedPaths)) return;
@@ -117,14 +116,29 @@ class StaticSiteGenerator
         $crawler = new Crawler($html);
         foreach ($crawler->filterXPath('//*[starts-with(@href, "/")]') as $domElement) {
             $href = $domElement->getAttribute('href');
+            $url = parse_url($href);
+
+            // Don't crawl other domains.
+            if (isset($url['host'])) {
+                continue;
+            }
+
+            // Drop fragment etc.
+            $path = rtrim($url['path'], '/');
+
+            // Use index if no filename is set (also handles /.amp and similar cases).
+            $filename = pathinfo($path, PATHINFO_FILENAME);
+            if(!$filename) {
+                $path = '/index';
+            }
 
             // Skip absolute paths without protocol, static directory and uploads directory.
-            if (strpos($href, '//') === 0 || strpos($href, '/static/') === 0 || strpos($href, '/uploads/') === 0) {
+            if (strpos($path, '/static/') === 0 || strpos($path, '/uploads/') === 0) {
                 continue;
             }
 
             // Render discovered path.
-            $discoveredPath = new Path($href);
+            $discoveredPath = new Path($path);
             $this->render($discoveredPath);
         }
     }
