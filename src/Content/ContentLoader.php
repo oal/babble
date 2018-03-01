@@ -138,8 +138,10 @@ class ContentLoader implements Iterator
             usort($records, function ($a, $b) use ($orderBy) {
                 $key = $orderBy[0];
                 $val = 0;
-                if ($a[$key] < $b[$key]) $val = -1;
-                else if ($a[$key] > $b[$key]) $val = 1;
+                $aKey = $a[$key] ?? null;
+                $bKey = $b[$key] ?? null;
+                if ($aKey < $bKey) $val = -1;
+                else if ($aKey > $bKey) $val = 1;
 
                 if ($orderBy[1] === 'desc') $val *= -1;
                 return $val;
