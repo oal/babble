@@ -90,7 +90,7 @@ class BaseModel implements JsonSerializable
         $this->name = $modelFormat['name'];
         if (!empty($modelFormat['name_plural'])) {
             $this->namePlural = $modelFormat['name_plural'];
-        } else if (substr($this->name, count($this->name) - 1) === 's') {
+        } else if (substr($this->name, strlen($this->name) - 1) === 's') {
             $this->namePlural = $this->name;
         } else {
             $this->namePlural = $this->name . 's';
