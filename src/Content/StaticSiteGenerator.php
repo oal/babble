@@ -17,12 +17,17 @@ class StaticSiteGenerator
     private $renderer;
     private $processedPaths = [];
     private $output;
+    /**
+     * @var string
+     */
+    private $baseUrl;
 
-    public function __construct(OutputInterface $output)
+    public function __construct(OutputInterface $output, string $baseUrl)
     {
         $dispatcher = new EventDispatcher();
         $this->renderer = new TemplateRenderer($dispatcher);
         $this->output = $output;
+        $this->baseUrl = $baseUrl;
     }
 
 
@@ -57,6 +62,8 @@ class StaticSiteGenerator
         // Create symlinks to static assets and uploads.
         $fs->symlink(absPath('public/static'), absPath('build/static'));
         $fs->symlink(absPath('public/uploads'), absPath('build/uploads'));
+
+        $fs->dumpFile(absPath('build/sitemap.xml'), $this->buildSitemap());
     }
 
     private function renderPage(string $relativePath)
@@ -96,10 +103,13 @@ class StaticSiteGenerator
         $path = '' . $pathObject;
 
         // Skip already rendered pages.
-        if (array_key_exists($path, $this->processedPaths)) return;
+        if (array_key_exists($path, $this->processedPaths)) {
+            $this->processedPaths[$path] += 1;
+            return;
+        }
 
         // Mark current page as processed / rendered.
-        $this->processedPaths[$path] = true;
+        $this->processedPaths[$path] = 1;
 
         // Attempt to render Log error if rendering fails (404 or other error).
         $html = $this->renderer->render($pathObject);
@@ -128,7 +138,7 @@ class StaticSiteGenerator
 
             // Use index if no filename is set (also handles /.amp and similar cases).
             $filename = pathinfo($path, PATHINFO_FILENAME);
-            if(!$filename) {
+            if (!$filename) {
                 $path = '/index';
             }
 
@@ -173,5 +183,19 @@ class StaticSiteGenerator
     {
         if (!$this->output) return;
         $this->output->write("<$type>$message</$type>\n");
+    }
+
+    private function buildSitemap()
+    {
+        $urls = [];
+        foreach (array_keys($this->processedPaths) as $path) {
+            $path = new Path($path);
+            if ($path->getFilename() === 'index') $path = $path->getDirectory();
+
+            $url = $this->baseUrl . $path . '/';
+            $urls[] = "<url><loc>$url</loc></url>";
+        }
+
+        return '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . implode('', $urls) . '</urlset>';
     }
 }

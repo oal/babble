@@ -5,6 +5,7 @@ namespace Babble\Commands;
 use Babble\Content\StaticSiteGenerator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class BuildCommand extends Command
@@ -13,12 +14,16 @@ class BuildCommand extends Command
     {
         $this
             ->setName('build')
+            ->addOption('host', null, InputOption::VALUE_REQUIRED, '')
+            ->addOption('scheme', 's', InputOption::VALUE_OPTIONAL, '', 'http')
             ->setDescription('Builds static HTML files for your website.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $walker = new StaticSiteGenerator($output);
+        $baseUrl = $input->getOption('scheme') . '://' . $input->getOption('host');
+        $output->writeln("<info>$baseUrl</info>");
+        $walker = new StaticSiteGenerator($output, $baseUrl);
         $walker->build();
     }
 }
