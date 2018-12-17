@@ -2,9 +2,12 @@
 
 namespace Babble\API;
 
+use Babble\Config;
+use Babble\Content\StaticSiteGenerator;
 use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\Model;
 use Babble\Models\Record;
+use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,13 +24,18 @@ class Router
     private $router;
     private $dispatcher;
     private $session;
+    /**
+     * @var Config
+     */
+    private $config;
 
-    public function __construct(EventDispatcher $dispatcher)
+    public function __construct(EventDispatcher $dispatcher, Config $config)
     {
         $this->dispatcher = $dispatcher;
         $this->router = new RouteCollection();
         $this->session = new Session();
         $this->addRoutes();
+        $this->config = $config;
     }
 
     public function handleRequest(Request $request): Response
@@ -45,6 +53,10 @@ class Router
         switch ($parameters['_route']) {
             case 'login':
                 return $this->handleLoginRoute($request);
+            case 'config':
+                return $this->handleConfigRoute($request);
+            case 'build':
+                return $this->handleBuildRoute($request);
             case 'resources':
                 return $this->handleModelRoute($request, $parameters);
             case 'models':
@@ -126,6 +138,12 @@ class Router
         $modelsRoute = new Route('/api/models');
         $this->router->add('models', $modelsRoute);
 
+        $configRoute = new Route('/api/config');
+        $this->router->add('config', $configRoute);
+
+        $buildRoute = new Route('/api/build');
+        $this->router->add('build', $buildRoute);
+
         $modelRoute = new Route('/api/models/{model}/{id}', ['id' => null], ['id' => '.+']); // TODO: Limit to safe characters.
         $this->router->add('resources', $modelRoute);
 
@@ -149,8 +167,7 @@ class Router
         ], 401);
     }
 
-    private
-    function handleModelRoute(Request $request, array $parameters)
+    private function handleModelRoute(Request $request, array $parameters)
     {
         $controller = new ModelController($this->dispatcher, $parameters['model']);
         $method = $request->getMethod();
@@ -171,8 +188,7 @@ class Router
         return null;
     }
 
-    private
-    function handleRootRoute($request)
+    private function handleRootRoute($request)
     {
         $controller = new RootController();
         $method = $request->getMethod();
@@ -184,8 +200,7 @@ class Router
         return null;
     }
 
-    private
-    function handleFileRoute($request, array $parameters)
+    private function handleFileRoute($request, array $parameters)
     {
         $controller = new FileController();
         $method = $request->getMethod();
@@ -204,5 +219,32 @@ class Router
 //                return $controller->describe($request);
         }
         return null;
+    }
+
+    private function handleConfigRoute(Request $request)
+    {
+        if ($request->getMethod() !== 'GET') return null;
+
+
+        return new JsonResponse($this->config->toArray());
+    }
+
+    private function handleBuildRoute(Request $request)
+    {
+        if ($request->getMethod() !== 'POST') return null;
+
+        $stream = fopen('php://memory','r+');
+        $output = new StreamOutput($stream);
+
+        $walker = new StaticSiteGenerator($output, '');
+        $walker->build();
+
+        rewind($stream);
+        $output = stream_get_contents($stream);
+        fclose($stream);
+
+        return new JsonResponse([
+            'log' => $output
+        ]);
     }
 }

@@ -56,7 +56,7 @@ class Babble
 
     private function handleAPIRequest(Request $request): Response
     {
-        $router = new API\Router($this->dispatcher);
+        $router = new API\Router($this->dispatcher, $this->config);
         return $router->handleRequest($request);
     }
 

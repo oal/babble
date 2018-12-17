@@ -7,7 +7,12 @@ use Symfony\Component\Yaml\Yaml;
 
 class Config
 {
-    private $config;
+    // Defaults.
+    private $config = [
+        'cache' => false,
+        'debug' => false,
+        'api' => false
+    ];
 
     public function __construct(string $currentHost)
     {
@@ -35,5 +40,10 @@ class Config
     public function get($key)
     {
         return $this->config[$key];
+    }
+
+    public function toArray()
+    {
+        return $this->config;
     }
 }
