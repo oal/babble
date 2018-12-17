@@ -122,6 +122,8 @@ class Image
             return '';
         }
 
+        $img->orientate();
+
         if ($width == 0) $width = null;
         if ($height == 0) $height = null;
 
