@@ -58,6 +58,12 @@ class Field implements JsonSerializable
         ];
     }
 
+    public function __toString()
+    {
+        return json_encode($this);
+    }
+
+
     public function getOption($key)
     {
         return $this->options[$key] ?? null;

@@ -2,6 +2,7 @@
 
 namespace Babble;
 
+use Babble\Commands\GenerateOpenApiCommand;
 use Babble\Commands\ServeCommand;
 use Symfony\Component\Console\Application;
 use Babble\Commands\BuildCommand;
@@ -14,6 +15,7 @@ class CLI
 
         $app->add(new BuildCommand());
         $app->add(new ServeCommand());
+        $app->add(new GenerateOpenApiCommand());
 
         $app->run();
     }

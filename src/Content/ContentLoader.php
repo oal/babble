@@ -30,6 +30,11 @@ class ContentLoader implements Iterator
         $this->filters = new FilterContainer();
     }
 
+    public function field($name)
+    {
+        return $this->model->getField($name);
+    }
+
     public function find($id)
     {
         $fs = new Filesystem();

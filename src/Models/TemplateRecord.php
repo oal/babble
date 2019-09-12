@@ -40,6 +40,11 @@ class TemplateRecord implements ArrayAccess, JsonSerializable
         return $this->record->getModel()->getProperty($property, ['this' => $this]);
     }
 
+    public function field($name)
+    {
+        return $this->record->getModel()->getField($name);
+    }
+
 
     public function offsetExists($offset)
     {
