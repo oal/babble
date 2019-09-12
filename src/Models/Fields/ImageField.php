@@ -6,6 +6,7 @@ use Babble\Models\Record;
 use Intervention\Image\Exception\NotReadableException;
 use Symfony\Component\Filesystem\Filesystem;
 use Intervention\Image\ImageManager;
+use Spatie\ImageOptimizer\OptimizerChainFactory;
 
 class ImageField extends FileField
 {
@@ -121,6 +122,8 @@ class Image
             return '';
         }
 
+        $img->orientate();
+
         if ($width == 0) $width = null;
         if ($height == 0) $height = null;
 
@@ -151,6 +154,11 @@ class Image
         }
 
         $img->save($absolutePath);
+
+        if ($this->field->getOption('optimize')) {
+            $optimizerChain = OptimizerChainFactory::create();
+            $optimizerChain->optimize($absolutePath);
+        }
 
         return $url;
     }

@@ -162,6 +162,11 @@ class ModelController extends Controller
         }
     }
 
+    /**
+     * Called on OPTIONS requests to this model.
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function describe(Request $request)
     {
         return new JsonResponse([
@@ -171,6 +176,8 @@ class ModelController extends Controller
     }
 
     /**
+     * Returns an array of data from the request body and omits null values.
+     *
      * @param Request $request
      * @return array
      */
@@ -186,6 +193,8 @@ class ModelController extends Controller
     }
 
     /**
+     * Calls jsonSchema() on the model and checks the provided data against the model's schema.
+     *
      * @param $id
      * @param $data
      * @return Validator
@@ -198,7 +207,7 @@ class ModelController extends Controller
         ];
 
         $validator = new \JsonSchema\Validator();
-        $validator->validate($modelData, $this->model->jsonSchema(), Constraint::CHECK_MODE_TYPE_CAST);
+        $validator->validate($modelData, $this->model->jsonSchema(), Constraint::CHECK_MODE_TYPE_CAST|Constraint::CHECK_MODE_COERCE_TYPES);
 
         return $validator;
     }

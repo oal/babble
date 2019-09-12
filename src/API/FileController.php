@@ -2,11 +2,13 @@
 
 namespace Babble\API;
 
+use Intervention\Image\ImageManager;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -36,12 +38,25 @@ class FileController extends Controller
     public function create(Request $request, $path)
     {
         $files = $request->files->all();
+
+        $imageManager = new ImageManager(array('driver' => 'imagick'));
+
         if (count($files) > 0) {
             $targetDir = absPath('public/uploads/' . $path);
             try {
+                /** @var UploadedFile $file */
                 foreach ($files as $file) {
-                    // Check if name already exists and rename.
-                    $file->move($targetDir, $file->getClientOriginalName());
+                    // Auto rotate if image and has exif rotation data.
+                    $fullPath = $file->getPathname();
+                    if($fullPath && exif_imagetype($fullPath)) {
+                        $img = $imageManager->make($fullPath);
+                        $img->orientate();
+                        $img->save($fullPath);
+                    }
+
+                    // TODO: Check if name already exists and rename.
+                    $filename = $file->getClientOriginalName();
+                    $file->move($targetDir, $filename);
                 }
             } catch (FileException $e) {
                 return new JsonResponse([
