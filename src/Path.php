@@ -57,6 +57,12 @@ class Path
     {
         $url = rtrim($url, '/');
         $clean = rtrim($this, '/');
+
+        // Special case for index:
+        if($url === '') {
+            return $url === $clean;
+        }
+
         return strpos($clean, $url) === 0;
     }
 
