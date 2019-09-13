@@ -18,7 +18,7 @@ class Path
         return $this->path;
     }
 
-    private function clean()
+    public function clean()
     {
         $cleanPath = $this->path;
         if (substr($cleanPath, -6) === '/index') {
@@ -27,6 +27,7 @@ class Path
         $cleanPath = rtrim($cleanPath, '/');
 
         if (!$cleanPath) return '/';
+        return $cleanPath;
     }
 
 

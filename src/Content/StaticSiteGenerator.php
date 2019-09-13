@@ -46,6 +46,7 @@ class StaticSiteGenerator
         $files = $finder->in(absPath('templates'))->notName('/^[_$].*/')->notPath('/^[_$].*/');
         foreach ($files as $file) {
             if ($file->isDir()) continue;
+            if (strpos($file, '$')) continue; // Not sure why $ isn't filtered out by the Symfony file matcher.
 
             $filename = $file->getFilename();
             $relativePath = $this->getRelativePath($file);
@@ -120,7 +121,7 @@ class StaticSiteGenerator
 
         // Save and log success.
         $this->save($pathObject, $html);
-        $this->log($path, 'info');
+        $this->log($pathObject->clean(), 'info');
 
         // Look for links on the rendered page, and render them.
         $crawler = new Crawler($html);
