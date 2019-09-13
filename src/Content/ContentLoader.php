@@ -4,6 +4,7 @@ namespace Babble\Content;
 
 use ArrayIterator;
 use Babble\Exceptions\RecordNotFoundException;
+use Babble\Models\TemplateField;
 use Babble\Models\TemplateRecord;
 use Babble\Models\Record;
 use Babble\Models\Model;
@@ -32,7 +33,9 @@ class ContentLoader implements Iterator
 
     public function field($name)
     {
-        return $this->model->getField($name);
+        $field = $this->model->getField($name);
+        $templateField = new TemplateField($field);
+        return $templateField;
     }
 
     public function find($id)

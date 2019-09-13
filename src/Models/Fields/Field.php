@@ -33,6 +33,18 @@ class Field implements JsonSerializable
         return $this->key;
     }
 
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
     public function validate(Record $record, $data)
     {
         return true;
@@ -43,12 +55,12 @@ class Field implements JsonSerializable
         return $data;
     }
 
-    function jsonSchema(): array
+    public function jsonSchema(): array
     {
         return $this->validation;
     }
 
-    function jsonSerialize()
+    public function jsonSerialize()
     {
         return [
             'key' => $this->key,
@@ -142,4 +154,5 @@ class Field implements JsonSerializable
     {
         return $this->isRequired;
     }
+
 }

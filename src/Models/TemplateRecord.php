@@ -42,7 +42,9 @@ class TemplateRecord implements ArrayAccess, JsonSerializable
 
     public function field($name)
     {
-        return $this->record->getModel()->getField($name);
+        $field = $this->record->getModel()->getField($name);
+        $templateField = new TemplateField($field);
+        return $templateField;
     }
 
 
