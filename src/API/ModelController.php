@@ -152,6 +152,12 @@ class ModelController extends Controller
         try {
             $deleteInstance = Record::fromDisk($this->model, $id);
             $deleteInstance->delete();
+
+            $this->dispatcher->dispatch(
+                RecordChangeEvent::NAME,
+                new RecordChangeEvent($this->model->getType(), $id)
+            );
+
             return new JsonResponse([
                 'message' => 'Delete successful.'
             ]);
