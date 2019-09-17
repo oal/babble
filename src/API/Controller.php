@@ -28,6 +28,13 @@ class Controller
         ], 400);
     }
 
+    public function partialUpdate(Request $request, $id)
+    {
+        return new JsonResponse([
+            'error' => 'Not implemented'
+        ], 400);
+    }
+
     public function delete(Request $request, $id)
     {
         return new JsonResponse([

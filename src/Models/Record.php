@@ -35,8 +35,9 @@ class Record implements JsonSerializable
     /**
      * Validates and saves record to disk.
      * @param array $data
+     * @param array|null $updateColumns
      */
-    public function save(array $data)
+    public function save(array $data, array $updateColumns = null)
     {
         if (!$this->getModel()->isSingle()) {
             $id = $data['id'] ?? $this->id;
@@ -44,6 +45,11 @@ class Record implements JsonSerializable
         }
 
         $columns = $this->data;
+        if($updateColumns) {
+            $columns = array_filter($columns, function($column) use (&$updateColumns) {
+                return in_array($column, $updateColumns);
+            }, ARRAY_FILTER_USE_KEY);
+        }
         foreach ($columns as $key => $column) {
             if (array_key_exists($key, $data)) {
                 $column->setValue($data[$key]);

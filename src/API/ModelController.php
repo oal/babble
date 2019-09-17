@@ -107,11 +107,15 @@ class ModelController extends Controller
         return new JsonResponse([]);
     }
 
-    public function update(Request $request, $id)
+    private function performUpdate(Request $request, $id, bool $partialUpdate)
     {
         $data = $this->getContentFromRequest($request);
 
-        $validator = $this->validate($id, $data);
+        if ($partialUpdate) {
+            $validator = $this->partialValidate($id, $data);
+        } else {
+            $validator = $this->validate($id, $data);
+        }
         if (!$validator->isValid()) {
             return new JsonResponse([
                 'errors' => $validator->getErrors()
@@ -129,7 +133,13 @@ class ModelController extends Controller
         $loadId = $oldId ?? $id;
         $record = Record::fromDisk($this->model, $loadId);
         $data['id'] = $id;
-        $record->save($data);
+
+        $updateColumns = null; // All columns by default.
+        if ($partialUpdate) {
+            $updateColumns = array_keys($data); // Only provided in $data.
+        }
+
+        $record->save($data, $updateColumns);
 
         // If ID was changed, delete old version.
         if (!empty($oldId) && $oldId !== $id) {
@@ -145,6 +155,16 @@ class ModelController extends Controller
         // TODO: RecordDeleteEvent when ID is changed?
 
         return new JsonResponse($record);
+    }
+
+    public function update(Request $request, $id)
+    {
+        return $this->performUpdate($request, $id, false);
+    }
+
+    public function partialUpdate(Request $request, $id)
+    {
+        return $this->performUpdate($request, $id, true);
     }
 
     public function delete(Request $request, $id)
@@ -199,7 +219,7 @@ class ModelController extends Controller
     }
 
     /**
-     * Calls jsonSchema() on the model and checks the provided data against the model's schema.
+     * Calls jsonSchema() on the model and checks the provided data against the model's FULL schema.
      *
      * @param $id
      * @param $data
@@ -207,13 +227,51 @@ class ModelController extends Controller
      */
     private function validate($id, $data): \JsonSchema\Validator
     {
+        return $this->validateWithSchema($id, $data, $this->model->jsonSchema());
+    }
+
+    /**
+     * Calls jsonSchema() on the model and checks ONLY the provided data against the model's schema.
+     *
+     * @param $id
+     * @param $data
+     * @return Validator
+     */
+    private function partialValidate($id, $data): \JsonSchema\Validator
+    {
+        $changedColumns = array_keys($data);
+
+        // Filter jsonSchema to only the columns in $data.
+        $schema = $this->model->jsonSchema();
+
+        // Filter required fields.
+        $schema['properties']['fields']['required'] = array_values(array_filter(
+            $schema['properties']['fields']['required'],
+            function ($field) use (&$changedColumns) {
+                return in_array($field, $changedColumns);
+            }
+        ));
+
+        // Filter property validations.
+        $schema['properties']['fields']['properties'] = array_values(array_filter(
+            $schema['properties']['fields']['properties'],
+            function ($field) use (&$changedColumns) {
+                return in_array($field, $changedColumns);
+            }
+        ));
+
+        return $this->validateWithSchema($id, $data, $schema);
+    }
+
+    private function validateWithSchema($id, array $data, array $schema): \JsonSchema\Validator
+    {
         $modelData = [
             'id' => $id,
             'fields' => $data
         ];
 
         $validator = new \JsonSchema\Validator();
-        $validator->validate($modelData, $this->model->jsonSchema(), Constraint::CHECK_MODE_TYPE_CAST|Constraint::CHECK_MODE_COERCE_TYPES);
+        $validator->validate($modelData, $schema, Constraint::CHECK_MODE_TYPE_CAST | Constraint::CHECK_MODE_COERCE_TYPES);
 
         return $validator;
     }

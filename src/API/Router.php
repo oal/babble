@@ -161,6 +161,8 @@ class Router
                 return $controller->read($request, $id);
             case 'PUT':
                 return $controller->update($request, $id);
+            case 'PATCH':
+                return $controller->partialUpdate($request, $id);
             case 'POST':
                 return $controller->create($request, $id);
             case 'DELETE':
