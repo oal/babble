@@ -48,7 +48,7 @@ class Babble
     {
         $path = $request->getPathInfo();
 
-        if (preg_match('/api/', $path)) {
+        if (strpos($path, '/api/') === 0) {
             return $this->handleAPIRequest($request);
         }
         return $this->handlePageRequest($request);
