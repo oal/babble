@@ -74,6 +74,20 @@ class ContentLoader implements Iterator
         return $this;
     }
 
+    public function whereChildrenOf($id)
+    {
+        $this->withChildren();
+        $this->filters->and(new ChildrenOfFilter($id));
+        return $this;
+    }
+
+    public function orWhereChildrenOf($id)
+    {
+        $this->withChildren();
+        $this->filters->or(new ChildrenOfFilter($id));
+        return $this;
+    }
+
     public function orderBy($key, $direction = 'desc')
     {
         $this->orderBy = [$key, strtolower($direction)];
@@ -112,6 +126,7 @@ class ContentLoader implements Iterator
 
     public function childrenOf(string $id)
     {
+        // DEPRECATED: You probably want to use whereChildrenOf instead.
         // TODO: Warn if not hierarchical?
         $this->parentId = $id;
         return $this;
