@@ -20,6 +20,7 @@ sudo chown -R www-data content
 sudo chown -R www-data cache
 
 sudo apt install php-imagick
+sudo apt install php-dom # If you want to use `php babble build`
 
 composer install
 composer dump-autoload -o
