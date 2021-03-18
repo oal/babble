@@ -13,6 +13,7 @@ use Cocur\Slugify\Bridge\Twig\SlugifyExtension;
 use Cocur\Slugify\Slugify;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
+use Twig\TwigFunction;
 use Twig_Environment;
 use Twig_Function;
 use Twig_Loader_Filesystem;
@@ -105,8 +106,8 @@ class TemplateRenderer
 
     private function initTwig()
     {
-        $loader = new Twig_Loader_Filesystem(absPath('templates'));
-        $twig = new Twig_Environment($loader, [
+        $loader = new \Twig\Loader\FilesystemLoader(absPath('templates'));
+        $twig = new \Twig\Environment($loader, [
             'debug' => true,
             'autoescape' => false
         ]);
@@ -115,7 +116,7 @@ class TemplateRenderer
             $twig->addGlobal($modelName, $resource);
         }
 
-        $twig->addFunction(new Twig_Function('abort', function ($a) {
+        $twig->addFunction(new TwigFunction('abort', function ($a) {
             throw new TemplateAbortException();
         }, ['needs_environment' => true]));
 
@@ -134,7 +135,7 @@ class TemplateRenderer
      *
      * @param Path $path
      * @return string
-     * @throws \Twig_Error_Runtime
+     * @throws \Twig\Error\RuntimeError
      */
     public function render(Path $path)
     {
@@ -167,13 +168,13 @@ class TemplateRenderer
         foreach ($this->resources as $modelName => $resource) {
             if ($resource->wasAccessed()) {
                 $this->dispatcher->dispatch(
-                    RenderDependencyEvent::NAME, new RenderDependencyEvent($modelName, $path)
+                    new RenderDependencyEvent($modelName, $path), RenderDependencyEvent::NAME
                 );
             }
         }
 
         $this->dispatcher
-            ->dispatch(RenderEvent::NAME, new RenderEvent($path, $html));
+            ->dispatch(new RenderEvent($path, $html), RenderEvent::NAME);
 
         return $html;
     }
@@ -182,7 +183,7 @@ class TemplateRenderer
     {
         try {
             $html = $this->renderTemplate($template->getTemplatePath(), $context);
-        } catch (\Twig_Error_Runtime $e) {
+        } catch (\Twig\Error\RuntimeError $e) {
             // Re-throw if not TemplateAbortException (something else failed)
             if (!($e->getPrevious() instanceof TemplateAbortException)) {
                 throw $e;
@@ -232,8 +233,8 @@ class TemplateRenderer
             if ($record !== null) {
                 $context['this'] = new TemplateRecord($record);
                 $this->dispatcher->dispatch(
-                    RenderDependencyEvent::NAME,
-                    new RenderDependencyEvent($record->getType(), $path)
+                    new RenderDependencyEvent($record->getType(), $path),
+                    RenderDependencyEvent::NAME
                 );
             } else {
                 return null;

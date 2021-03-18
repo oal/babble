@@ -3,7 +3,7 @@
 namespace Babble\Events;
 
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class RecordChangeEvent extends Event
 {

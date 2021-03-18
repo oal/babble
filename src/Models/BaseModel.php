@@ -8,8 +8,6 @@ use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
-use Twig_Environment;
-use Twig_Loader_Array;
 
 class BaseModel implements JsonSerializable
 {
@@ -170,8 +168,8 @@ class BaseModel implements JsonSerializable
     protected function initProperties(array $properties)
     {
         // TODO: Validation.
-        $loader = new Twig_Loader_Array($properties);
-        $twig = new Twig_Environment($loader);
+        $loader = new \Twig\Loader\ArrayLoader($properties);
+        $twig = new \Twig\Environment($loader);
         $this->properties = $twig;
     }
 
