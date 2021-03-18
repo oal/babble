@@ -26,7 +26,7 @@ class ModelController extends Controller
         $this->dispatcher = $dispatcher;
     }
 
-    public function create(Request $request, $id)
+    public function create(Request $request, $id): JsonResponse
     {
         // If ID is already taken (assuming not a single instance model).
         if (!$this->model->isSingle() && $this->model->exists($id)) {
@@ -96,7 +96,7 @@ class ModelController extends Controller
         return new Response(null, 404);
     }
 
-    private function readMany(ContentLoader $loader)
+    private function readMany(ContentLoader $loader): JsonResponse
     {
         try {
             $records = $loader->withChildren();
@@ -107,7 +107,7 @@ class ModelController extends Controller
         return new JsonResponse([]);
     }
 
-    private function performUpdate(Request $request, $id, bool $partialUpdate)
+    private function performUpdate(Request $request, $id, bool $partialUpdate): JsonResponse
     {
         $data = $this->getContentFromRequest($request);
 
@@ -157,17 +157,17 @@ class ModelController extends Controller
         return new JsonResponse($record);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
         return $this->performUpdate($request, $id, false);
     }
 
-    public function partialUpdate(Request $request, $id)
+    public function partialUpdate(Request $request, $id): JsonResponse
     {
         return $this->performUpdate($request, $id, true);
     }
 
-    public function delete(Request $request, $id)
+    public function delete(Request $request, $id): JsonResponse
     {
         try {
             $deleteInstance = Record::fromDisk($this->model, $id);
@@ -193,7 +193,7 @@ class ModelController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function describe(Request $request)
+    public function describe(Request $request): JsonResponse
     {
         return new JsonResponse([
             'model' => $this->model,
@@ -225,7 +225,7 @@ class ModelController extends Controller
      * @param $data
      * @return Validator
      */
-    private function validate($id, $data): \JsonSchema\Validator
+    private function validate($id, $data): Validator
     {
         return $this->validateWithSchema($id, $data, $this->model->jsonSchema());
     }
@@ -237,7 +237,7 @@ class ModelController extends Controller
      * @param $data
      * @return Validator
      */
-    private function partialValidate($id, $data): \JsonSchema\Validator
+    private function partialValidate($id, $data): Validator
     {
         $changedColumns = array_keys($data);
 
@@ -263,14 +263,14 @@ class ModelController extends Controller
         return $this->validateWithSchema($id, $data, $schema);
     }
 
-    private function validateWithSchema($id, array $data, array $schema): \JsonSchema\Validator
+    private function validateWithSchema($id, array $data, array $schema): Validator
     {
         $modelData = [
             'id' => $id,
             'fields' => $data
         ];
 
-        $validator = new \JsonSchema\Validator();
+        $validator = new Validator();
         $validator->validate($modelData, $schema, Constraint::CHECK_MODE_TYPE_CAST | Constraint::CHECK_MODE_COERCE_TYPES);
 
         return $validator;

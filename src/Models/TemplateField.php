@@ -23,7 +23,7 @@ class TemplateField
         return $this->field->getName();
     }
 
-    public function key()
+    public function key(): string
     {
         return $this->field->getKey();
     }

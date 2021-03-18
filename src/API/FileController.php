@@ -71,7 +71,7 @@ class FileController extends Controller
                 return new JsonResponse([
                     'error' => 'Invalid directory name.'
                 ], 400);
-            };
+            }
 
             $fs = new Filesystem();
             $fs->mkdir(absPath('public/uploads/' . $path . '/' . $dirName));
@@ -82,7 +82,7 @@ class FileController extends Controller
         ]);
     }
 
-    public function read(Request $request, $path)
+    public function read(Request $request, $path): JsonResponse
     {
         if (strpos($path, '..') !== false) {
             return new JsonResponse([
@@ -107,7 +107,7 @@ class FileController extends Controller
         return new JsonResponse($filenames);
     }
 
-    public function update(Request $request, $path)
+    public function update(Request $request, $path): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $dirName = $data['name'] ?? null;
@@ -116,7 +116,7 @@ class FileController extends Controller
             return new JsonResponse([
                 'error' => 'Invalid directory name.'
             ], 400);
-        };
+        }
 
         $newPath = explode('/', $path);
         array_pop($newPath);
@@ -130,7 +130,7 @@ class FileController extends Controller
         ]);
     }
 
-    public function delete(Request $request, $path)
+    public function delete(Request $request, $path): JsonResponse
     {
         if (strpos($path, '..') !== false) {
             return new JsonResponse([

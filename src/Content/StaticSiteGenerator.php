@@ -186,7 +186,7 @@ class StaticSiteGenerator
         $this->output->write("<$type>$message</$type>\n");
     }
 
-    private function buildSitemap()
+    private function buildSitemap(): string
     {
         $urls = [];
         foreach (array_keys($this->processedPaths) as $path) {

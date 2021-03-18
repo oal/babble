@@ -5,7 +5,7 @@ namespace Babble;
 use Babble\Events\RecordChangeEvent;
 use Babble\Events\RenderDependencyEvent;
 use Babble\Events\RenderEvent;
-use Exception;
+use RuntimeException;
 use SplFileObject;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
@@ -129,7 +129,7 @@ class Cache
         $dependencyFilename = $this->getModelDependencyFile($modelName);
         try {
             $file = new SplFileObject($dependencyFilename);
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             return;
         }
 

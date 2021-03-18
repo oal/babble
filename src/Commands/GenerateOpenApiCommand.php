@@ -18,7 +18,7 @@ class GenerateOpenApiCommand extends Command
             ->setDescription('Generate OpenAPI / swagger JSON definition.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $generator = new OpenApiGenerator();
 
@@ -26,5 +26,6 @@ class GenerateOpenApiCommand extends Command
 
         file_put_contents('openapi.json', $definition);
 
+        return 0;
     }
 }

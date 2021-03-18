@@ -18,7 +18,7 @@ class Path
         return $this->path;
     }
 
-    public function clean()
+    public function clean(): string
     {
         $cleanPath = $this->path;
         if (substr($cleanPath, -6) === '/index') {
@@ -41,7 +41,7 @@ class Path
         return pathinfo($this->path, PATHINFO_FILENAME);
     }
 
-    public function getWithoutExtension()
+    public function getWithoutExtension(): string
     {
         $dirName = $this->getDirectory();
         $filename = $this->getFilename();
@@ -49,12 +49,12 @@ class Path
         return '/' . $filename;
     }
 
-    public function getDirectory()
+    public function getDirectory(): string
     {
         return rtrim(pathinfo($this->path, PATHINFO_DIRNAME), '/');
     }
 
-    public function is(string $url)
+    public function is(string $url): bool
     {
         $url = rtrim($url, '/');
         $clean = rtrim($this, '/');
@@ -67,7 +67,7 @@ class Path
         return strpos($clean, $url) === 0;
     }
 
-    public function isExactly(string $url)
+    public function isExactly(string $url): bool
     {
         $url = rtrim($url, '/');
         $clean = rtrim($this, '/');

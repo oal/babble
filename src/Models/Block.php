@@ -17,7 +17,7 @@ class Block extends BaseModel
         return $this->model;
     }
 
-    protected function getDefinitionFile()
+    protected function getDefinitionFile(): string
     {
         return absPath('models/blocks/' . $this->type . '.yaml');
     }
@@ -28,7 +28,7 @@ class Block extends BaseModel
     }
 
 
-    public function getCacheLocation(string $recordId)
+    public function getCacheLocation(string $recordId): string
     {
         $baseLocation = parent::getCacheLocation($recordId);
         return $baseLocation . $this->model->getType() . '/' . $recordId . '/' . $this->getType() . '/';

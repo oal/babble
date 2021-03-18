@@ -18,7 +18,7 @@ class Column implements JsonSerializable
         $this->value = $value;
     }
 
-    function validate()
+    function validate(): bool
     {
         return $this->field->validate($this->record, $this->value);
     }

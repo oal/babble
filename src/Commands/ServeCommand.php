@@ -16,7 +16,7 @@ class ServeCommand extends Command
             ->setDescription("Start Babble's development server.");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if($input->getOption('live-reload')) {
             echo "Live reload enabled.\n";
@@ -29,5 +29,7 @@ class ServeCommand extends Command
             $read = fread($handle, 1024);
             echo $read;
         }
+
+        return 0;
     }
 }

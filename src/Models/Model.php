@@ -37,7 +37,7 @@ class Model extends BaseModel
         $this->initProperties($modelFormat['properties'] ?? []);
     }
 
-    public function exists(string $id = null)
+    public function exists(string $id = null): bool
     {
         $fs = new Filesystem();
         if ($this->isSingle()) {
@@ -48,7 +48,7 @@ class Model extends BaseModel
         }
     }
 
-    static function all()
+    static function all(): array
     {
         $finder = new Finder();
         $files = $finder->files()->depth(0)->in(absPath('models'));
@@ -76,7 +76,7 @@ class Model extends BaseModel
         if (is_array($options)) $this->options = $options;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $data = parent::jsonSerialize();
         $data['options'] = $this->options;
@@ -95,13 +95,13 @@ class Model extends BaseModel
         return $this->single;
     }
 
-    public function getCacheLocation(string $recordId)
+    public function getCacheLocation(string $recordId): string
     {
         $baseLocation = parent::getCacheLocation($recordId);
         return $baseLocation . $this->getType() . '/' . $recordId . '/';
     }
 
-    public function getBaseURL()
+    public function getBaseURL(): string
     {
         $finder = new Finder();
 
@@ -122,7 +122,7 @@ class Model extends BaseModel
         return '/' . $shortestFile->getRelativePath();
     }
 
-    public function jsonSchema()
+    public function jsonSchema(): array
     {
         $schema = parent::jsonSchema();
 

@@ -3,7 +3,6 @@
 namespace Babble\Models;
 
 use Babble\Exceptions\RecordNotFoundException;
-use Exception;
 use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
@@ -118,7 +117,7 @@ class Record implements JsonSerializable
         return $this->model->getType();
     }
 
-    static function fromDisk(Model $model, $id = null)
+    static function fromDisk(Model $model, $id = null): Record
     {
         if (!$model->isSingle() && !$id) throw new RecordNotFoundException();
 
@@ -127,9 +126,7 @@ class Record implements JsonSerializable
         if ($content === false) throw new RecordNotFoundException();
 
         $dataArray = Yaml::parse($content);
-        $record = new Record($model, $id, $dataArray);
-
-        return $record;
+        return new Record($model, $id, $dataArray);
     }
 
     private function getContentFilePath(): string
@@ -137,7 +134,7 @@ class Record implements JsonSerializable
         return getContentDir($this->getModel(), $this->id);
     }
 
-    private function getData()
+    private function getData(): array
     {
         $data = [];
         foreach ($this->data as $key => $column) {
@@ -160,7 +157,7 @@ class Record implements JsonSerializable
         return $this->model;
     }
 
-    public function getAbsoluteURL()
+    public function getAbsoluteURL(): string
     {
         $baseURL = $this->getModel()->getBaseURL();
         if ($baseURL === '/') $baseURL = '';
@@ -169,7 +166,7 @@ class Record implements JsonSerializable
     }
 }
 
-function getContentDir(Model $model, $id)
+function getContentDir(Model $model, $id): string
 {
     $typeDir = 'content/' . $model->getType();
     if ($model->isSingle()) return absPath($typeDir . '.yaml');

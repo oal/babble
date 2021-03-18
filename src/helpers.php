@@ -1,6 +1,6 @@
 <?php
 
-function absPath($path)
+function absPath($path): string
 {
     // Current working directory is "public/", so step out once.
     return getcwd() . '/../' . $path;

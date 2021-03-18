@@ -3,6 +3,10 @@
 namespace Babble\Content;
 
 use ArrayIterator;
+use Babble\Content\Filters\ChildrenOfFilter;
+use Babble\Content\Filters\FilterContainer;
+use Babble\Content\Filters\WhereContainsFilter;
+use Babble\Content\Filters\WhereFilter;
 use Babble\Exceptions\RecordNotFoundException;
 use Babble\Models\TemplateField;
 use Babble\Models\TemplateRecord;
@@ -31,14 +35,13 @@ class ContentLoader implements Iterator
         $this->filters = new FilterContainer();
     }
 
-    public function field($name)
+    public function field($name): TemplateField
     {
         $field = $this->model->getField($name);
-        $templateField = new TemplateField($field);
-        return $templateField;
+        return new TemplateField($field);
     }
 
-    public function find($id)
+    public function find($id): TemplateRecord
     {
         $fs = new Filesystem();
         $filePath = $this->getModelDirectory() . $id . '.yaml';
@@ -48,83 +51,83 @@ class ContentLoader implements Iterator
         throw new RecordNotFoundException($this->model->getType() . ' record with ID "' . $id . '" does not exist.');
     }
 
-    public function where($key, $comparison, $value)
+    public function where($key, $comparison, $value): ContentLoader
     {
         // TODO: Validate that model actually has the key / column provided.
         $this->filters->and(new WhereFilter($key, $comparison, $value));
         return $this;
     }
 
-    public function orWhere($key, $comparison, $value)
+    public function orWhere($key, $comparison, $value): ContentLoader
     {
         // TODO: Validate that model actually has the key / column provided.
         $this->filters->or(new WhereFilter($key, $comparison, $value));
         return $this;
     }
 
-    public function whereContains($key, $value)
+    public function whereContains($key, $value): ContentLoader
     {
         $this->filters->and(new WhereContainsFilter($key, $value));
         return $this;
     }
 
-    public function orWhereContains($key, $value)
+    public function orWhereContains($key, $value): ContentLoader
     {
         $this->filters->or(new WhereContainsFilter($key, $value));
         return $this;
     }
 
-    public function whereChildrenOf($id)
+    public function whereChildrenOf($id): ContentLoader
     {
         $this->withChildren();
         $this->filters->and(new ChildrenOfFilter($id));
         return $this;
     }
 
-    public function orWhereChildrenOf($id)
+    public function orWhereChildrenOf($id): ContentLoader
     {
         $this->withChildren();
         $this->filters->or(new ChildrenOfFilter($id));
         return $this;
     }
 
-    public function orderBy($key, $direction = 'desc')
+    public function orderBy($key, $direction = 'desc'): ContentLoader
     {
         $this->orderBy = [$key, strtolower($direction)];
         return $this;
     }
 
-    public function skip($skip)
+    public function skip($skip): ContentLoader
     {
         $this->skip = $skip;
         return $this;
     }
 
-    public function take($take)
+    public function take($take): ContentLoader
     {
         $this->take = $take;
         return $this;
     }
 
-    public function paginate($perPage, $currentPage)
+    public function paginate($perPage, $currentPage): Paginator
     {
         return new Paginator($this, $perPage, $currentPage);
     }
 
-    public function count()
+    public function count(): int
     {
         if (!$this->arrayIterator) $this->initIterator();
         return iterator_count($this->arrayIterator);
     }
 
-    public function withChildren()
+    public function withChildren(): ContentLoader
     {
         // TODO: Warn if not hierarchical?
         $this->withChildren = true;
         return $this;
     }
 
-    public function childrenOf(string $id)
+    public function childrenOf(string $id): ContentLoader
     {
         // DEPRECATED: You probably want to use whereChildrenOf instead.
         // TODO: Warn if not hierarchical?
@@ -209,7 +212,7 @@ class ContentLoader implements Iterator
         return $id;
     }
 
-    static function getModelNames()
+    static function getModelNames(): array
     {
         $models = [];
         $finder = new Finder();
@@ -269,7 +272,7 @@ class ContentLoader implements Iterator
      * Returns true on success or false on failure.
      * @since 5.0.0
      */
-    public function valid()
+    public function valid(): bool
     {
         return $this->arrayIterator->valid();
     }

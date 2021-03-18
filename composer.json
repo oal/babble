@@ -20,7 +20,8 @@
     "cocur/slugify": "^3.0",
     "symfony/dom-crawler": "^3.4.4",
     "justinrainbow/json-schema": "^5.2",
-    "spatie/image-optimizer": "^1.1"
+    "spatie/image-optimizer": "^1.1",
+    "ext-imagick": "*"
   },
   "autoload": {
     "psr-4": {

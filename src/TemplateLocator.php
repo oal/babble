@@ -47,8 +47,7 @@ class Template
         $modelName = $this->getModelName();
         if (!$modelName) return null;
 
-        $model = new Model($modelName);
-        return $model;
+        return new Model($modelName);
     }
 
     public function getRecord()
@@ -67,12 +66,12 @@ class Template
         }
     }
 
-    public function getBoundPath()
+    public function getBoundPath(): Path
     {
         return $this->path;
     }
 
-    public function getTemplatePath()
+    public function getTemplatePath(): string
     {
         return $this->templatePath;
     }

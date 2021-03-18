@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class RootController extends Controller
 {
-    public function describe(Request $request)
+    public function describe(Request $request): JsonResponse
     {
         return new JsonResponse(Model::all());
     }

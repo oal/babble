@@ -19,11 +19,13 @@ class BuildCommand extends Command
             ->setDescription('Builds static HTML files for your website.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $baseUrl = $input->getOption('scheme') . '://' . $input->getOption('host');
         $output->writeln("<info>$baseUrl</info>");
         $walker = new StaticSiteGenerator($output, $baseUrl);
         $walker->build();
+
+        return 0;
     }
 }

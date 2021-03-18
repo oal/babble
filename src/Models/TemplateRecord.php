@@ -40,15 +40,14 @@ class TemplateRecord implements ArrayAccess, JsonSerializable
         return $this->record->getModel()->getProperty($property, ['this' => $this]);
     }
 
-    public function field($name)
+    public function field($name): TemplateField
     {
         $field = $this->record->getModel()->getField($name);
-        $templateField = new TemplateField($field);
-        return $templateField;
+        return new TemplateField($field);
     }
 
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return !!$this->record->getView($offset) || $this->record->getModel()->hasProperty($offset);
     }
@@ -74,7 +73,7 @@ class TemplateRecord implements ArrayAccess, JsonSerializable
         return $this->record;
     }
 
-    public function getAbsoluteURL()
+    public function getAbsoluteURL(): string
     {
         return $this->record->getAbsoluteURL();
     }
