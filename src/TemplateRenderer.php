@@ -14,9 +14,6 @@ use Cocur\Slugify\Slugify;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Filesystem\Filesystem;
 use Twig\TwigFunction;
-use Twig_Environment;
-use Twig_Function;
-use Twig_Loader_Filesystem;
 
 class DependencyTrackedResource
 {
