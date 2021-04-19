@@ -53,11 +53,13 @@ class SingleRecordDecorator extends DependencyTrackedResource
         }
 
         $templateRecord = new TemplateRecord($record);
-        if ($templateRecord[$methodName]) {
+        if ($templateRecord[$methodName] ?? null) {
             return $templateRecord[$methodName];
         }
 
-        return call_user_func_array(array($templateRecord, $methodName), $args);
+        if (method_exists($templateRecord, $methodName) && is_callable(array($templateRecord, $methodName))) {
+            return call_user_func_array(array($templateRecord, $methodName), $args);
+        }
     }
 
     /**
