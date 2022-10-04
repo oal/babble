@@ -156,7 +156,6 @@ class ContentLoader implements Iterator
                 if ($this->filters->isMatch($record)) {
                     // Matching record was found.
                     $records[] = new TemplateRecord($record);
-                    continue;
                 }
             }
 
@@ -178,7 +177,7 @@ class ContentLoader implements Iterator
             }
 
             $this->arrayIterator = new ArrayIterator($records);
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException) {
             $this->arrayIterator = new ArrayIterator([]);
         }
     }

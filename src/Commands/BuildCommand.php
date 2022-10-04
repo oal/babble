@@ -14,7 +14,7 @@ class BuildCommand extends Command
     {
         $this
             ->setName('build')
-            ->addOption('host', null, InputOption::VALUE_REQUIRED, '')
+            ->addOption('host', null, InputOption::VALUE_REQUIRED)
             ->addOption('scheme', 's', InputOption::VALUE_OPTIONAL, '', 'http')
             ->setDescription('Builds static HTML files for your website.');
     }

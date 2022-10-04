@@ -2,6 +2,7 @@
 
 namespace Babble\Models\Fields;
 
+use ArrayIterator;
 use Babble\Models\Record;
 use Cocur\Slugify\Slugify;
 use Traversable;
@@ -66,7 +67,7 @@ class TagsView implements \IteratorAggregate
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->tags);
+        return new ArrayIterator($this->tags);
     }
 
 

@@ -84,11 +84,11 @@ class FileController extends Controller
 
     public function read(Request $request, $path): JsonResponse
     {
-        if (strpos($path, '..') !== false) {
+        if (str_contains($path, '..')) {
             return new JsonResponse([
                 'error' => 'Invalid location provided.'
             ], 400);
-        };
+        }
 
         $finder = new Finder();
 
@@ -132,7 +132,7 @@ class FileController extends Controller
 
     public function delete(Request $request, $path): JsonResponse
     {
-        if (strpos($path, '..') !== false) {
+        if (str_contains($path, '..')) {
             return new JsonResponse([
                 'error' => 'Invalid file path'
             ], 400);

@@ -63,7 +63,7 @@ class ModelController extends Controller
             if ($id) return new Response(null, 404);
             try {
                 $record = Record::fromDisk($this->model);
-            } catch (RecordNotFoundException $e) {
+            } catch (RecordNotFoundException) {
                 $record = new Record($this->model);
             }
             return new JsonResponse($record);
@@ -76,7 +76,7 @@ class ModelController extends Controller
         $sort = $request->get('sort');
         if ($sort) {
             $sortDirection = 'asc';
-            if (substr($sort, 0, 1) === '-') {
+            if (str_starts_with($sort, '-')) {
                 $sortDirection = 'desc';
                 $sort = substr($sort, 1);
             }
@@ -90,7 +90,7 @@ class ModelController extends Controller
         try {
             $record = $loader->find($id);
             return new JsonResponse($record);
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
 
         return new Response(null, 404);
@@ -101,7 +101,7 @@ class ModelController extends Controller
         try {
             $records = $loader->withChildren();
             return new JsonResponse(array_values(iterator_to_array($records)));
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
 
         return new JsonResponse([]);
@@ -181,7 +181,7 @@ class ModelController extends Controller
             return new JsonResponse([
                 'message' => 'Delete successful.'
             ]);
-        } catch (RecordNotFoundException $e) {
+        } catch (RecordNotFoundException) {
             return new JsonResponse([
                 'error' => 'Not found.'
             ], 403);

@@ -8,6 +8,8 @@ use JsonSerializable;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
+use Twig\Environment;
+use Twig\Loader\ArrayLoader;
 
 class BaseModel implements JsonSerializable
 {
@@ -25,7 +27,7 @@ class BaseModel implements JsonSerializable
     {
         try {
             $this->init($type);
-        } catch (ParseException $e) {
+        } catch (ParseException) {
             throw new InvalidModelException('Invalid definition: ' . $type);
         }
     }
@@ -88,7 +90,7 @@ class BaseModel implements JsonSerializable
         $this->name = $modelFormat['name'];
         if (!empty($modelFormat['name_plural'])) {
             $this->namePlural = $modelFormat['name_plural'];
-        } else if (substr($this->name, strlen($this->name) - 1) === 's') {
+        } else if (str_ends_with($this->name, 's')) {
             $this->namePlural = $this->name;
         } else {
             $this->namePlural = $this->name . 's';
@@ -168,8 +170,8 @@ class BaseModel implements JsonSerializable
     protected function initProperties(array $properties)
     {
         // TODO: Validation.
-        $loader = new \Twig\Loader\ArrayLoader($properties);
-        $twig = new \Twig\Environment($loader);
+        $loader = new ArrayLoader($properties);
+        $twig = new Environment($loader);
         $this->properties = $twig;
     }
 

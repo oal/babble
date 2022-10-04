@@ -37,7 +37,7 @@ class OpenApiGenerator
         $title = $siteRecord->getValue('title');
         return [
             'title' => $title,
-            'description' => "API documentation for {$title}"
+            'description' => "API documentation for $title"
         ];
     }
 
@@ -52,9 +52,9 @@ class OpenApiGenerator
             $modelType = $model->getType();
             $modelName = $model->getName();
             $verb = $model->isSingle() ? 'Get' : 'List';
-            $paths["/api/{$modelType}"] = [
+            $paths["/api/$modelType"] = [
                 'get' => [
-                    'summary' => "{$verb} {$modelName}",
+                    'summary' => "$verb $modelName",
                     'responses' => [
                         '200' => [
                             'description' => 'Successful operation',
