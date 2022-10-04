@@ -121,7 +121,7 @@ class StaticSiteGenerator
 
         // Save and log success.
         $this->save($pathObject, $html);
-        $this->log($pathObject->clean(), 'info');
+        $this->log($pathObject->clean());
 
         // Look for links on the rendered page, and render them.
         $crawler = new Crawler($html);
@@ -144,7 +144,7 @@ class StaticSiteGenerator
             }
 
             // Skip absolute paths without protocol, static directory and uploads directory.
-            if (strpos($path, '/static/') === 0 || strpos($path, '/uploads/') === 0) {
+            if (str_starts_with($path, '/static/') || str_starts_with($path, '/uploads/')) {
                 continue;
             }
 

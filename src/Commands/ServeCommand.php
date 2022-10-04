@@ -23,7 +23,7 @@ class ServeCommand extends Command
             putenv('BABBLE_LIVE_RELOAD=true');
         }
 
-        $command = 'php -S localhost:8000 index.php';
+        $command = 'php -S localhost:8000';
         $handle = popen($command, 'r');
         while (1) {
             $read = fread($handle, 1024);

@@ -34,9 +34,9 @@ class WhereFilter implements ContentFilter
             case '<=':
                 return $field->isLessOrEqual($key, $this->value);
             case '>=':
-                return $field->isGreater($key, $this->value);
+                return $field->isGreaterOrEqual($key, $this->value);
         }
 
-        throw new Exception('Invalid comparison operator "' . $this->comparison . '".');
+        throw new \Exception('Invalid comparison operator "' . $this->comparison . '".');
     }
 }

@@ -118,7 +118,7 @@ class Image
         $sourceFilename = absPath('public' . $path);
         try {
             $img = $manager->make($sourceFilename);
-        } catch (NotReadableException $e) {
+        } catch (NotReadableException) {
             return '';
         }
 
