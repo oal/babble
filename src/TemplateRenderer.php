@@ -167,7 +167,8 @@ class TemplateRenderer
         foreach ($this->resources as $modelName => $resource) {
             if ($resource->wasAccessed()) {
                 $this->dispatcher->dispatch(
-                    new RenderDependencyEvent($modelName, $path), RenderDependencyEvent::NAME
+                    new RenderDependencyEvent($modelName, $path),
+                    RenderDependencyEvent::NAME
                 );
             }
         }

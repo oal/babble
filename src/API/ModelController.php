@@ -49,8 +49,8 @@ class ModelController extends Controller
         $record->save($data);
 
         $this->dispatcher->dispatch(
-            RecordChangeEvent::NAME,
-            new RecordChangeEvent($this->model->getType(), $id)
+            new RecordChangeEvent($this->model->getType(), $id),
+            RecordChangeEvent::NAME
         );
 
         return new JsonResponse($record);
@@ -148,8 +148,8 @@ class ModelController extends Controller
         }
 
         $this->dispatcher->dispatch(
-            RecordChangeEvent::NAME,
-            new RecordChangeEvent($this->model->getType(), $id)
+            new RecordChangeEvent($this->model->getType(), $id),
+            RecordChangeEvent::NAME
         );
 
         // TODO: RecordDeleteEvent when ID is changed?
@@ -174,8 +174,8 @@ class ModelController extends Controller
             $deleteInstance->delete();
 
             $this->dispatcher->dispatch(
-                RecordChangeEvent::NAME,
-                new RecordChangeEvent($this->model->getType(), $id)
+                new RecordChangeEvent($this->model->getType(), $id),
+                RecordChangeEvent::NAME
             );
 
             return new JsonResponse([
