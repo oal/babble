@@ -195,9 +195,10 @@ class ModelController extends Controller
      */
     public function describe(Request $request): JsonResponse
     {
+        $blocks = $this->model->getBlocks();
         return new JsonResponse([
             'model' => $this->model,
-            'blocks' => $this->model->getBlocks()
+            'blocks' => count($blocks) > 0 ? $blocks : new \ArrayObject()
         ]);
     }
 

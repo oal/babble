@@ -98,7 +98,7 @@ class Field implements JsonSerializable
 
     protected function initOptions(array $data)
     {
-        $this->options = $data['options'] ?? [];
+        $this->options = $data['options'] ?? new \ArrayObject();
     }
 
     private function initValidation($data)
